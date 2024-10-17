@@ -1,5 +1,4 @@
 import logo from "@/assets/Logo - Completa.png";
-import logoGoogle from "@/assets/LogoGoogle.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -70,12 +69,7 @@ export function Login() {
 
                 <Separator className="my-10" />
 
-                <Button variant={'secondary'} className="flex gap-2 font-semibold">
-                    <img src={logoGoogle} alt="logo do google" />
-                    Entrar com o Google
-                </Button>
-
-                <div className="flex items-center justify-center mt-5 gap-2">
+                <div className="flex items-center justify-center gap-2">
                     <p>Não tem uma conta?</p>
                     <a href={'/'} className="font-semibold text-primary">Crie gratuitamente</a>
                 </div>

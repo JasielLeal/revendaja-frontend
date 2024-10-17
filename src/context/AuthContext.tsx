@@ -51,7 +51,8 @@ export function AuthProvider({ children }) {
                     const expirationDate = new Date(Number(decodedToken?.exp) * 1000);
 
                     if (expirationDate < currentDate) {
-                        await cookie.remove("token");
+                        cookie.remove("token");
+                        cookie.remove("user");
                         setUser(null);
                         console.log("Token expirou e os dados foram limpos.");
                     }
