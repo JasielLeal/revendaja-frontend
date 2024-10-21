@@ -51,7 +51,7 @@ export function Layout() {
                     </Avatar>
                     <Options />
                 </div>
-                <div className="pt-5 pl-5">
+                <div className="pt-5 px-5">
                     <Outlet />
                 </div>
 
