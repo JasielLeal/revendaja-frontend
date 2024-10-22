@@ -13,6 +13,7 @@ export function Layout() {
 
     const { user } = useContext(AuthContext);
 
+
     return (
         <div className="flex">
             <div className="w-72 p-7 border-r h-screen">
@@ -63,6 +64,7 @@ export function Layout() {
                         <AvatarFallback>{getInitials(user?.name as string, user?.secondName as string)}</AvatarFallback>
                     </Avatar>
                     <Options />
+
                 </div>
                 <div className="pt-5 px-5">
                     <Outlet />

@@ -9,11 +9,12 @@ import {
 import { FaAngleDown } from "react-icons/fa6"
 import AuthContext from '@/context/AuthContext';
 import { useContext } from 'react';
+import { Button } from "@/components/ui/button";
 
 export function Options() {
-   
-    const { user } = useContext(AuthContext);
-    
+
+    const { user, logoutFc } = useContext(AuthContext);
+
     return (
         <>
             <DropdownMenu>
@@ -32,7 +33,11 @@ export function Options() {
                     <DropdownMenuLabel>Opções</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Configurações</DropdownMenuItem>
-                    <DropdownMenuItem>Sair</DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Button variant={'ghost'} className="w-full text-start" onClick={()=> logoutFc()}>
+                            Sair
+                        </Button>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
 

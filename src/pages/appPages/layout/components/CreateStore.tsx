@@ -10,28 +10,30 @@ import {
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query"
 import { CreateStoreFn } from "../services/CreateStore"
 import { FieldValues, useForm } from "react-hook-form"
 import { CreateStoreSchema } from "../schemas/CreateStoreSchema"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import AuthContext from "@/context/AuthContext"
+import { SucessStoreCreated } from "./SucessStoreCreated"
 
 export function CreateStore() {
-
-
     const { user, updateUserStoreStatus } = useContext(AuthContext)
-
-    const { mutateAsync: createStoreFn } = useMutation({
+    const [success, setSuccess] = useState(false)
+    const { mutateAsync: createStoreFn, isSuccess } = useMutation({
         mutationFn: CreateStoreFn,
         onSuccess: () => {
-            updateUserStoreStatus(true);
+            setSuccess(true) // Define sucesso como true
+            updateUserStoreStatus(true)
         },
         onError: (e) => {
             console.log(e)
         },
     })
+
+    console.log(isSuccess)
 
     const { register, handleSubmit } = useForm({
         resolver: zodResolver(CreateStoreSchema),
@@ -46,9 +48,8 @@ export function CreateStore() {
         };
 
         await createStoreFn(storeData)
-        console.log(data)
+        // Aqui, se quiser, você pode fechar o modal de criação da loja após a submissão
     }
-
 
     return (
         <>
@@ -66,12 +67,12 @@ export function CreateStore() {
                     <form onSubmit={handleSubmit(onSub)}>
                         <p>Nome da loja</p>
                         <Input className="mb-5" {...register('name')} />
-                        <p>Descriação</p>
+                        <p>Descrição</p>
                         <Input {...register('description')} />
                         <div className="flex items-center space-x-2 my-5">
                             <Checkbox id="terms" />
-                            <Label htmlFor="terms">Aceito os <a href="/" className="text-primary">Termos e Condições </a>
-                                do Revendaja.
+                            <Label htmlFor="terms">
+                                Aceito os <a href="/" className="text-primary">Termos e Condições</a> do Revendaja.
                             </Label>
                         </div>
                         <div className="w-full flex gap-2 mt-5">
@@ -84,6 +85,13 @@ export function CreateStore() {
                 </DialogContent>
             </Dialog>
 
+            {
+                isSuccess ?
+
+                    <SucessStoreCreated isOpen={success} onOpenChange={setSuccess} />
+                    :
+                    ''
+            }
         </>
     )
 }
