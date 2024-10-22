@@ -14,9 +14,11 @@ interface AuthContextData {
         image: string;
         paymentStatus: string;
         role: string;
+        userHasStore: boolean
     } | null;
     signInFc(data: FieldValues): Promise<void>; // Corrigido aqui
     logoutFc(): Promise<void>;
+    updateUserStoreStatus(hasStore: boolean): Promise<void>;
     loading: boolean;
 }
 
@@ -28,6 +30,7 @@ interface User {
     image: string;
     paymentStatus: string;
     role: string;
+    userHasStore: boolean
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -49,12 +52,8 @@ export function AuthProvider({ children }) {
                     const decodedToken = jwtDecode(storagedToken);
                     const currentDate = new Date();
                     const expirationDate = new Date(Number(decodedToken?.exp) * 1000);
-
                     if (expirationDate < currentDate) {
-                        cookie.remove("token");
-                        cookie.remove("user");
-                        setUser(null);
-                        console.log("Token expirou e os dados foram limpos.");
+                        logoutFc();
                     }
                 }
             } catch (error) {
@@ -65,7 +64,7 @@ export function AuthProvider({ children }) {
         }
 
         loadStoragedData();
-    }, []);
+    }, [user]);
 
     interface singInProps {
         email: string;
@@ -96,12 +95,24 @@ export function AuthProvider({ children }) {
 
     async function logoutFc() {
         const cookie = new Cookies();
-        await cookie.remove("token");
+        cookie.remove("token");
         setUser(null);
     }
 
+    async function updateUserStoreStatus(hasStore: boolean) {
+        setUser((prevUser) => {
+            if (prevUser) {
+                return {
+                    ...prevUser,
+                    userHasStore: hasStore,
+                };
+            }
+            return prevUser;
+        });
+    }
+
     return (
-        <AuthContext.Provider value={{ signed: !!user, user, signInFc, loading, logoutFc }}>
+        <AuthContext.Provider value={{ signed: !!user, user, signInFc, loading, logoutFc, updateUserStoreStatus }}>
             {loading ? <h1>carregando</h1> : children}
         </AuthContext.Provider>
     );

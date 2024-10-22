@@ -60,10 +60,15 @@
   }
 }
 
+* {
+  font-family: "Open Sans", sans-serif;
+}
+
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
