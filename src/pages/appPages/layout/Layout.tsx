@@ -43,7 +43,7 @@ export function Layout() {
                             <p className="font-medium text-gray-500 pt-7 mb-3">Minha Loja</p>
                             <div className="flex flex-col gap-2">
                                 <NavLink to={'/relatorio'} isEnabled={true}><IoBarChartOutline /> Relatórios</NavLink>
-                                <NavLink to={'/e'} isEnabled={true}><IoBagCheckOutline /> Estoque</NavLink>
+                                <NavLink to={'/estoque'} isEnabled={true}><IoBagCheckOutline /> Estoque</NavLink>
                                 <NavLink to={'/e'} isEnabled={true}><IoPricetagOutline /> Promoções</NavLink>
                             </div>
                         </div>
