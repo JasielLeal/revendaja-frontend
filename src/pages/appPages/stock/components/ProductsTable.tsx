@@ -1,4 +1,3 @@
-
 import {
     Table,
     TableBody,
@@ -7,17 +6,91 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import produto from "@/assets/Produto.jpg"
-import { Button } from "@/components/ui/button"
-import { IoEllipsisVerticalSharp } from "react-icons/io5"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { IoChevronBack, IoChevronForwardOutline, IoEllipsisVerticalSharp } from "react-icons/io5";
+import { useQuery } from "@tanstack/react-query";
+import { GetStock } from "../services/GetStock";
+import { useState } from "react";
+import { formatCurrency } from "@/utils/FormatCurrency";
 
+export function ProductsTable({ filter }: { filter: string }) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 5; // Defina o número de itens por página
 
-export function ProductsTable() {
+    // Query para pegar os produtos, agora passando o termo de filtro
+    const { data: List } = useQuery({
+        queryKey: ["GetStock", currentPage, filter], // Inclui o termo de filtro como parte da queryKey
+        queryFn: () => GetStock(currentPage, pageSize, filter), // Passa o termo de filtro para a função GetStock
+    });
+
+    interface Product {
+        id: string;
+        name: string;
+        normalPrice: string;
+        suggestedPrice: string;
+        description: string;
+        imgUrl: string;
+        brand: string;
+        company: string;
+        createdAt: string;
+        updatedAt: string;
+    }
+
+    interface StockItem {
+        id: string;
+        quantity: number;
+        customPrice: string;
+        suggestedPrice: string;
+        normalPrice: string;
+        status: string;
+        storeId: string;
+        productId: string;
+        updatedAt: string;
+        product: Product;
+    }
+
+    const handleNextPage = () => {
+        if (currentPage < (List?.data.totalPages || 0)) {
+            setCurrentPage((prev) => prev + 1);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage((prev) => prev - 1);
+        }
+    };
+
     return (
         <>
-            <Table className="mt-5">
-                <TableCaption>Lista do Estoque</TableCaption>
+            <Table className="mt-5 w-full rounded">
+                <TableCaption>
+                    <div className="flex gap-10 mt-3 items-center justify-end w-full">
+                        <p className="font-medium">
+                            Página {List?.data.currentPage} de {List?.data.totalPages === 0 ? '1' : List?.data.totalPages}
+                        </p>
+                        <div className="flex gap-4">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1} // Desabilitar se na primeira página
+                            >
+                                <IoChevronBack />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handleNextPage}
+                                disabled={currentPage === List?.data.totalPages} // Desabilitar se na última página
+                            >
+                                <IoChevronForwardOutline />
+                            </Button>
+                        </div>
+                    </div>
+                    Lista do Estoque
+                </TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Produto</TableHead>
@@ -27,35 +100,36 @@ export function ProductsTable() {
                         <TableHead>Ações</TableHead>
                     </TableRow>
                 </TableHeader>
-                <TableBody>
-                    <TableRow>
-                        <TableCell>
-                            <div className="flex items-center">
-                                <img src={produto} alt="produto" width={60} />
-                                <div>
-                                    <p className="font-semibold">Kaiak Tradicional</p>
-                                    <p>Natura - 14331</p>
+                <TableBody className="h-[384px]">
+                    {List?.data.items?.map((product: StockItem) => (
+                        <TableRow key={product.id}>
+                            <TableCell>
+                                <div className="flex items-center">
+                                    <img src={product.product.imgUrl} alt="produto" width={60} />
+                                    <div>
+                                        <p className="font-semibold">{product.product.name}</p>
+                                        <p>{product.product.company}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </TableCell>
-                        <TableCell>
-                            <p>R$ 123,00</p>
-                        </TableCell>
-                        <TableCell>
-                            R$ 200,00
-                        </TableCell>
-                        <TableCell>
-                            20
-                        </TableCell>
-                        <TableCell >
-                            <Button variant={'ghost'}>
-                                <IoEllipsisVerticalSharp />
-                            </Button>
-                        </TableCell>
-                    </TableRow>
+                            </TableCell>
+                            <TableCell>
+                                R$ {formatCurrency(product.customPrice)}
+                            </TableCell>
+                            <TableCell>
+                                R$ {formatCurrency(product.normalPrice)}
+                            </TableCell>
+                            <TableCell>
+                                {product.quantity}
+                            </TableCell>
+                            <TableCell>
+                                <Button variant={'ghost'}>
+                                    <IoEllipsisVerticalSharp />
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    ))}
                 </TableBody>
             </Table>
-
         </>
-    )
+    );
 }
