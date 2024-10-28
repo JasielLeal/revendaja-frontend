@@ -1,7 +1,7 @@
 import { backend } from "@/api/backend";
 import Cookies from "universal-cookie";
 
-export async function GetStock(
+export async function GetAllProducts(
   currentPage: number,
   pageSize: number,
   search: string,
@@ -10,7 +10,7 @@ export async function GetStock(
   const cookie = new Cookies();
   const token = await cookie.get("token");
 
-  const response = await backend.get(`stock/getstock`, {
+  const response = await backend.get(`products/getall`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

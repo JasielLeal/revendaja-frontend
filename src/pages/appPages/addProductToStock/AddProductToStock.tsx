@@ -1,47 +1,47 @@
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { BreadcrumbListComponent } from "./components/BreadcrumbList";
+import { SelectCompany } from "./components/SelectCompany";
+import { TableOfProductsToAdd } from "./components/TableOfProductsToAdd";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export function AddProductToStock() {
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterTerm, setFilterTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState(""); // Estado para armazenar o filtro de categoria ao clicar no botão
+
+    const handleFilter = () => {
+        setFilterTerm(searchTerm); // Define o termo de busca
+        setCategoryFilter(selectedCategory); // Define o filtro de categoria ao clicar no botão
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+
+        if (value === "") {
+            setFilterTerm("");
+        }
+    };
+
     return (
         <>
-            <p className="font-bold text-xl ">Estoque</p>
-            <Breadcrumb>
-                <BreadcrumbList>
-                    <BreadcrumbItem>
-                        <BreadcrumbLink href="/estoque">Estoque</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                        <BreadcrumbLink href="/addproductstock">Adicionar Produto</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    
-                </BreadcrumbList>
-            </Breadcrumb>
+            <p className="font-bold text-xl">Adicione produtos ao seu estoque</p>
+            <BreadcrumbListComponent />
 
-            <div className="mt-5 flex items-center gap-3">
-                <Input placeholder="Procurar produto" className="w-72" />
-                <Select>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Categorias" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Todas as Categorias</SelectLabel>
-                            <SelectItem value="apple">Natura</SelectItem>
-                            <SelectItem value="banana">OBoticario</SelectItem>
-                            <SelectItem value="blueberry">Avon</SelectItem>
-                            <SelectItem value="blueberry">Eudora</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
+            <div className="mt-5 flex items-center gap-3 mb-5">
+                <Input
+                    placeholder="Procurar produto"
+                    className="w-72"
+                    value={searchTerm}
+                    onChange={handleInputChange}
+                />
+                <SelectCompany onSelectChange={setSelectedCategory} />
+                <Button onClick={handleFilter}>Filtrar</Button>
             </div>
+
+            <TableOfProductsToAdd filter={filterTerm} category={categoryFilter} />
         </>
-    )
+    );
 }

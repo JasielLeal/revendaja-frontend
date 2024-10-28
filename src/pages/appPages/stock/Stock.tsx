@@ -17,10 +17,13 @@ export function Stock() {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState(""); // Para armazenar o valor do input
     const [filterTerm, setFilterTerm] = useState(""); // Para passar para o ProductsTable
+    const [category, setCategory] = useState(""); // Novo estado para armazenar o valor do Select
+    const [selectedCategory, setSelectedCategory] = useState(""); // Estado para armazenar a categoria selecionada
 
     // Função para aplicar o filtro quando o botão for clicado
     const handleFilter = () => {
         setFilterTerm(searchTerm); // Define o termo de filtro quando o botão for clicado
+        setSelectedCategory(category); // Define a categoria selecionada ao clicar em "Filtrar"
     };
 
     // Monitora as mudanças no input e limpa o filtro se o input ficar vazio
@@ -32,6 +35,11 @@ export function Stock() {
         if (value === "") {
             setFilterTerm(""); // Reseta o filtro
         }
+    };
+
+    // Função para lidar com a mudança do Select
+    const handleSelectChange = (value: string) => {
+        setCategory(value); // Armazena o valor do Select
     };
 
     return (
@@ -48,16 +56,18 @@ export function Stock() {
                     onChange={handleInputChange} // Monitora as mudanças no input
                     className="w-80"
                 />
-                <Select>
+                <Select onValueChange={handleSelectChange}> {/* Altera o valor do Select */}
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Categorias" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
                             <SelectLabel>Todas as Categorias</SelectLabel>
-                            <SelectItem value="apple">Com Estoque</SelectItem>
-                            <SelectItem value="banana">Sem Estoque</SelectItem>
-                            <SelectItem value="blueberry">Vencendo</SelectItem>
+                            <SelectItem value="todos">Todos</SelectItem>
+                            <SelectItem value="comEstoque">Com Estoque</SelectItem>
+                            <SelectItem value="semEstoque">Sem Estoque</SelectItem>
+                            <SelectItem value="vencendo">Vencendo</SelectItem>
+                            <SelectItem value="personalizados">Personalizados</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
@@ -67,8 +77,8 @@ export function Stock() {
                 </Button>
             </div>
 
-            {/* Passa o filterTerm para o ProductsTable */}
-            <ProductsTable filter={filterTerm} />
+            {/* Passa o filterTerm e selectedCategory para o ProductsTable */}
+            <ProductsTable filter={filterTerm} category={selectedCategory} />
         </>
     );
 }

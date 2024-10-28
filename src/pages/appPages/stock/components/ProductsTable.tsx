@@ -14,14 +14,14 @@ import { GetStock } from "../services/GetStock";
 import { useState } from "react";
 import { formatCurrency } from "@/utils/FormatCurrency";
 
-export function ProductsTable({ filter }: { filter: string }) {
+export function ProductsTable({ filter, category }: { filter: string; category: string }) {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5; // Defina o número de itens por página
 
-    // Query para pegar os produtos, agora passando o termo de filtro
+    // Query para pegar os produtos, agora passando o termo de filtro e a categoria
     const { data: List } = useQuery({
-        queryKey: ["GetStock", currentPage, filter], // Inclui o termo de filtro como parte da queryKey
-        queryFn: () => GetStock(currentPage, pageSize, filter), // Passa o termo de filtro para a função GetStock
+        queryKey: ["GetStock", currentPage, filter, category], // Inclui o termo de filtro e categoria como parte da queryKey
+        queryFn: () => GetStock(currentPage, pageSize, filter, category), // Passa o termo de filtro e categoria para a função GetStock
     });
 
     interface Product {
@@ -47,7 +47,8 @@ export function ProductsTable({ filter }: { filter: string }) {
         storeId: string;
         productId: string;
         updatedAt: string;
-        product: Product;
+        product: Product | null;
+        customProduct: Product | null;
     }
 
     const handleNextPage = () => {
@@ -101,33 +102,36 @@ export function ProductsTable({ filter }: { filter: string }) {
                     </TableRow>
                 </TableHeader>
                 <TableBody className="h-[384px]">
-                    {List?.data.items?.map((product: StockItem) => (
-                        <TableRow key={product.id}>
-                            <TableCell>
-                                <div className="flex items-center">
-                                    <img src={product.product.imgUrl} alt="produto" width={60} />
-                                    <div>
-                                        <p className="font-semibold">{product.product.name}</p>
-                                        <p>{product.product.company}</p>
+                    {List?.data.items?.map((item: StockItem) => {
+                        const product = item.product || item.customProduct; // Verifica se é produto ou customizado
+                        return (
+                            <TableRow key={item.id}>
+                                <TableCell>
+                                    <div className="flex items-center">
+                                        <img src={product?.imgUrl || ""} alt="produto" width={60} />
+                                        <div>
+                                            <p className="font-semibold">{product?.name}</p>
+                                            <p>{product?.company || "Personalizado"}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                                R$ {formatCurrency(product.customPrice)}
-                            </TableCell>
-                            <TableCell>
-                                R$ {formatCurrency(product.normalPrice)}
-                            </TableCell>
-                            <TableCell>
-                                {product.quantity}
-                            </TableCell>
-                            <TableCell>
-                                <Button variant={'ghost'}>
-                                    <IoEllipsisVerticalSharp />
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                                </TableCell>
+                                <TableCell>
+                                    R$ {formatCurrency(item.customPrice)}
+                                </TableCell>
+                                <TableCell>
+                                    R$ {formatCurrency(item.normalPrice)}
+                                </TableCell>
+                                <TableCell>
+                                    {item.quantity}
+                                </TableCell>
+                                <TableCell>
+                                    <Button variant="ghost">
+                                        <IoEllipsisVerticalSharp />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
                 </TableBody>
             </Table>
         </>
