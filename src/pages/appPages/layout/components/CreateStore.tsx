@@ -33,8 +33,6 @@ export function CreateStore() {
         },
     })
 
-    console.log(isSuccess)
-
     const { register, handleSubmit } = useForm({
         resolver: zodResolver(CreateStoreSchema),
         mode: 'all',

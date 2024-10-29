@@ -13,7 +13,6 @@ export function Layout() {
 
     const { user } = useContext(AuthContext);
 
-
     return (
         <div className="flex">
             <div className="w-72 p-7 border-r h-screen">

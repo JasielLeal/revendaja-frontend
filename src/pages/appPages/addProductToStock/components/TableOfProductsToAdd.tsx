@@ -14,16 +14,18 @@ import { GetAllProducts } from "../services/GetAllProducts";
 import { useState } from "react";
 import { formatCurrency } from "@/utils/FormatCurrency";
 import { IoChevronBack, IoChevronForwardOutline } from "react-icons/io5";
+import { ModalToAddProductToStock } from "./ModalToAddProductToStock";
 
 export function TableOfProductsToAdd({ filter, category }: { filter: string, category: string }) {
 
     const [currentPage, setCurrentPage] = useState(1);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const pageSize = 5;
 
-
     const { data: List } = useQuery({
-        queryKey: ["GetAllProducts", currentPage, filter, category], // Inclui o termo de filtro e categoria como parte da queryKey
-        queryFn: () => GetAllProducts(currentPage, pageSize, filter, category), // Passa o termo de filtro e categoria para a função GetStock
+        queryKey: ["GetAllProducts", currentPage, filter, category],
+        queryFn: () => GetAllProducts(currentPage, pageSize, filter, category),
     });
 
     const handleNextPage = () => {
@@ -51,6 +53,11 @@ export function TableOfProductsToAdd({ filter, category }: { filter: string, cat
         updatedAt: string;
     }
 
+    const openModal = (product: Product) => {
+        setSelectedProduct(product); // Define o produto selecionado
+        setModalOpen(true); // Abre o modal
+    };
+
     return (
         <>
             <Table>
@@ -64,7 +71,7 @@ export function TableOfProductsToAdd({ filter, category }: { filter: string, cat
                                 variant="outline"
                                 size="icon"
                                 onClick={handlePreviousPage}
-                                disabled={currentPage === 1} // Desabilitar se na primeira página
+                                disabled={currentPage === 1}
                             >
                                 <IoChevronBack />
                             </Button>
@@ -72,7 +79,7 @@ export function TableOfProductsToAdd({ filter, category }: { filter: string, cat
                                 variant="outline"
                                 size="icon"
                                 onClick={handleNextPage}
-                                disabled={currentPage === List?.data.totalPages} // Desabilitar se na última página
+                                disabled={currentPage === List?.data.totalPages}
                             >
                                 <IoChevronForwardOutline />
                             </Button>
@@ -90,10 +97,10 @@ export function TableOfProductsToAdd({ filter, category }: { filter: string, cat
                 </TableHeader>
                 <TableBody>
                     {List?.data.items.map((product: Product) => (
-                        <TableRow className="cursor-pointer hover:bg-gray-100">
-                            <TableCell className="w-96">
+                        <TableRow className="cursor-pointer hover:bg-gray-100" key={product.id} onClick={() => openModal(product)}>
+                            <TableCell className="w-96" >
                                 <div className="flex items-center text-left">
-                                    <img src={produto} alt="produto" width={60} />
+                                    <img src={product.imgUrl} alt="produto" width={60} />
                                     <div className="ml-4">
                                         <p className="font-semibold">{product.name}</p>
                                         <p>{product.brand}</p>
@@ -104,13 +111,21 @@ export function TableOfProductsToAdd({ filter, category }: { filter: string, cat
                             <TableCell>R${formatCurrency(product.suggestedPrice)}</TableCell>
                             <TableCell>R${formatCurrency(product.normalPrice)}</TableCell>
                             <TableCell>
-                                <Button size="icon">+</Button>
+                                <Button size="icon" >+</Button>
                             </TableCell>
-
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
+
+            {/* Passa o produto selecionado para o modal */}
+            {selectedProduct && (
+                <ModalToAddProductToStock
+                    isOpen={modalOpen}
+                    onClose={() => setModalOpen(false)}
+                    product={selectedProduct} // Passa o produto selecionado
+                />
+            )}
         </>
     );
 };
