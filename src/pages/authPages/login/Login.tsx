@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema } from "./schemas/LoginSchema";
 import { useContext } from "react";
 import AuthContext from "@/context/AuthContext";
+import perfil from '@/assets/Revenda.png'
 
 export function Login() {
 
@@ -28,8 +29,12 @@ export function Login() {
     }
 
     return (
-        <div className="grid grid-cols-9">
-            <div className="col-span-5"></div>
+        <div className="grid grid-cols-9 items-center">
+            <div className="col-span-5 items-center justify-center flex">
+                <div className="w-[800px]">
+                    <img src={perfil} alt="" />
+                </div>
+            </div>
             <div className="col-span-4 flex flex-col h-screen px-40 justify-center">
                 <img alt="logo do site" src={logo} className="w-40 mb-16" />
                 <p className="font-semibold text-2xl mb-5">Bem-vindo de volta, {user?.name}</p>
