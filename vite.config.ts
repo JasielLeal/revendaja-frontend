@@ -9,4 +9,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true, // Permite que o Vite escute em todos os hosts de rede locais
+    port: 5173, // Porta padrão do Vite ou outra que preferir
+  },
 });

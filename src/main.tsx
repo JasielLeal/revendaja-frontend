@@ -5,17 +5,20 @@ import './globals.css'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from "@/components/ui/toaster"
+import { DomainProvider } from './context/DomainContext.tsx'
 
 const client = new QueryClient()
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={client}>
-      <AuthProvider>
-        <App />
-        <Toaster />
-      </AuthProvider>
+      <DomainProvider>
+        <AuthProvider>
+          <App />
+          <Toaster />
+        </AuthProvider>
+      </DomainProvider>
     </QueryClientProvider>
-
   </StrictMode>,
 )

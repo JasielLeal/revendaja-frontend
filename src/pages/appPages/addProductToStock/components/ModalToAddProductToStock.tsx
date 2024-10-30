@@ -76,7 +76,6 @@ export function ModalToAddProductToStock({
 
     async function onSub(data: FieldValues) {
         const formattedPrice = formatCustomPrice(data.customPrice);
-        console.log(formattedPrice); // Agora deve imprimir 1000000, mantendo os centavos
 
         const newData = {
             ...data,
