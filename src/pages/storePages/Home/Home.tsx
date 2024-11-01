@@ -1,13 +1,17 @@
-import { useDomain } from "@/context/DomainContext"
-
+import { Button } from "@/components/ui/button";
+import { OnSale } from "./components/OnSale";
 
 export function Home() {
 
-    const { storeData } = useDomain();
-
     return (
         <>
-            <h1>Home Store {storeData?.name}</h1>
+            <div className="flex items-center justify-between mb-5">
+                <p className="font-semibold ">Promoções</p>
+                <Button variant={'link'}>
+                    Ver todas
+                </Button>
+            </div>
+            <OnSale />
         </>
     )
 }
