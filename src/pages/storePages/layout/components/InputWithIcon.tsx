@@ -9,7 +9,7 @@ function InputWithIcon() {
             </span>
             <Input
                 placeholder="Buscar..."
-                className="pl-10" // espaçamento para acomodar o ícone
+                className="pl-10 " // espaçamento para acomodar o ícone
             />
         </div>
     );

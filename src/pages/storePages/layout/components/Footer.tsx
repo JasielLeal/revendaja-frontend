@@ -9,7 +9,7 @@ export function Footer() {
             <div className="py-10 px-5 bg-[#0F0F0F] mt-10">
                 <div >
                     <p className="font-semibold text-3xl text-white">{storeData?.name}</p>
-                    <p className="text-sm text-zinc-200">Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat aut dolore </p>
+                    <p className="text-sm text-zinc-200">{storeData?.description}</p>
                 </div>
                 <div className="flex flex-col gap-2">
                     <p className="font-semibold text-xl mb-2 mt-5 text-white">Atendimento</p>

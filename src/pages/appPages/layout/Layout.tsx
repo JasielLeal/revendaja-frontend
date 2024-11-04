@@ -57,7 +57,7 @@ export function Layout() {
                 }
             </div>
             <div className="w-full">
-                <div className="flex gap-3 items-center justify-end border-b h-[70px] p-4 bg-white dark:bg-background relative z-10 w-full">
+                <div className="flex gap-3 items-center justify-end border-b h-[70px] p-4  dark:bg-background relative z-10 w-full">
                     <Avatar>
                         <AvatarImage src={user?.image} className='object-cover' />
                         <AvatarFallback>{getInitials(user?.name as string, user?.secondName as string)}</AvatarFallback>

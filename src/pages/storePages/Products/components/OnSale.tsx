@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useDomain } from "@/context/DomainContext";
 import {
     Drawer,
-    DrawerClose,
     DrawerContent,
     DrawerDescription,
     DrawerFooter,
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/drawer"
 import { IoCartOutline } from "react-icons/io5";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 
 export function OnSale() {
@@ -62,13 +62,18 @@ export function OnSale() {
         customProduct: Product | null;
     }
 
+    const navigate = useNavigate()
+
     return (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {data?.data.items.map((produto: StockItem) => {
                 const item = produto.product || produto.customProduct; // Seleciona o produto normal ou customizado
                 return (
+
                     <div key={produto.id} className="border p-2 rounded-lg">
-                        <img src={item?.imgUrl} alt={item?.name} />
+                        <button onClick={()=> navigate(`/produtos/${item?.name}/${item?.id}`)}>
+                            <img src={item?.imgUrl} alt={item?.name} />
+                        </button>
                         <p className="font-semibold mb-3 text-sm">{item?.name}</p>
                         <div className="flex items-center justify-between">
                             <div>
@@ -85,7 +90,10 @@ export function OnSale() {
                                 </DrawerTrigger>
                                 <DrawerContent>
                                     <DrawerHeader>
-                                        <DrawerTitle className="text-start">{item?.name}</DrawerTitle>
+                                        <DrawerTitle className="text-start">
+                                            <img src={item?.imgUrl} alt="" />
+                                            {item?.name}
+                                            </DrawerTitle>
                                         <DrawerDescription className="text-start my-3">
                                             <p className="line-through text-xs">
                                                 R$ {(Number(produto?.normalPrice) / 100).toFixed(2)}
