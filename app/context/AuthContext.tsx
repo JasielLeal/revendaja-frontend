@@ -5,6 +5,7 @@ import { FieldValues } from "react-hook-form";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
 import { backend } from "../api/backend";
+import { redirect } from "next/navigation";
 
 interface AuthContextData {
     signed: boolean;
@@ -58,7 +59,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         logoutFc();
                     }
                 }
+
             } catch (error) {
+                redirect("/login");
                 console.error("Erro ao carregar os dados do armazenamento:", error);
             } finally {
                 setLoading(false);

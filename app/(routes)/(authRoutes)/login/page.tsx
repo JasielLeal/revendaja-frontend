@@ -52,7 +52,7 @@ export default function Login() {
                     </div>
 
                     <div className="w-full mt-5">
-                        <Button className="w-full">Entrar</Button>
+                        <Button className="w-full hover:bg-secondary" variant={'default'}>Entrar</Button>
                     </div>
                 </form>
 
