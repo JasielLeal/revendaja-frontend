@@ -2,6 +2,11 @@
 
 import { backend } from "@/app/api/backend";
 import { useEffect, useState } from "react";
+import { MobileNavBar } from "./components/mobileNavBar";
+import { Cart } from "./components/cart";
+import { Input } from "@/components/ui/input";
+import { ActivesPromotions } from "./components/activesPromotions";
+import { Categories } from "./components/Categories";
 
 export default function Store() {
     const [subdomain, setSubdomain] = useState('');
@@ -31,8 +36,17 @@ export default function Store() {
     }, [subdomain]);
 
     return (
-        <div>
-            <h1>Store {domain}</h1>
-        </div>
+        <>
+            <div className="bg-primary px-4 pt-4 pb-4">
+                <div className="flex items-center justify-between mb-5">
+                    <MobileNavBar />
+                    <h1 className="text-white font-medium">{domain}</h1>
+                    <Cart />
+                </div>
+                <Input placeholder="Pesquisar" className="placeholder:text-white" />
+            </div>
+            <Categories />
+            <ActivesPromotions />
+        </>
     );
 }
