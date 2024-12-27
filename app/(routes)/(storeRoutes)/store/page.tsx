@@ -35,8 +35,10 @@ export default function Store() {
         fetchSubdomainData();
     }, [subdomain]);
 
+   
+
     return (
-        <>
+        <>  
             <div className="bg-primary px-4 pt-4 pb-4">
                 <div className="flex items-center justify-between mb-5">
                     <MobileNavBar />
@@ -47,6 +49,8 @@ export default function Store() {
             </div>
             <Categories />
             <ActivesPromotions />
+
+            
         </>
     );
 }

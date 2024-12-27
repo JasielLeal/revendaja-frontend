@@ -1,17 +1,44 @@
 import Link from "next/link";
-import produtoImg from "@/app/assets/Produto.jpg"; 
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { FindProductsOnPromotion } from "../services/FindProductsOnPromotion";
+import { formatCurrency } from "@/app/utils/FormatCurrency";
+import { calculatePercentage } from "@/app/utils/formatDiscount";
+import { useDomain } from "@/app/context/DomainContext";
 
 export function ActivesPromotions() {
 
-    const produtos = [
-        { id: 1, nome: "Kaiak Tradicional - 100ml", imagem: produtoImg, precoAntigo: "R$ 199,99", precoAtual: "R$ 99,99", brand: "Kaiak" },
-        { id: 2, nome: "Essencial Exclusivo - 100ml", imagem: produtoImg, precoAntigo: "R$ 219,99", precoAtual: "R$ 109,99", brand: "Essencial" },
-        { id: 3, nome: "Luna Feminino - 75ml", imagem: produtoImg, precoAntigo: "R$ 179,99", precoAtual: "R$ 89,99", brand: "Luna" },
-        { id: 4, nome: "Humor a Dois - 100ml", imagem: produtoImg, precoAntigo: "R$ 149,99", precoAtual: "R$ 79,99", brand: "Humor" },
-        { id: 5, nome: "Kaiak Aventura - 100ml", imagem: produtoImg, precoAntigo: "R$ 199,99", precoAtual: "R$ 99,99", brand: "Kaiak" },
-        { id: 6, nome: "Essencial Supreme - 100ml", imagem: produtoImg, precoAntigo: "R$ 239,99", precoAtual: "R$ 119,99", brand: "Essencial" },
-    ];
+    const { storeData } = useDomain();
+
+    console.log(storeData)
+
+
+    const { data: ProductsOnPromotion } = useQuery({
+        queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
+        queryFn: () => FindProductsOnPromotion(storeData?.subdomain),
+    })
+
+    type ProductProps = {
+        id: number;
+        normalPrice: string;
+        customPrice: string;
+        product: {
+            id: number;
+            name: string;
+            brand: string;
+            imgUrl: string;
+            normalPrice: string;
+        };
+        customProduct: {
+            id: number;
+            name: string;
+            brand: string;
+            imgUrl: string;
+            normalPrice: string;
+        };
+    }
+
+
 
     return (
         <div className="px-4">
@@ -21,27 +48,39 @@ export function ActivesPromotions() {
                 <Link href={'/'} className="text-text font-medium">Ver todas</Link>
             </div>
             <div className="flex overflow-x-scroll space-x-3 ">
-                {produtos.map((produto) => (
-                    <div
-                        key={produto.id}
-                        className="flex flex-col justify-between w-36 rounded-lg"
-                        style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
-                    >
-                        <div>
-                            <div className="flex items-center w-full justify-center">
-                                <Image src={produto.imagem} alt={produto.nome} className="mb-3 rounded-xl " />
-                            </div>
-                            <p className="text-xs text-gray-400">{produto.brand}</p>
-                            <p className="font-semibold mb-2 text-text text-sm">{produto.nome}</p>
-                        </div>
-                        <div className="flex items-center justify-between">
+                {ProductsOnPromotion && ProductsOnPromotion.map((promotion: ProductProps) => {
+
+                    const produto = promotion.product || promotion.customProduct;
+
+                    const discountPercentage = calculatePercentage(Number(produto.normalPrice), Number(promotion.customPrice)).percentage;
+
+                    return (
+                        <div
+                            key={promotion.id}
+                            className="flex flex-col justify-between w-36 rounded-lg"
+                            style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
+                        >
                             <div>
-                                <p className="line-through text-xs text-gray-500">{produto.precoAntigo}</p>
-                                <p className="font-semibold text-xl text-text">{produto.precoAtual}</p>
+                                <div className="relative">
+                                    <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                        {discountPercentage.toFixed(0)}% OFF
+                                    </div>
+                                    <div className="flex items-center w-full justify-center">
+                                        <Image src={produto.imgUrl || '/path/to/defaultImage.jpg'} alt={produto.name} className="mb-3 rounded-xl" width={170} height={170} priority />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-gray-400">{produto.brand}</p>
+                                <p className="font-semibold mb-2 text-text text-sm">{produto.name}</p>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(promotion.normalPrice)}</p>
+                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(promotion.customPrice)}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     )
