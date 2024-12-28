@@ -42,18 +42,22 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
 
     useEffect(() => {
         const fetchSubdomainData = async () => {
+
+            if(subdomain === 'localhost:3000') {
+                return;
+            }
+
             if (subdomain) {
                 try {
                     const response = await axios.get(`http://localhost:9999/store/verifysubdomain/${subdomain}`);
-                    console.log(response)
                     if (response.data.exists) {
                         setStoreData(response.data.exists);
                     } else {
-                        window.location.href = `http://localhost:5173`;  // Redireciona para uma URL que não existe
+                        window.location.href = `http://localhost:3000`;  // Redireciona para uma URL que não existe
                     }
                 } catch (error) {
                     console.error("Erro ao verificar subdomínio:", error);
-                    window.location.href = `http://localhost:5173`;  // Redireciona em caso de erro
+                    window.location.href = `http://localhost:3000`;  // Redireciona em caso de erro
                 }
             }
         };

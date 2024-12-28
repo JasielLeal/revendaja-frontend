@@ -6,6 +6,13 @@ body {
   font-family: "Open Sans", serif;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
 
 @layer base {
   :root {

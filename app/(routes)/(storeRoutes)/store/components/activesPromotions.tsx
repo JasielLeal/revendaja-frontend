@@ -10,9 +10,6 @@ export function ActivesPromotions() {
 
     const { storeData } = useDomain();
 
-    console.log(storeData)
-
-
     const { data: ProductsOnPromotion } = useQuery({
         queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
         queryFn: () => FindProductsOnPromotion(storeData?.subdomain),
@@ -38,16 +35,14 @@ export function ActivesPromotions() {
         };
     }
 
-
-
     return (
         <div className="px-4">
-            <div className="flex items-center justify-between mb-4 mt-4">
+            <div className="flex items-center justify-between mb-4 mt-4 ">
                 <p className="text-text font-medium">Promoções</p>
 
                 <Link href={'/'} className="text-text font-medium">Ver todas</Link>
             </div>
-            <div className="flex overflow-x-scroll space-x-3 ">
+            <div className="flex overflow-x-scroll space-x-3 no-scrollbar">
                 {ProductsOnPromotion && ProductsOnPromotion.map((promotion: ProductProps) => {
 
                     const produto = promotion.product || promotion.customProduct;
@@ -59,8 +54,9 @@ export function ActivesPromotions() {
                             key={promotion.id}
                             className="flex flex-col justify-between w-36 rounded-lg"
                             style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
+                            onClick={() => console.log('clicou')}
                         >
-                            <div>
+                            <div >
                                 <div className="relative">
                                     <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
                                         {discountPercentage.toFixed(0)}% OFF
@@ -70,7 +66,7 @@ export function ActivesPromotions() {
                                     </div>
                                 </div>
                                 <p className="text-xs text-gray-400">{produto.brand}</p>
-                                <p className="font-semibold mb-2 text-text text-sm">{produto.name}</p>
+                                <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
                             </div>
                             <div className="flex items-center justify-between">
                                 <div>

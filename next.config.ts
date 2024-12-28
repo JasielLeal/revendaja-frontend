@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: "/",
+        has: [
+          {
+            type: "host",
+            value: "(?<subdomain>.+)\\.localhost:3000",
+          },
+        ],
+        destination: "/routes/storeRoutes/store",
+      },
+      {
         source: "/:path*",
         has: [
           {
@@ -14,7 +24,7 @@ const nextConfig: NextConfig = {
             value: "(?<subdomain>.+)\\.localhost:3000",
           },
         ],
-        destination: "/storeRoutes/home/:path*",
+        destination: "/storeRoutes/store/:path*",
       },
     ];
   },
