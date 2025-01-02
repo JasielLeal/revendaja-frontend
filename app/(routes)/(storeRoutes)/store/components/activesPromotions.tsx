@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -5,6 +7,8 @@ import { FindProductsOnPromotion } from "../services/FindProductsOnPromotion";
 import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { calculatePercentage } from "@/app/utils/formatDiscount";
 import { useDomain } from "@/app/context/DomainContext";
+import { useRouter } from "next/navigation";
+
 
 export function ActivesPromotions() {
 
@@ -14,6 +18,8 @@ export function ActivesPromotions() {
         queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
         queryFn: () => FindProductsOnPromotion(storeData?.subdomain),
     })
+
+    const router = useRouter();
 
     type ProductProps = {
         id: number;
@@ -35,6 +41,8 @@ export function ActivesPromotions() {
         };
     }
 
+
+
     return (
         <div className="px-4">
             <div className="flex items-center justify-between mb-4 mt-4 ">
@@ -54,7 +62,7 @@ export function ActivesPromotions() {
                             key={promotion.id}
                             className="flex flex-col justify-between w-36 rounded-lg"
                             style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
-                            onClick={() => console.log('clicou')}
+                            onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
                         >
                             <div >
                                 <div className="relative">

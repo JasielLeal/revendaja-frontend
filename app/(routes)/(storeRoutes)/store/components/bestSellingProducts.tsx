@@ -5,8 +5,7 @@ import Image from "next/image";
 import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { calculatePercentage } from "@/app/utils/formatDiscount";
 import Link from "next/link";
-
-
+import { useRouter } from "next/navigation";
 
 export function BestSellingProducts() {
 
@@ -42,6 +41,9 @@ export function BestSellingProducts() {
         }
     }
 
+     const router = useRouter();
+    
+
     return (
         <div className="px-4 mb-10">
             <div className="flex items-center justify-between mb-4 mt-10">
@@ -60,6 +62,7 @@ export function BestSellingProducts() {
                             key={stock.id}
                             className="flex flex-col justify-between w-36 rounded-lg relative"
                             style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
+                            onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
                         >
                             <div className="relative">
                                 {discountPercentage !== null && (
