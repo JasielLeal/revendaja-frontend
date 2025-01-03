@@ -1,6 +1,13 @@
 import { backend } from "@/app/api/backend";
 
-export async function SearchDinamic(search: string | null, page: number, pageSize: number, subdomain: string | null) {
+interface searchDinamicProps {
+    search: string | null,
+    page: number,
+    pageSize: number,
+    subdomain: string | null
+}
+
+export async function SearchDinamic({ search, page, pageSize, subdomain }: searchDinamicProps) {
 
     const response = await backend.get(`/stock/SearchDinamic`, {
         params: {
