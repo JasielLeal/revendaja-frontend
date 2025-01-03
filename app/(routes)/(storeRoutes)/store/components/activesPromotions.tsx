@@ -41,8 +41,6 @@ export function ActivesPromotions() {
         };
     }
 
-
-
     return (
         <div className="px-4">
             <div className="flex items-center justify-between mb-4 mt-4 ">

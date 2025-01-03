@@ -6,7 +6,6 @@ import { BestSellingProducts } from "./components/bestSellingProducts";
 
 export default function Store() {
 
-
     return (
         <>
             <Categories />
