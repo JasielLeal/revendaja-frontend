@@ -41,8 +41,8 @@ export function BestSellingProducts() {
         }
     }
 
-     const router = useRouter();
-    
+    const router = useRouter();
+
 
     return (
         <div className="px-4 mb-10">
@@ -78,8 +78,8 @@ export function BestSellingProducts() {
                             <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(stock.normalPrice)}</p>
-                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(stock.customPrice)}</p>
+                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(stock.normalPrice))}</p>
+                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(stock.customPrice))}</p>
                                 </div>
                             </div>
                         </div>

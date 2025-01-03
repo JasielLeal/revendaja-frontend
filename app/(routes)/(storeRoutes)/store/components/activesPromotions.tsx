@@ -16,7 +16,7 @@ export function ActivesPromotions() {
 
     const { data: ProductsOnPromotion } = useQuery({
         queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
-        queryFn: () => FindProductsOnPromotion(storeData?.subdomain),
+        queryFn: async () => await FindProductsOnPromotion(storeData?.subdomain),
     })
 
     const router = useRouter();
@@ -76,8 +76,8 @@ export function ActivesPromotions() {
                             </div>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(promotion.normalPrice)}</p>
-                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(promotion.customPrice)}</p>
+                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
+                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
                                 </div>
                             </div>
                         </div>

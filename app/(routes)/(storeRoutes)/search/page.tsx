@@ -10,13 +10,15 @@ import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { calculatePercentage } from "@/app/utils/formatDiscount";
 import { Button } from "@/components/ui/button";
 import { SearchDinamic } from "./services/SearchDinamic";
+import { useState } from "react";
 
 export default function Search() {
     const { subdomain } = useDomain();
+    const [selectedOrder, setSelectedOrder] = useState<string>('');
     const router = useRouter();
     const searchParams = useSearchParams();
     const query = searchParams.get('query');
-
+     // Ordenação dos produtos
     const pageSize = 10; // Número de itens por página
 
     // Configuração do useInfiniteQuery
@@ -28,12 +30,11 @@ export default function Search() {
         hasNextPage,
         isFetchingNextPage
     } = useInfiniteQuery({
-        queryKey: ['SearchDinamic', query],
+        queryKey: ['SearchDinamic', query, selectedOrder],
         queryFn: ({ pageParam = 0 }) =>
-            SearchDinamic({ search: query, page: pageParam + 1, pageSize, subdomain }),
+            SearchDinamic({ search: query, page: pageParam + 1, pageSize, subdomain, orderBy: selectedOrder }),
         getNextPageParam: (lastPage, allPages) => {
             const currentPage = allPages.length;
-            console.log(currentPage, lastPage?.totalPages);
 
             if (currentPage < lastPage?.totalPages) {
                 return currentPage;
@@ -74,6 +75,10 @@ export default function Search() {
         }
     }
 
+    const handleOrderChange = (value: string) => {
+        setSelectedOrder(value); // Atualiza o estado do componente pai com a opção selecionada// Aqui você pode usar o valor conforme necessário
+      };
+
     return (
         <div className="px-4 mt-5">
             <p className="font-medium text-text mb-4 text-lg">
@@ -82,7 +87,7 @@ export default function Search() {
 
             {/* Filtros e Menu */}
             <div className="flex items-center justify-between mb-6">
-                <DropDownMenu />
+                <DropDownMenu onOrderChange={handleOrderChange}/>
                 <Filter />
             </div>
 

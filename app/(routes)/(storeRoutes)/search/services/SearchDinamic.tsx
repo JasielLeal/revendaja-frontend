@@ -5,16 +5,18 @@ interface searchDinamicProps {
     page: number,
     pageSize: number,
     subdomain: string | null
+    orderBy?: string | null
 }
 
-export async function SearchDinamic({ search, page, pageSize, subdomain }: searchDinamicProps) {
+export async function SearchDinamic({ search, page, pageSize, subdomain, orderBy }: searchDinamicProps) {
 
     const response = await backend.get(`/stock/SearchDinamic`, {
         params: {
             search,
             page,
             pageSize,
-            subdomain
+            subdomain,
+            orderBy
         }
     })
 
