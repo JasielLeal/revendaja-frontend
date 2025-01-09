@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginSchema } from "./schemas/LoginSchema";
+import { LoginSchema } from "../../(storeRoutes)/cart/schemas/SalePendingSchema";
 import { FieldValues, useForm } from "react-hook-form";
 import { useContext } from "react";
 import AuthContext from "@/app/context/AuthContext";

@@ -7,6 +7,8 @@ import Image from "next/image";
 import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { Button } from "@/components/ui/button";
 import { calculatePercentage } from "@/app/utils/formatDiscount";
+import { useCart } from "@/app/context/CartContext";
+import { useRouter } from "next/navigation";
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
 
@@ -18,16 +20,32 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const { data } = useQuery({
         queryKey: ["findProductInStock", id],
         queryFn: () => FindProductInStock(subdomain, id)
-
     })
 
     const product = data?.data.product
 
     const discountPercentage = calculatePercentage(Number(product?.normalPrice), Number(data?.data?.customPrice)).percentage;
 
+    const router = useRouter()
+    const { addToCart } = useCart();
+
+    const handleAddToCart = () => {
+        if (product) {
+            addToCart({
+                id: product.id,
+                quantity: 1,
+                imgUrl: product.imgUrl,
+                name: product.name,
+                value: data?.data?.customPrice
+            });
+            router.push('/cart');
+        }
+    };
+
     if (!product) {
         return
     }
+
 
     return (
         <div className="mt-7 px-5">
@@ -52,7 +70,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
             </div>
 
-            <Button className="w-full mt-5 mb-10">Adicionar ao carrinho</Button>
+            <Button className="w-full mt-5 mb-10" onClick={() => handleAddToCart()}>Adicionar ao carrinho</Button>
 
         </div>
     );
