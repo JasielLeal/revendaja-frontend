@@ -13,6 +13,7 @@ interface Product {
 
 interface CartContextType {
     cart: Product[];
+    clearCart: () => void;
     addToCart: (product: Product) => void;
 }
 
@@ -47,9 +48,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     };
 
+    const clearCart = () => {
+        setCart([]);
+    };
+
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, }}>
+        <CartContext.Provider value={{ cart, addToCart, clearCart }}>
             {children}
         </CartContext.Provider>
     );

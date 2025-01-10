@@ -19,14 +19,16 @@ export default function ClientProvider({ children }: { children: React.ReactNode
     }));
 
     return (
-        <CartProvider>
-            <QueryClientProvider client={queryClient}>
-                <DomainProvider>
+
+        <QueryClientProvider client={queryClient}>
+            <DomainProvider>
+                <CartProvider>
                     <AuthProvider>
                         {children}
                     </AuthProvider>
-                </DomainProvider>
-            </QueryClientProvider>
-        </CartProvider>
+                </CartProvider >
+            </DomainProvider>
+        </QueryClientProvider>
+
     );
 }
