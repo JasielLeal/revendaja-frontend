@@ -1,8 +1,16 @@
+'use client';
+
+
+import { Store } from "./(routes)/(storeRoutes)/store/store";
+import { useDomain } from "./context/DomainContext";
 
 export default function App() {
+
+  const { isMainDomain } = useDomain();
+
   return (
     <>
-    <h1>a111</h1>
+      {isMainDomain ? "Home Revendaja" : <Store />}
     </>
   );
 }

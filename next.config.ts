@@ -7,24 +7,14 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/",
-        has: [
-          {
-            type: "host",
-            value: "(?<subdomain>.+)\\.localhost:3000",
-          },
-        ],
-        destination: "/routes/storeRoutes/store",
+        source: "/:path*",
+        has: [{ type: "host", value: "localhost" }],
+        destination: "/",
       },
       {
         source: "/:path*",
-        has: [
-          {
-            type: "host",
-            value: "(?<subdomain>.+)\\.localhost:3000",
-          },
-        ],
-        destination: "/storeRoutes/store/:path*",
+        has: [{ type: "host", value: ".*\\.localhost" }], // Subdomínios válidos como "leal.localhost"
+        destination: "/routes/storeRoutes/store/:path*",
       },
     ];
   },
