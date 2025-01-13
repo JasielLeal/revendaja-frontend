@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  font-family: "Open Sans", serif;
+  font-family: "Montserrat", serif;
 }
 
 .no-scrollbar::-webkit-scrollbar {

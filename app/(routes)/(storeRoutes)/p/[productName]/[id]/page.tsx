@@ -24,7 +24,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
     const product = data?.data.product
 
-    const discountPercentage = calculatePercentage(Number(product?.normalPrice), Number(data?.data?.customPrice)).percentage;
+    const discountPercentage = calculatePercentage(Number(data?.data?.discountValue), Number(data?.data?.customPrice))
 
     const router = useRouter()
     const { addToCart } = useCart();
@@ -46,6 +46,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         return
     }
 
+    function OriginalCustomValue(numberOne: number, numberTwo: number) {
+        const total = Number(numberOne) + Number(numberTwo)
+
+        return total
+    }
 
     return (
         <div className="mt-7 px-5">
@@ -64,10 +69,27 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <p className="font-semibold mb-2 text-text line-clamp-2">{product?.name}</p>
             <p className="text-xs text-gray-400 mb-5">{product?.description}</p>
             <div className="flex items-center justify-between">
-                <div>
-                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(product?.normalPrice))}</p>
-                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(data?.data?.customPrice))}</p>
-                </div>
+
+
+                {
+                    data?.data?.discountValue ?
+                        <>
+                            <div>
+                                <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(OriginalCustomValue(data?.data?.discountValue, data?.data?.customPrice)))}</p>
+                                <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(data?.data?.customPrice))}</p>
+                            </div>
+
+                        </>
+
+                        :
+
+                        <>
+                            <div>
+                                <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(product?.normalPrice))}</p>
+                                <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(data?.data?.customPrice))}</p>
+                            </div>
+                        </>
+                }
             </div>
 
             <Button className="w-full mt-5 mb-10" onClick={() => handleAddToCart()}>Adicionar ao carrinho</Button>

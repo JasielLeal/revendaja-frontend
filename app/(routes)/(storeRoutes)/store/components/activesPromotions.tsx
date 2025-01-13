@@ -25,6 +25,7 @@ export function ActivesPromotions() {
         id: number;
         normalPrice: string;
         customPrice: string;
+        discountValue: string
         product: {
             id: number;
             name: string;
@@ -53,7 +54,16 @@ export function ActivesPromotions() {
 
                     const produto = promotion.product || promotion.customProduct;
 
-                    const discountPercentage = calculatePercentage(Number(produto.normalPrice), Number(promotion.customPrice)).percentage;
+                    function OriginalCustomValue(numberOne: number, numberTwo: number) {
+                        const total = Number(numberOne) + Number(numberTwo)
+
+                        return total
+                    }
+
+                    const newCustomPrice = Number(promotion.discountValue) + Number(promotion.customPrice)
+                    console.log(newCustomPrice)
+                    const discountPercentage = calculatePercentage(Number(promotion.discountValue), Number(promotion.customPrice))
+
 
                     return (
                         <div
@@ -76,8 +86,21 @@ export function ActivesPromotions() {
                             </div>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
-                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                    {
+                                        promotion?.discountValue ?
+
+                                            <>
+                                                <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(OriginalCustomValue(Number(promotion.discountValue), Number(promotion.customPrice))))}</p>
+                                                <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                            </>
+
+                                            :
+
+                                            <>
+                                                <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
+                                                <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                            </>
+                                    }
                                 </div>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ interface StoreData {
     userId: string;
     createdAt: string;
     updatedAt: string;
+    numberPhone: string
 }
 
 interface DomainContextType {

@@ -1,6 +1,6 @@
 'use client';
 
-
+import { Site } from "./(routes)/(Site)/site";
 import { Store } from "./(routes)/(storeRoutes)/store/store";
 import { useDomain } from "./context/DomainContext";
 
@@ -10,7 +10,7 @@ export default function App() {
 
   return (
     <>
-      {isMainDomain ? "Home Revendaja" : <Store />}
+      {isMainDomain ? <Site /> : <Store />}
     </>
   );
 }

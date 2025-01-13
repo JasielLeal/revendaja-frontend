@@ -1,5 +1,6 @@
 'use client'
 
+import { useDomain } from "@/app/context/DomainContext";
 import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
@@ -13,6 +14,10 @@ export default function Congratulations() {
     const store = searchParams.get("store")
     const client = searchParams.get("client")
 
+    const {storeData} = useDomain()
+
+    const cleanNumber = storeData?.numberPhone.replace(/[()\s-]/g, "");
+    console.log(cleanNumber)
     return (
         <div className="flex flex-col items-center mt-5 px-4">
             <p className="text-green-600 bg-green-200 p-3 rounded-full">
@@ -26,7 +31,7 @@ export default function Congratulations() {
 
             <div className="flex items-center mt-5 mb-2 gap-4">
                 <Link href={'/'} className="bg-primary text-white px-6 py-2 rounded-lg">Pagina inicial</Link>
-                <Link href={''} className="text-primary">Entrar em contato</Link>
+                <Link href={`https://api.whatsapp.com/send?phone=55${cleanNumber}`} className="text-primary">Entrar em contato</Link>
             </div>
 
 
