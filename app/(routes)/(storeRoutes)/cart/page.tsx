@@ -37,12 +37,12 @@ export default function Cart() {
     const [transactionType, setTransactionType] = useState("");
     const router = useRouter();
 
-    const handleIncrement = (product: Product) => {  
+    const handleIncrement = (product: Product) => {
         addToCart({ ...product, quantity: 1 });
     };
 
     const handleDecrement = (product: Product) => {
-       
+
         if (product.quantity > 1) {
             addToCart({ ...product, quantity: -1 });
         }
@@ -93,66 +93,87 @@ export default function Cart() {
         <div className="px-4 mt-5">
             <h1 className="font-semibold text-text">Meu carrinho</h1>
 
-            {cart.map((item) => (
-                <div className="flex gap-4 items-center mt-5" key={item.id}>
-                    <Image src={item.imgUrl} alt="imagem do produto" width={80} height={80} className="rounded-xl" />
-                    <div>
-                        <p className="text-gray-600 font-medium text-sm">{item.name}</p>
-                        <p className="text-text font-semibold">R$ {formatCurrency(String(totalValueOfTheProduct(item.value, String(item.quantity))))}</p>
+            {
+                cart.length <= 0 ?
 
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => handleDecrement(item)}
-                                className="h-8 w-8 bg-gray-200 rounded-md"
-                            >
-                                -
-                            </button>
-                            <input
-                                type="text"
-                                value={item.quantity}
-                                readOnly
-                                className="w-8 text-center border-t border-b border-gray-200 h-8 rounded-md"
-                            />
-                            <button
-                                onClick={() => handleIncrement(item)}
-                                className="h-8 w-8 bg-gray-200 rounded-md"
-                            >
-                                +
-                            </button>
-                        </div>
+                    <div className="flex flex-col items-center justify-center py-10">
+                        <p className="text-center text-gray-500 text-xl">
+                            Opa, carrinho vazio :(
+                        </p>
+                        <p className="text-center text-gray-500 text-sm">
+                            Adicione produtos para pode vizualizalos aqui
+                        </p>
                     </div>
-                </div>
-            ))}
 
-            <Separator className="my-5" />
+                    :
 
-            <div className="flex items-center justify-between">
-                <p className="font-semibold text-text">Valor total</p>
-                <p>R$ {formatCurrency(String(totalCartValue))}</p>
-            </div>
-            <form onSubmit={handleSubmit(onSub)}>
-                <div className="mt-3">
-                    <p className="text-gray-600 font-medium text-sm mb-1">Seu nome</p>
-                    <Input placeholder="Insira seu nome" className="bg-background border mb-3" {...register("customer")} />
+                    <>
+                        {
+                            cart.map((item) => (
+                                <div className="flex gap-4 items-center mt-5" key={item.id}>
+                                    <Image src={item.imgUrl} alt="imagem do produto" width={80} height={80} className="rounded-xl" />
+                                    <div>
+                                        <p className="text-gray-600 font-medium text-sm">{item.name}</p>
+                                        <p className="text-text font-semibold">R$ {formatCurrency(String(totalValueOfTheProduct(item.value, String(item.quantity))))}</p>
 
-                    <p className=" font-medium text-sm mb-1">Seu celular</p>
-                    <Input placeholder="Insira seu celular" className="bg-background border mb-3" {...register("numberPhone")} />
+                                        <div className="flex gap-4">
+                                            <button
+                                                onClick={() => handleDecrement(item)}
+                                                className="h-8 w-8 bg-gray-200 rounded-md"
+                                            >
+                                                -
+                                            </button>
+                                            <input
+                                                type="text"
+                                                value={item.quantity}
+                                                readOnly
+                                                className="w-8 text-center border-t border-b border-gray-200 h-8 rounded-md"
+                                            />
+                                            <button
+                                                onClick={() => handleIncrement(item)}
+                                                className="h-8 w-8 bg-gray-200 rounded-md"
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        < Separator className="my-5" />
 
-                    <p className="text-text font-medium text-sm mb-1">Metodo de pagamento</p>
-                    <Select onValueChange={(value) => setTransactionType(value)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecione o metodo de pagamento" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Pix">Pix</SelectItem>
-                            <SelectItem value="Cartão">Cartão</SelectItem>
-                            <SelectItem value="Dinheiro">Dinheiro</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
+                        <div className="flex items-center justify-between">
+                            <p className="font-semibold text-text">Valor total</p>
+                            <p>R$ {formatCurrency(String(totalCartValue))}</p>
+                        </div>
+                        <form onSubmit={handleSubmit(onSub)}>
+                            <div className="mt-3">
+                                <p className="text-gray-600 font-medium text-sm mb-1">Seu nome</p>
+                                <Input placeholder="Insira seu nome" className="bg-background border mb-3" {...register("customer")} />
 
-                <Button className="w-full my-5">Finalizar Compra</Button>
-            </form>
+                                <p className=" font-medium text-sm mb-1">Seu celular</p>
+                                <Input placeholder="Insira seu celular" className="bg-background border mb-3" {...register("numberPhone")} />
+
+                                <p className="text-text font-medium text-sm mb-1">Metodo de pagamento</p>
+                                <Select onValueChange={(value) => setTransactionType(value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecione o metodo de pagamento" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Pix">Pix</SelectItem>
+                                        <SelectItem value="Cartão">Cartão</SelectItem>
+                                        <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <Button className="w-full my-5">Finalizar Compra</Button>
+                        </form>
+
+                    </>
+
+            }
+
+
 
         </div>
     )
