@@ -43,49 +43,59 @@ export function BestSellingProducts() {
 
     const router = useRouter();
 
+    console.log(ProductsOnPromotion)
 
     return (
         <div className="px-4 mb-10">
-            <div className="flex items-center justify-between mb-4 mt-10">
-                <p className="text-text font-medium">Mais vendidos</p>
-                <Link href={'/'} className="text-text font-medium">Ver todos</Link>
-            </div>
-            <div className="flex overflow-x-scroll space-x-3 no-scrollbar no-">
-                {ProductsOnPromotion && ProductsOnPromotion.map((item: ProductProps) => {
-                    const stock = item.stock;
-                    const produto = stock.product || stock.customProduct;
+            {ProductsOnPromotion?.lenght <= 0 ?
 
-                    const discountPercentage = stock.discountValue ? calculatePercentage(Number(stock.normalPrice), Number(stock.customPrice)).percentage : null;
+                <>
+                    <div className="flex items-center justify-between mb-4 mt-10">
+                        <p className="text-text font-medium">Mais vendidos</p>
+                        <Link href={'/'} className="text-text font-medium">Ver todos</Link>
+                    </div>
+                    <div className="flex overflow-x-scroll space-x-3 no-scrollbar no-">
+                        {ProductsOnPromotion && ProductsOnPromotion.map((item: ProductProps) => {
+                            const stock = item.stock;
+                            const produto = stock.product || stock.customProduct;
 
-                    return (
-                        <div
-                            key={stock.id}
-                            className="flex flex-col justify-between w-36 rounded-lg relative"
-                            style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
-                            onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
-                        >
-                            <div className="relative">
-                                {discountPercentage !== null && (
-                                    <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
-                                        {discountPercentage.toFixed(0)}% OFF
+                            const discountPercentage = stock.discountValue ? calculatePercentage(Number(stock.normalPrice), Number(stock.customPrice)) : null;
+
+                            return (
+                                <div
+                                    key={stock.id}
+                                    className="flex flex-col justify-between w-36 rounded-lg relative"
+                                    style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
+                                    onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
+                                >
+                                    <div className="relative">
+                                        {discountPercentage !== null && (
+                                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                                {discountPercentage.toFixed(0)}% OFF
+                                            </div>
+                                        )}
+                                        <div className="flex items-center w-full justify-center">
+                                            <Image src={produto.imgUrl || '/path/to/defaultImage.jpg'} alt={produto.name} className="mb-3 rounded-xl" width={170} height={170} priority />
+                                        </div>
                                     </div>
-                                )}
-                                <div className="flex items-center w-full justify-center">
-                                    <Image src={produto.imgUrl || '/path/to/defaultImage.jpg'} alt={produto.name} className="mb-3 rounded-xl" width={170} height={170} priority />
+                                    <p className="text-xs text-gray-400">{produto.brand}</p>
+                                    <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(stock.normalPrice))}</p>
+                                            <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(stock.customPrice))}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <p className="text-xs text-gray-400">{produto.brand}</p>
-                            <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(stock.normalPrice))}</p>
-                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(stock.customPrice))}</p>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                            );
+                        })}
+                    </div>
+                </>
+                :
+                <>
+
+                </>
+            }
         </div>
     );
 }

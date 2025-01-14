@@ -7,7 +7,7 @@ import { BestSellingProducts } from "./components/bestSellingProducts";
 export function Store() {
 
     return (
-        <>
+        <>  
             <Categories />
             <ActivesPromotions />
             <BestSellingProducts />

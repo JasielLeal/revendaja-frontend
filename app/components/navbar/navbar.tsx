@@ -39,7 +39,11 @@ export function Navbar() {
                         </Link>
                         {cartItemCount > 0 && (
                             <span className="absolute top-0 -right-2 bg-[#ce640e] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                                {cartItemCount}
+                                {cartItemCount >= 9 ?
+                                    "+9"
+                                    :
+                                    cartItemCount
+                                }
                             </span>
                         )}
                     </div>

@@ -18,7 +18,7 @@ export default function Search() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const query = searchParams.get('query');
-     // Ordenação dos produtos
+    // Ordenação dos produtos
     const pageSize = 10; // Número de itens por página
 
     // Configuração do useInfiniteQuery
@@ -49,7 +49,7 @@ export default function Search() {
     if (isLoading) return <p>Carregando...</p>;
     if (isError) return <p>Ocorreu um erro ao carregar os dados.</p>;
 
-    interface productsProps{
+    interface productsProps {
         id: number;
         name: string;
         imgUrl: string;
@@ -77,7 +77,13 @@ export default function Search() {
 
     const handleOrderChange = (value: string) => {
         setSelectedOrder(value); // Atualiza o estado do componente pai com a opção selecionada// Aqui você pode usar o valor conforme necessário
-      };
+    };
+
+    function OriginalCustomValue(numberOne: number, numberTwo: number) {
+        const total = Number(numberOne) + Number(numberTwo)
+
+        return total
+    }
 
     return (
         <div className="px-4 mt-5">
@@ -87,7 +93,7 @@ export default function Search() {
 
             {/* Filtros e Menu */}
             <div className="flex items-center justify-between mb-6">
-                <DropDownMenu onOrderChange={handleOrderChange}/>
+                <DropDownMenu onOrderChange={handleOrderChange} />
                 <Filter />
             </div>
 
@@ -99,9 +105,9 @@ export default function Search() {
 
                         const discountPercentage = productResults.discountValue
                             ? calculatePercentage(
-                                Number(productResults.normalPrice),
+                                Number(productResults.discountValue),
                                 Number(productResults.customPrice)
-                            ).percentage
+                            )
                             : null;
 
                         return (
@@ -135,12 +141,30 @@ export default function Search() {
 
                                 {/* Preços */}
                                 <div className="flex flex-col mt-3">
-                                    <p className="line-through text-xs text-gray-500">
-                                        R$ {formatCurrency(String(productResults.normalPrice))}
-                                    </p>
-                                    <p className="font-semibold text-lg text-text">
-                                        R$ {formatCurrency(String(productResults.customPrice))}
-                                    </p>
+                                    {
+                                        productResults.discountValue ?
+
+                                            <>
+                                                <p className="line-through text-xs text-gray-500">
+                                                R$ {formatCurrency(String(OriginalCustomValue(productResults.customPrice, productResults.discountValue)))}
+                                                </p>
+                                                <p className="font-semibold text-lg text-text">
+                                                    R$ {formatCurrency(String(productResults.customPrice))}
+                                                </p>
+                                            </>
+
+                                            :
+
+                                            <>
+                                                <p className="line-through text-xs text-gray-500">
+                                                R$ {formatCurrency(String(productResults.normalPrice))}
+                                                    
+                                                </p>
+                                                <p className="font-semibold text-lg text-text">
+                                                    R$ {formatCurrency(String(productResults.customPrice))}
+                                                </p>
+                                            </>
+                                    }
                                 </div>
                             </div>
                         );

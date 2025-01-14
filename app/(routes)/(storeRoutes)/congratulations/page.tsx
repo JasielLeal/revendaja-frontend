@@ -17,7 +17,7 @@ export default function Congratulations() {
     const {storeData} = useDomain()
 
     const cleanNumber = storeData?.numberPhone.replace(/[()\s-]/g, "");
-    console.log(cleanNumber)
+  
     return (
         <div className="flex flex-col items-center mt-5 px-4">
             <p className="text-green-600 bg-green-200 p-3 rounded-full">
