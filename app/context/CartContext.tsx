@@ -33,7 +33,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const cookie = new Cookies();
         cookie.set('cart', JSON.stringify(cart), { expires: new Date(Date.now() + 60 * 60 * 24 * 365 * 1000) });
-        console.log('Cart updated:', cart);
     }, [cart]);
 
     const addToCart = (product: Product) => {

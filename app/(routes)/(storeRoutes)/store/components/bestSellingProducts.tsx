@@ -13,6 +13,7 @@ export function BestSellingProducts() {
     const { data: ProductsOnPromotion } = useQuery({
         queryKey: ['GetTheTopBestSellingProducts', storeData?.subdomain],
         queryFn: () => GetTheTopBestSellingProducts(storeData?.subdomain),
+        enabled: !!storeData?.subdomain, 
     })
 
     type ProductProps = {
@@ -42,8 +43,6 @@ export function BestSellingProducts() {
     }
 
     const router = useRouter();
-
-    console.log(ProductsOnPromotion)
 
     return (
         <div className="px-4 mb-10">

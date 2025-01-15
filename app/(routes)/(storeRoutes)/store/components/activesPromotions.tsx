@@ -15,9 +15,13 @@ export function ActivesPromotions() {
 
     const { storeData } = useDomain();
 
+    const page = 1
+    const pageSize = 10
+
     const { data: ProductsOnPromotion } = useQuery({
         queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
-        queryFn: async () => await FindProductsOnPromotion(storeData?.subdomain),
+        queryFn: async () => await FindProductsOnPromotion(storeData?.subdomain, page, pageSize),
+        enabled: !!storeData?.subdomain, 
     })
 
     const router = useRouter();
@@ -46,7 +50,7 @@ export function ActivesPromotions() {
     return (
         <div className="px-4">
             {
-                ProductsOnPromotion?.lenght <= 0 ?
+                ProductsOnPromotion?.items?.length > 0 ?
 
                     <>
                         <div className="flex items-center justify-between mb-4 mt-4 ">
@@ -55,7 +59,7 @@ export function ActivesPromotions() {
                             <Link href={'/'} className="text-text font-medium">Ver todas</Link>
                         </div>
                         <div className="flex overflow-x-scroll space-x-3 no-scrollbar">
-                            {ProductsOnPromotion && ProductsOnPromotion.map((promotion: ProductProps) => {
+                            {ProductsOnPromotion?.items && ProductsOnPromotion?.items.map((promotion: ProductProps) => {
 
                                 const produto = promotion.product || promotion.customProduct;
 
@@ -65,8 +69,6 @@ export function ActivesPromotions() {
                                     return total
                                 }
 
-                                const newCustomPrice = Number(promotion.discountValue) + Number(promotion.customPrice)
-                                
                                 const discountPercentage = calculatePercentage(Number(promotion.discountValue), Number(promotion.customPrice))
 
 
@@ -116,7 +118,7 @@ export function ActivesPromotions() {
 
                     :
 
-                   <FindListNewProducts/>
+                    <FindListNewProducts />
             }
         </div>
     )

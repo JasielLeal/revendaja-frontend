@@ -15,7 +15,8 @@ export function FindListNewProducts() {
 
     const { data: productsRecommended } = useQuery({
         queryKey: ["FindNewProducts", storeData?.subdomain],
-        queryFn: async () => await FindNewProducts(storeData?.subdomain)
+        queryFn: async () => await FindNewProducts(storeData?.subdomain),
+        enabled: !!storeData?.subdomain, 
     })
 
     type ProductProps = {
@@ -58,9 +59,7 @@ export function FindListNewProducts() {
 
                         return total
                     }
-
-                    const newCustomPrice = Number(promotion.discountValue) + Number(promotion.customPrice)
-                    console.log(newCustomPrice)
+                  
                     const discountPercentage = calculatePercentage(Number(promotion.discountValue), Number(promotion.customPrice))
 
 
