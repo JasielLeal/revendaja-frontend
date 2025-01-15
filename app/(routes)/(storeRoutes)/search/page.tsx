@@ -85,6 +85,9 @@ export default function Search() {
         return total
     }
 
+
+    //fazer pagina de produtos com desconto.
+
     return (
         <div className="px-4 mt-5">
             <p className="font-medium text-text mb-4 text-lg">
