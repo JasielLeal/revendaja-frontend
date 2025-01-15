@@ -21,6 +21,7 @@ import { CreateSalePeding } from "./services/CreateSalePending";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useDomain } from "@/app/context/DomainContext";
+import { IoTrash } from "react-icons/io5";
 
 
 export default function Cart() {
@@ -33,7 +34,7 @@ export default function Cart() {
         quantity: number;
     }
 
-    const { cart, addToCart, clearCart } = useCart();
+    const { cart, addToCart, clearCart, removeFromCart } = useCart();
     const [transactionType, setTransactionType] = useState("");
     const router = useRouter();
 
@@ -112,36 +113,43 @@ export default function Cart() {
                             cart.map((item) => (
                                 <div className="flex gap-4 items-center mt-5" key={item.id}>
                                     <Image src={item.imgUrl} alt="imagem do produto" width={80} height={80} className="rounded-xl" />
-                                    <div>
+                                    <div className="w-full">
                                         <p className="text-gray-600 font-medium text-sm">{item.name}</p>
                                         <p className="text-text font-semibold">R$ {formatCurrency(String(totalValueOfTheProduct(item.value, String(item.quantity))))}</p>
 
-                                        <div className="flex gap-4">
-                                            <button
-                                                onClick={() => handleDecrement(item)}
-                                                className="h-8 w-8 bg-gray-200 rounded-md"
-                                            >
-                                                -
-                                            </button>
-                                            <input
-                                                type="text"
-                                                value={item.quantity}
-                                                readOnly
-                                                className="w-8 text-center border-t border-b border-gray-200 h-8 rounded-md"
-                                            />
-                                            <button
-                                                onClick={() => handleIncrement(item)}
-                                                className="h-8 w-8 bg-gray-200 rounded-md"
-                                            >
-                                                +
-                                            </button>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex gap-4">
+                                                <button
+                                                    onClick={() => handleDecrement(item)}
+                                                    className="h-8 w-8 bg-gray-200 rounded-md"
+                                                >
+                                                    -
+                                                </button>
+                                                <input
+                                                    type="text"
+                                                    value={item.quantity}
+                                                    readOnly
+                                                    className="w-8 text-center border-t border-b border-gray-200 h-8 rounded-md"
+                                                />
+                                                <button
+                                                    onClick={() => handleIncrement(item)}
+                                                    className="h-8 w-8 bg-gray-200 rounded-md"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                            <div>
+                                                <button className="text-red-500" onClick={() => removeFromCart(item.id)}>
+                                                    <IoTrash />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         < Separator className="my-5" />
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full">
                             <p className="font-semibold text-text">Valor total</p>
                             <p>R$ {formatCurrency(String(totalCartValue))}</p>
                         </div>
