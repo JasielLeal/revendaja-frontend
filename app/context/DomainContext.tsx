@@ -1,5 +1,8 @@
+'use client'
+
 import axios from 'axios';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+
 
 interface StoreData {
     id: string;
@@ -10,7 +13,7 @@ interface StoreData {
     userId: string;
     createdAt: string;
     updatedAt: string;
-    numberPhone: string;
+    numberPhone: string
 }
 
 interface DomainContextType {
@@ -19,6 +22,7 @@ interface DomainContextType {
     storeData: StoreData | null;
 }
 
+// Crie o contexto e defina o valor inicial
 const DomainContext = createContext<DomainContextType | undefined>(undefined);
 
 export const useDomain = (): DomainContextType => {
@@ -38,8 +42,6 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     const [isMainDomain, setIsMainDomain] = useState<boolean>(true);
     const [storeData, setStoreData] = useState<StoreData | null>(null);
 
-    console.log(process.env.NEXT_PUBLIC_FRONTEND)
-
     useEffect(() => {
         if (typeof window !== "undefined") {
             const host = window.location.host;
@@ -51,22 +53,23 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
 
     useEffect(() => {
         const fetchSubdomainData = async () => {
-            if (!subdomain || subdomain === process.env.NEXT_PUBLIC_FRONTEND ) {
+
+            if(subdomain === process.env.NEXT_PUBLIC_FRONTEND) {
                 return;
             }
 
-            try {
-                const response = await axios.get(
-                    `http://localhost:9999/store/verifysubdomain/${subdomain}`
-                );
-                if (response.data.exists) {
-                    setStoreData(response.data.exists);
-                } else {
-                    window.location.href = process.env.NEXT_PUBLIC_FRONTEND as string;
+            if (subdomain) {
+                try {
+                    const response = await axios.get(`http://localhost:9999/store/verifysubdomain/${subdomain}`);
+                    if (response.data.exists) {
+                        setStoreData(response.data.exists);
+                    } else {
+                        window.location.href = `revendaja.vercel.app`;  // Redireciona para uma URL que não existe
+                    }
+                } catch (error) {
+                    console.error("Erro ao verificar subdomínio:", error);
+                    window.location.href = `revendaja.vercel.app`;  // Redireciona em caso de erro
                 }
-            } catch (error) {
-                console.error("Erro ao verificar subdomínio:", error);
-                window.location.href = process.env.NEXT_PUBLIC_FRONTEND as string;
             }
         };
 
@@ -83,4 +86,4 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
             {children}
         </DomainContext.Provider>
     );
-};
+}
