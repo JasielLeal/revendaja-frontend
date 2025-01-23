@@ -38,18 +38,20 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     const [isMainDomain, setIsMainDomain] = useState<boolean>(true);
     const [storeData, setStoreData] = useState<StoreData | null>(null);
 
+    console.log(process.env.NEXT_PUBLIC_FRONTEND)
+
     useEffect(() => {
         if (typeof window !== "undefined") {
             const host = window.location.host;
             const currentSubdomain = host.split('.')[0];
             setSubdomain(currentSubdomain);
-            setIsMainDomain(host === "localhost:3000");
+            setIsMainDomain(host === process.env.NEXT_PUBLIC_FRONTEND);
         }
     }, []);
 
     useEffect(() => {
         const fetchSubdomainData = async () => {
-            if (!subdomain || subdomain === "localhost:3000") {
+            if (!subdomain || subdomain === process.env.NEXT_PUBLIC_FRONTEND ) {
                 return;
             }
 
@@ -60,11 +62,11 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
                 if (response.data.exists) {
                     setStoreData(response.data.exists);
                 } else {
-                    window.location.href = `http://localhost:3000`;
+                    window.location.href = process.env.NEXT_PUBLIC_FRONTEND as string;
                 }
             } catch (error) {
                 console.error("Erro ao verificar subdomínio:", error);
-                window.location.href = `http://localhost:3000`;
+                window.location.href = process.env.NEXT_PUBLIC_FRONTEND as string;
             }
         };
 
