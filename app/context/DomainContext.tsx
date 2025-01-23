@@ -44,7 +44,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
-            const mainDomain = process.env.NEXT_PUBLIC_FRONTEND; // Domínio principal (ex: revendaja.vercel.app)
+            const mainDomain = process.env.NEXT_PUBLIC_FRONTEND2; // Domínio principal (ex: revendaja.vercel.app)
 
             if (host === mainDomain) {
                 // Se o host for igual ao domínio principal, é o domínio principal
@@ -52,7 +52,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
                 setSubdomain(null);
             } else {
                 // Caso contrário, extrai o subdomínio
-                const currentSubdomain = host.split('.')[0];
+                const currentSubdomain = host.split('.')[1];
                 setIsMainDomain(false);
                 setSubdomain(currentSubdomain);
             }
@@ -70,11 +70,11 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
                 if (response.data.exists) {
                     setStoreData(response.data.exists);
                 } else {
-                    window.location.href = process.env.NEXT_PUBLIC_FRONTEND || '/'; // Redireciona para o domínio principal
+                    window.location.href = process.env.NEXT_PUBLIC_FRONTEND2 || '/'; // Redireciona para o domínio principal
                 }
             } catch (error) {
                 console.error('Erro ao verificar subdomínio:', error);
-                window.location.href = process.env.NEXT_PUBLIC_FRONTEND || '/'; // Redireciona em caso de erro
+                window.location.href = process.env.NEXT_PUBLIC_FRONTEND2 || '/'; // Redireciona em caso de erro
             }
         };
 
