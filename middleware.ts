@@ -10,5 +10,5 @@ export function middleware(request: NextRequest) {
     request.nextUrl.searchParams.set("subdomain", subdomain); // Adiciona o subdomínio aos parâmetros
   }
 
-  return NextResponse.next();
+  return NextResponse.next(); // Continua o fluxo
 }
