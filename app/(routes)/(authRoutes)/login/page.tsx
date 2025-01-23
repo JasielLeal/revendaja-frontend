@@ -6,14 +6,15 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginSchema } from "../../(storeRoutes)/cart/schemas/SalePendingSchema";
+
 import { FieldValues, useForm } from "react-hook-form";
 import { useContext } from "react";
 import AuthContext from "@/app/context/AuthContext";
+import { LoginSchema } from "./schemas/SalePendingSchema";
 
 export default function Login() {
 
-    const { register, handleSubmit} = useForm({
+    const { register, handleSubmit } = useForm({
         resolver: zodResolver(LoginSchema),
         mode: 'onSubmit',
         criteriaMode: 'all',
@@ -39,16 +40,16 @@ export default function Login() {
                 <form onSubmit={handleSubmit(onSub)}>
                     <div className="my-5">
                         <Input placeholder="E-mail" {...register('email')} />
-                       
+
                     </div>
 
                     <div className="flex justify-end w-full mb-2">
                         <Link href="/register" className="text-primary font-medium text-sm">Esqueceu a senha?</Link>
                     </div>
-                    
+
                     <div>
                         <Input placeholder="Senha" {...register('password')} />
-                        
+
                     </div>
 
                     <div className="w-full mt-5">
