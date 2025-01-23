@@ -45,9 +45,11 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
             console.log('host:', host);
+            const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
+            
             const mainDomain = 'revendaja.com'; // Domínio principal (ex: revendaja.vercel.app)
 
-            if (host === mainDomain) {
+            if (cleanHost === mainDomain) {
                 // Se o host for igual ao domínio principal, é o domínio principal
                 setIsMainDomain(true);
                 setSubdomain(null);
