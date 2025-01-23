@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
-
 interface StoreData {
     id: string;
     name: string;
@@ -11,7 +10,7 @@ interface StoreData {
     userId: string;
     createdAt: string;
     updatedAt: string;
-    numberPhone: string
+    numberPhone: string;
 }
 
 interface DomainContextType {
@@ -20,7 +19,6 @@ interface DomainContextType {
     storeData: StoreData | null;
 }
 
-// Crie o contexto e defina o valor inicial
 const DomainContext = createContext<DomainContextType | undefined>(undefined);
 
 export const useDomain = (): DomainContextType => {
@@ -36,30 +34,37 @@ interface DomainProviderProps {
 }
 
 export const DomainProvider = ({ children }: DomainProviderProps) => {
-    const host = window.location.host;
-    const subdomain = host.split('.')[0];
-    const isMainDomain = host === 'localhost:3000';
+    const [subdomain, setSubdomain] = useState<string | null>(null);
+    const [isMainDomain, setIsMainDomain] = useState<boolean>(true);
     const [storeData, setStoreData] = useState<StoreData | null>(null);
 
     useEffect(() => {
-        const fetchSubdomainData = async () => {
+        if (typeof window !== "undefined") {
+            const host = window.location.host;
+            const currentSubdomain = host.split('.')[0];
+            setSubdomain(currentSubdomain);
+            setIsMainDomain(host === "localhost:3000");
+        }
+    }, []);
 
-            if(subdomain === 'localhost:3000') {
+    useEffect(() => {
+        const fetchSubdomainData = async () => {
+            if (!subdomain || subdomain === "localhost:3000") {
                 return;
             }
 
-            if (subdomain) {
-                try {
-                    const response = await axios.get(`http://localhost:9999/store/verifysubdomain/${subdomain}`);
-                    if (response.data.exists) {
-                        setStoreData(response.data.exists);
-                    } else {
-                        window.location.href = `http://localhost:3000`;  // Redireciona para uma URL que não existe
-                    }
-                } catch (error) {
-                    console.error("Erro ao verificar subdomínio:", error);
-                    window.location.href = `http://localhost:3000`;  // Redireciona em caso de erro
+            try {
+                const response = await axios.get(
+                    `http://localhost:9999/store/verifysubdomain/${subdomain}`
+                );
+                if (response.data.exists) {
+                    setStoreData(response.data.exists);
+                } else {
+                    window.location.href = `http://localhost:3000`;
                 }
+            } catch (error) {
+                console.error("Erro ao verificar subdomínio:", error);
+                window.location.href = `http://localhost:3000`;
             }
         };
 
@@ -76,4 +81,4 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
             {children}
         </DomainContext.Provider>
     );
-}
+};
