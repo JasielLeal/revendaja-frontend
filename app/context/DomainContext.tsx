@@ -44,7 +44,8 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
-            const mainDomain = 'https://www.revendaja.com/'; // Domínio principal (ex: revendaja.vercel.app)
+            console.log('host:', host);
+            const mainDomain = 'revendaja.com'; // Domínio principal (ex: revendaja.vercel.app)
 
             if (host === mainDomain) {
                 // Se o host for igual ao domínio principal, é o domínio principal
