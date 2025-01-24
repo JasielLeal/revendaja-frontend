@@ -44,7 +44,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
-            console.log('host:', host);
+           
             const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
             
             const mainDomain = 'revendaja.com'; // Domínio principal (ex: revendaja.vercel.app)

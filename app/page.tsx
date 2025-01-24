@@ -8,6 +8,8 @@ export default function App() {
 
   const { isMainDomain } = useDomain();
 
+  console.log('isMainDomain', isMainDomain);
+
   return (
     <>
       {isMainDomain ? <Site /> : <Store />}
