@@ -87,34 +87,70 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <p className="text-xs text-gray-400 mt-5">{product?.brand}</p>
             <p className="font-semibold mb-2 text-text line-clamp-2">{product?.name}</p>
             <p className="text-xs text-gray-400 mb-5">{product?.description}</p>
-            <div className="flex items-center justify-between">
-                {data?.data?.discountValue ? (
+            {
+                 (data?.data?.quantity > 0 || product.quantity > 0) ?
                     <>
-                        <div>
-                            <p className="line-through text-xs text-gray-500">
-                                R$ {formatCurrency(String(OriginalCustomValue(data?.data?.discountValue, data?.data?.customPrice)))}
-                            </p>
-                            <p className="font-semibold text-xl text-text">
-                                R$ {formatCurrency(String(data?.data?.customPrice))}
-                            </p>
+                        <div className="flex items-center justify-between">
+                            {data?.data?.discountValue ? (
+                                <>
+                                    <div>
+                                        <p className="line-through text-xs text-gray-500">
+                                            R$ {formatCurrency(String(OriginalCustomValue(data?.data?.discountValue, data?.data?.customPrice)))}
+                                        </p>
+                                        <p className="font-semibold text-xl text-text">
+                                            R$ {formatCurrency(String(data?.data?.customPrice))}
+                                        </p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <p className="line-through text-xs text-gray-500">
+                                            R$ {formatCurrency(String(product?.normalPrice))}
+                                        </p>
+                                        <p className="font-semibold text-xl text-text">
+                                            R$ {formatCurrency(String(data?.data?.customPrice))}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
+                        <Button className="w-full mt-5 mb-10" onClick={handleAddToCart}>
+                            Adicionar ao carrinho
+                        </Button>
                     </>
-                ) : (
+                    :
+
                     <>
-                        <div>
-                            <p className="line-through text-xs text-gray-500">
-                                R$ {formatCurrency(String(product?.normalPrice))}
-                            </p>
-                            <p className="font-semibold text-xl text-text">
-                                R$ {formatCurrency(String(data?.data?.customPrice))}
-                            </p>
+                        <div className="flex items-center justify-between">
+                            {data?.data?.discountValue ? (
+                                <>
+                                    <div>
+                                        <p className="line-through text-xs text-gray-500">
+                                            R$ {formatCurrency(String(OriginalCustomValue(data?.data?.discountValue, data?.data?.customPrice)))}
+                                        </p>
+                                        <p className="font-semibold text-xl text-text">
+                                            R$ {formatCurrency(String(data?.data?.customPrice))}
+                                        </p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div>
+                                        <p className="text-red-500">
+                                            Produto esgotado
+                                        </p>
+
+                                    </div>
+                                </>
+                            )}
                         </div>
+                        <Button className="w-full mt-5 mb-10" onClick={handleAddToCart} disabled>
+                            Sem estoque
+                        </Button>
                     </>
-                )}
-            </div>
-            <Button className="w-full mt-5 mb-10" onClick={handleAddToCart}>
-                Adicionar ao carrinho
-            </Button>
+            }
+
         </div>
     );
 }

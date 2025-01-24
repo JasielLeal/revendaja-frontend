@@ -16,14 +16,15 @@ export function FindListNewProducts() {
     const { data: productsRecommended } = useQuery({
         queryKey: ["FindNewProducts", storeData?.subdomain],
         queryFn: async () => await FindNewProducts(storeData?.subdomain),
-        enabled: !!storeData?.subdomain, 
+        enabled: !!storeData?.subdomain,
     })
 
     type ProductProps = {
         id: number;
         normalPrice: string;
         customPrice: string;
-        discountValue: string
+        discountValue: string;
+        quantity: number;
         product: {
             id: number;
             name: string;
@@ -59,9 +60,10 @@ export function FindListNewProducts() {
 
                         return total
                     }
-                  
+
                     const discountPercentage = calculatePercentage(Number(promotion.discountValue), Number(promotion.customPrice))
 
+                    
 
                     return (
                         <div
@@ -84,24 +86,35 @@ export function FindListNewProducts() {
                                 <p className="text-xs text-gray-400">{produto.brand}</p>
                                 <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
                             </div>
+                            
                             <div className="flex items-center justify-between">
-                                <div>
-                                    {
-                                        promotion?.discountValue ?
+                                {promotion.quantity === 0 ?
+                                    <div>
+                                        <p className="text-red-500">
+                                            Produto esgotado
+                                        </p>
+                                    </div>
 
-                                            <>
-                                                <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(OriginalCustomValue(Number(promotion.discountValue), Number(promotion.customPrice))))}</p>
-                                                <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
-                                            </>
+                                    :
 
-                                            :
+                                    <div>
+                                        {
+                                            promotion?.discountValue ?
 
-                                            <>
-                                                <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
-                                                <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
-                                            </>
-                                    }
-                                </div>
+                                                <>
+                                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(OriginalCustomValue(Number(promotion.discountValue), Number(promotion.customPrice))))}</p>
+                                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                                </>
+
+                                                :
+
+                                                <>
+                                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
+                                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                                </>
+                                        }
+                                    </div>
+                                }
                             </div>
                         </div>
                     );

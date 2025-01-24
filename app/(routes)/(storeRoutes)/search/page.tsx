@@ -57,6 +57,7 @@ export default function Search() {
         discountValue: number;
         normalPrice: number;
         customPrice: number;
+        quantity: number;
         product: {
             id: number;
             name: string;
@@ -105,7 +106,7 @@ export default function Search() {
                 {data?.pages.map((page) =>
                     page.items.map((productResults: productsProps) => {
                         const products = productResults.product || productResults.customProduct;
-
+                        
                         const discountPercentage = productResults.discountValue
                             ? calculatePercentage(
                                 Number(productResults.discountValue),
@@ -143,32 +144,39 @@ export default function Search() {
                                 </p>
 
                                 {/* Preços */}
-                                <div className="flex flex-col mt-3">
-                                    {
-                                        productResults.discountValue ?
+                                {productResults.quantity === 0 ?
+                                    <div className="flex flex-col mt-3">
+                                        <p className="text-red-500">Produto esgotado</p>
+                                    </div>
+                                    :
 
-                                            <>
-                                                <p className="line-through text-xs text-gray-500">
-                                                R$ {formatCurrency(String(OriginalCustomValue(productResults.customPrice, productResults.discountValue)))}
-                                                </p>
-                                                <p className="font-semibold text-lg text-text">
-                                                    R$ {formatCurrency(String(productResults.customPrice))}
-                                                </p>
-                                            </>
+                                    <div className="flex flex-col mt-3">
+                                        {
+                                            productResults.discountValue ?
 
-                                            :
+                                                <>
+                                                    <p className="line-through text-xs text-gray-500">
+                                                        R$ {formatCurrency(String(OriginalCustomValue(productResults.customPrice, productResults.discountValue)))}
+                                                    </p>
+                                                    <p className="font-semibold text-lg text-text">
+                                                        R$ {formatCurrency(String(productResults.customPrice))}
+                                                    </p>
+                                                </>
 
-                                            <>
-                                                <p className="line-through text-xs text-gray-500">
-                                                R$ {formatCurrency(String(productResults.normalPrice))}
-                                                    
-                                                </p>
-                                                <p className="font-semibold text-lg text-text">
-                                                    R$ {formatCurrency(String(productResults.customPrice))}
-                                                </p>
-                                            </>
-                                    }
-                                </div>
+                                                :
+
+                                                <>
+                                                    <p className="line-through text-xs text-gray-500">
+                                                        R$ {formatCurrency(String(productResults.normalPrice))}
+
+                                                    </p>
+                                                    <p className="font-semibold text-lg text-text">
+                                                        R$ {formatCurrency(String(productResults.customPrice))}
+                                                    </p>
+                                                </>
+                                        }
+                                    </div>
+                                }
                             </div>
                         );
                     })
