@@ -44,10 +44,10 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
-           
+
             const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
-            
-            const mainDomain =  'localhost:3000' //'revendaja.com'; // Domínio principal (ex: revendaja.vercel.app)
+
+            const mainDomain = 'revendaja.com'; // Domínio principal (ex: revendaja.vercel.app)
 
             if (cleanHost === mainDomain) {
                 // Se o host for igual ao domínio principal, é o domínio principal
