@@ -9,6 +9,7 @@ interface Product {
     imgUrl: string;
     value: string
     quantity: number;
+    quantityInStock?: number;
 }
 
 interface CartContextType {

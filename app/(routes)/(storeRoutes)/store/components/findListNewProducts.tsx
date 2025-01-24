@@ -2,7 +2,6 @@
 
 import { useDomain } from "@/app/context/DomainContext";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link"
 import { FindNewProducts } from "../services/FindNewProducts";
 import { formatCurrency } from "@/app/utils/FormatCurrency";
 import Image from "next/image";
@@ -47,7 +46,7 @@ export function FindListNewProducts() {
         <>
             <div className="flex items-center justify-between mb-4 mt-10">
                 <p className="text-text font-medium">Produtos Recentes</p>
-                <Link href={'/'} className="text-text font-medium">Ver todos</Link>
+               
             </div>
 
             <div className="flex overflow-x-scroll space-x-3 no-scrollbar">

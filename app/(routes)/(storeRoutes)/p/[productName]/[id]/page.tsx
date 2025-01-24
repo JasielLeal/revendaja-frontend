@@ -50,6 +50,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 imgUrl: product.imgUrl,
                 name: product.name,
                 value: data?.data?.customPrice,
+                quantityInStock: product.quantity || data?.data?.quantity,
             });
             router.push('/cart');
         }
@@ -87,8 +88,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <p className="text-xs text-gray-400 mt-5">{product?.brand}</p>
             <p className="font-semibold mb-2 text-text line-clamp-2">{product?.name}</p>
             <p className="text-xs text-gray-400 mb-5">{product?.description}</p>
+
+            <p className="text-sm text-text text-medium mb-3">Estoque disponivel: 
+                <span className="text-text font-semibold ml-1">
+                     { product.quantity || data?.data?.quantity}
+                </span>
+
+            </p>
+
             {
-                 (data?.data?.quantity > 0 || product.quantity > 0) ?
+                (data?.data?.quantity > 0 || product.quantity > 0) ?
                     <>
                         <div className="flex items-center justify-between">
                             {data?.data?.discountValue ? (

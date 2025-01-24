@@ -70,8 +70,8 @@ export default function Cart() {
     const { mutateAsync: createSalePedingFn } = useMutation({
         mutationFn: CreateSalePeding,
         onSuccess: (response) => {
-            clearCart();
             router.push(`/congratulations?id=${response.id}&value=${response.totalPrice}&store=${storeData?.name}&client=${response.customer}`);
+            clearCart();
         },
         onError: () => {
 
@@ -89,6 +89,8 @@ export default function Cart() {
 
         await createSalePedingFn(newData)
     }
+
+    console.log(cart)
 
     return (
         <div className="px-4 mt-5">
@@ -121,7 +123,8 @@ export default function Cart() {
                                             <div className="flex gap-4">
                                                 <button
                                                     onClick={() => handleDecrement(item)}
-                                                    className="h-8 w-8 bg-gray-200 rounded-md"
+                                                    className="h-8 w-8 bg-gray-300 rounded-md"
+                                                    disabled={item.quantity === 1}
                                                 >
                                                     -
                                                 </button>
@@ -129,11 +132,12 @@ export default function Cart() {
                                                     type="text"
                                                     value={item.quantity}
                                                     readOnly
-                                                    className="w-8 text-center border-t border-b border-gray-200 h-8 rounded-md"
+                                                    className="w-8 text-center border-t border-b bg-white h-8 rounded-md"
                                                 />
                                                 <button
                                                     onClick={() => handleIncrement(item)}
-                                                    className="h-8 w-8 bg-gray-200 rounded-md"
+                                                    className="h-8 w-8 bg-gray-300 rounded-md"
+                                                    disabled={item.quantity === item.quantityInStock}
                                                 >
                                                     +
                                                 </button>
@@ -156,10 +160,10 @@ export default function Cart() {
                         <form onSubmit={handleSubmit(onSub)}>
                             <div className="mt-3">
                                 <p className="text-gray-600 font-medium text-sm mb-1">Seu nome</p>
-                                <Input placeholder="Insira seu nome" className="bg-background border mb-3" {...register("customer")} />
+                                <Input placeholder="Insira seu nome" className="bg-background border mb-3 border-gray-300 " {...register("customer")} />
 
                                 <p className=" font-medium text-sm mb-1">Seu celular</p>
-                                <Input placeholder="Insira seu celular" className="bg-background border mb-3" {...register("numberPhone")} />
+                                <Input placeholder="Insira seu celular" className="bg-background border border-gray-300 mb-3" {...register("numberPhone")} />
 
                                 <p className="text-text font-medium text-sm mb-1">Metodo de pagamento</p>
                                 <Select onValueChange={(value) => setTransactionType(value)}>
