@@ -19,6 +19,7 @@ interface DomainContextType {
     isMainDomain: boolean;
     subdomain: string | null;
     storeData: StoreData | null;
+    erro404: boolean;
 }
 
 // Crie o contexto e defina o valor inicial
@@ -41,13 +42,14 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     const [isMainDomain, setIsMainDomain] = useState<boolean>(true);
     const [storeData, setStoreData] = useState<StoreData | null>(null);
 
+    const [erro404, setError404] = useState<boolean>(false);
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
 
             const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
 
-            const mainDomain =  'revendaja.com' // 'localhost:3000' Domínio principal (ex: revendaja.vercel.app)
+            const mainDomain = 'revendaja.com' // 'localhost:3000' Domínio principal (ex: revendaja.vercel.app)
 
             if (cleanHost === mainDomain) {
                 // Se o host for igual ao domínio principal, é o domínio principal
@@ -69,15 +71,23 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
             }
 
             try {
+                // Tente fazer a requisição e verificar se houve algum erro
                 const response = await axios.get(`http://localhost:9999/store/verifysubdomain/${subdomain}`);
+
                 if (response.data.exists) {
+                    // Caso o subdomínio exista, salva os dados da loja
                     setStoreData(response.data.exists);
+                    setError404(false);  // Resetando o erro 404, pois encontramos a loja
                 } else {
-                    window.location.href = 'www.revendaja.com'  // Redireciona para o domínio principal
+                    // Caso contrário, marca que houve erro 404
+                    setError404(true);
+                    setStoreData(null); // Limpa os dados da loja
                 }
             } catch (error) {
-                console.error('Erro ao verificar subdomínio:', error);
-                window.location.href = 'www.revendaja.com'  // Redireciona em caso de erro
+                // Se ocorrer algum erro na requisição, trata o erro aqui
+                console.error("Erro ao buscar dados do subdomínio:", error);
+                setError404(true); // Considerando erro 404 caso haja falha na requisição
+                setStoreData(null);
             }
         };
 
@@ -85,8 +95,8 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
     }, [subdomain, isMainDomain]);
 
     const value = useMemo(
-        () => ({ isMainDomain, subdomain, storeData }),
-        [isMainDomain, subdomain, storeData]
+        () => ({ isMainDomain, subdomain, storeData, erro404 }),
+        [isMainDomain, subdomain, storeData, erro404]
     );
 
     return <DomainContext.Provider value={value}>{children}</DomainContext.Provider>;
