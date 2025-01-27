@@ -8,18 +8,12 @@ import { CartProvider } from "./CartContext";
 import { Navbar } from "../components/navbar/navbar";
 import { Footer } from "../components/footer/footer";
 
+
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
-    const { isMainDomain, erro404 } = useDomain(); // Use o contexto para verificar o domínio
-
-    console.log(erro404)
-
-    if (erro404) {
-        // Se houver erro 404, exibe apenas o conteúdo (children)
-        return <>{children}</>;
-    }
+    const { isMainDomain } = useDomain(); // Use o contexto para verificar o domínio
 
     return (
-        <>  
+        <>
             {!isMainDomain && <Navbar />}
             {children}
             {!isMainDomain && <Footer />}
