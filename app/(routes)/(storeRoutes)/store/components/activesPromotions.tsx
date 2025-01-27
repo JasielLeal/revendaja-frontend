@@ -8,7 +8,7 @@ import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { calculatePercentage } from "@/app/utils/formatDiscount";
 import { useDomain } from "@/app/context/DomainContext";
 import { useRouter } from "next/navigation";
-import { FindListNewProducts } from "./findListNewProducts";
+import { NewProductsList } from "./findListNewProducts";
 
 
 export function ActivesPromotions() {
@@ -18,10 +18,10 @@ export function ActivesPromotions() {
     const page = 1
     const pageSize = 10
 
-    const { data: ProductsOnPromotion } = useQuery({
+    const { data: ProductsOnPromotion, isPending } = useQuery({
         queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
         queryFn: async () => await FindProductsOnPromotion(storeData?.subdomain, page, pageSize),
-        enabled: !!storeData?.subdomain, 
+        enabled: !!storeData?.subdomain,
     })
 
     const router = useRouter();
@@ -73,44 +73,52 @@ export function ActivesPromotions() {
 
 
                                 return (
-                                    <div
-                                        key={promotion.id}
-                                        className="flex flex-col justify-between w-36 rounded-lg"
-                                        style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
-                                        onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
-                                    >
-                                        <div >
-                                            <div className="relative">
-                                                <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
-                                                    {discountPercentage.toFixed(0)}% OFF
+                                    <>
+                                        {isPending ?
+                                            <div
+                                                key={promotion.id}
+                                                className="flex flex-col justify-between w-36 rounded-lg"
+                                                style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
+                                                onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
+                                            >
+                                                <div >
+                                                    <div className="relative">
+                                                        <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                                            {discountPercentage.toFixed(0)}% OFF
+                                                        </div>
+                                                        <div className="flex items-center w-full justify-center">
+                                                            <Image src={produto.imgUrl || '/path/to/defaultImage.jpg'} alt={produto.name} className="mb-3 rounded-xl" width={170} height={170} priority />
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-gray-400">{produto.brand}</p>
+                                                    <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
                                                 </div>
-                                                <div className="flex items-center w-full justify-center">
-                                                    <Image src={produto.imgUrl || '/path/to/defaultImage.jpg'} alt={produto.name} className="mb-3 rounded-xl" width={170} height={170} priority />
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        {
+                                                            promotion?.discountValue ?
+
+                                                                <>
+                                                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(OriginalCustomValue(Number(promotion.discountValue), Number(promotion.customPrice))))}</p>
+                                                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                                                </>
+
+                                                                :
+
+                                                                <>
+                                                                    <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
+                                                                    <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
+                                                                </>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <p className="text-xs text-gray-400">{produto.brand}</p>
-                                            <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                {
-                                                    promotion?.discountValue ?
+                                            
+                                            :
 
-                                                        <>
-                                                            <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(OriginalCustomValue(Number(promotion.discountValue), Number(promotion.customPrice))))}</p>
-                                                            <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
-                                                        </>
-
-                                                        :
-
-                                                        <>
-                                                            <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(promotion.normalPrice))}</p>
-                                                            <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(promotion.customPrice))}</p>
-                                                        </>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
+                                            <p>carregando</p>
+                                    }
+                                    </>
                                 );
                             })}
                         </div>
@@ -118,7 +126,7 @@ export function ActivesPromotions() {
 
                     :
 
-                    <FindListNewProducts />
+                    <NewProductsList />
             }
         </div>
     )

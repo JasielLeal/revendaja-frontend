@@ -3,7 +3,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import Cookies from 'universal-cookie';
 
-interface Product {
+export interface Product {
     id: string;
     name: string
     imgUrl: string;

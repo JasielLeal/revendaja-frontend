@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import Cookies from "universal-cookie";
 import { backend } from "../api/backend";
 import { redirect } from "next/navigation";
+import { ClipLoader } from "react-spinners";
 
 interface AuthContextData {
     signed: boolean;
@@ -123,7 +124,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <AuthContext.Provider value={{ signed: !!user, user, signInFc, loading, logoutFc, updateUserStoreStatus }}>
-            {loading ? <h1>carregando</h1> : children}
+            {loading ?
+                // Spinner de carregamento
+                <div className="flex justify-center items-center h-screen">
+                    <ClipLoader  color="#4A90E2" loading={loading} size={50} />
+                </div>
+                :
+                children
+            }
         </AuthContext.Provider>
     );
 }

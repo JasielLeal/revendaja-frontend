@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { FindProductInStock } from "./services/findProductInStock";
 import * as React from 'react';
 import Image from "next/image";
@@ -42,9 +42,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const router = useRouter();
     const { addToCart } = useCart();
 
+    const { mutate } = useMutation({
+        mutationFn: addToCart,
+        onSuccess: () => {
+            router.push('/cart');
+        }
+    });
+
     const handleAddToCart = () => {
         if (product) {
-            addToCart({
+            mutate({
                 id: product.id,
                 quantity: 1,
                 imgUrl: product.imgUrl,
@@ -52,7 +59,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 value: data?.data?.customPrice,
                 quantityInStock: product.quantity || data?.data?.quantity,
             });
-            router.push('/cart');
         }
     };
 

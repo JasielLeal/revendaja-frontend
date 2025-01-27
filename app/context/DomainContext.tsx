@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import axios from 'axios';
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
@@ -39,22 +39,28 @@ interface DomainProviderProps {
 export const DomainProvider = ({ children }: DomainProviderProps) => {
     const [subdomain, setSubdomain] = useState<string | null>(null);
     const [isMainDomain, setIsMainDomain] = useState<boolean>(true);
-    const [storeData, setStoreData] = useState<StoreData | null>(null);
+    const [storeData, setStoreData] = useState<StoreData | null>(() => {
+        // Recupera dados do localStorage ao carregar o componente
+        if (typeof window !== 'undefined') {
+            const savedData = localStorage.getItem('storeData');
+            return savedData ? JSON.parse(savedData) : null;
+        }
+        return null;
+    });
+    const [lastDomain, setLastDomain] = useState<string | null>(null); // Armazenar o domínio anterior
 
+    // Identificar o subdomínio ao carregar a página
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const host = window.location.host;
-
             const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
 
-            const mainDomain = 'revendaja.com' // 'localhost:3000' Domínio principal (ex: revendaja.vercel.app)
+            const mainDomain = 'revendaja.com'; // Substitua pelo domínio principal da sua aplicação
 
             if (cleanHost === mainDomain) {
-                // Se o host for igual ao domínio principal, é o domínio principal
                 setIsMainDomain(true);
                 setSubdomain(null);
             } else {
-                // Caso contrário, extrai o subdomínio
                 const currentSubdomain = host.split('.')[0];
                 setIsMainDomain(false);
                 setSubdomain(currentSubdomain);
@@ -62,30 +68,47 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
         }
     }, []);
 
+    // Buscar dados do subdomínio apenas quando ele mudar ou o domínio for alterado
     useEffect(() => {
-        const fetchSubdomainData = async () => {
-            if (!subdomain || isMainDomain) {
-                return;
-            }
-
-                const response = await axios.get(`http://localhost:9999/store/verifysubdomain/${subdomain}`);
-
-                if (response.data.exists) {
-                    // Caso o subdomínio exista, salva os dados da loja
-                    setStoreData(response.data.exists);
-                } else {
-                    return
+        if (subdomain && subdomain !== lastDomain) {
+            // Se o domínio mudou, faz a requisição e limpa o localStorage
+            const fetchSubdomainData = async () => {
+                try {
+                    const response = await axios.get(`http://localhost:9999/store/verifysubdomain/${subdomain}`);
+                    if (response.data.exists) {
+                        setStoreData(response.data.exists); // Atualiza o estado com os dados da loja
+                        localStorage.setItem('storeData', JSON.stringify(response.data.exists)); // Salva os dados no localStorage
+                        setLastDomain(subdomain); // Atualiza o último domínio registrado
+                    } else {
+                        setStoreData(null); // Reseta os dados caso o subdomínio não exista
+                        localStorage.removeItem('storeData'); // Remove os dados do localStorage
+                        setLastDomain(null); // Limpa o domínio anterior
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar dados do subdomínio:', error);
+                    setStoreData(null);
+                    localStorage.removeItem('storeData'); // Remove os dados do localStorage em caso de erro
+                    setLastDomain(null); // Limpa o domínio anterior
                 }
-          
-        };
+            };
 
-        fetchSubdomainData();
-    }, [subdomain, isMainDomain]);
+            fetchSubdomainData();
+        }
+    }, [subdomain, lastDomain]); // Dependência do subdomínio e domínio anterior
 
-    const value = useMemo(
-        () => ({ isMainDomain, subdomain, storeData}),
-        [isMainDomain, subdomain, storeData]
-    );
+    // Verificar se o domínio mudou após o carregamento da página
+    useEffect(() => {
+        if (subdomain === lastDomain) {
+            // Se o subdomínio não mudou, carrega os dados do localStorage
+            const savedData = localStorage.getItem('storeData');
+            if (savedData) {
+                setStoreData(JSON.parse(savedData)); // Recupera os dados do localStorage
+            }
+        }
+    }, [subdomain, lastDomain]); // Dependência no subdomínio e no domínio anterior
+
+    // Valor do contexto
+    const value = useMemo(() => ({ isMainDomain, subdomain, storeData }), [isMainDomain, subdomain, storeData]);
 
     return <DomainContext.Provider value={value}>{children}</DomainContext.Provider>;
 };

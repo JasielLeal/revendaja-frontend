@@ -24,8 +24,6 @@ export default function Search() {
     // Configuração do useInfiniteQuery
     const {
         data,
-        isLoading,
-        isError,
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage
@@ -45,9 +43,6 @@ export default function Search() {
         enabled: !!query,
         initialPageParam: 0 // Só executa se "query" não estiver vazio
     });
-
-    if (isLoading) return <p>Carregando...</p>;
-    if (isError) return <p>Ocorreu um erro ao carregar os dados.</p>;
 
     interface productsProps {
         id: number;
