@@ -1,5 +1,6 @@
 'use client'
 
+import { useCart } from "@/app/context/CartContext";
 import { useDomain } from "@/app/context/DomainContext";
 import { formatCurrency } from "@/app/utils/FormatCurrency";
 import { Separator } from "@radix-ui/react-dropdown-menu";
@@ -14,15 +15,18 @@ export default function Congratulations() {
     const store = searchParams.get("store")
     const client = searchParams.get("client")
 
-    const {storeData} = useDomain()
+    const { storeData } = useDomain()
+    const { clearCart } = useCart()
+
+    clearCart()
 
     const cleanNumber = storeData?.numberPhone.replace(/[()\s-]/g, "");
-  
+
     return (
         <div className="flex flex-col items-center mt-5 px-4">
             <p className="text-green-600 bg-green-200 p-3 rounded-full">
                 <IoCheckmarkCircle size={50} />
-                {}
+                { }
             </p>
             <p className="text-text font-medium mt-2">Pedido Realizado</p>
             <p className="text-xl font-bold text-text">R$ {formatCurrency(String(value))}</p>

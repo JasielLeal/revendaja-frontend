@@ -34,7 +34,7 @@ export default function Cart() {
         quantity: number;
     }
 
-    const { cart, addToCart, clearCart, removeFromCart } = useCart();
+    const { cart, addToCart, removeFromCart } = useCart();
     const [transactionType, setTransactionType] = useState("");
     const router = useRouter();
 
@@ -71,7 +71,7 @@ export default function Cart() {
         mutationFn: CreateSalePeding,
         onSuccess: (response) => {
             router.push(`/congratulations?id=${response.id}&value=${response.totalPrice}&store=${storeData?.name}&client=${response.customer}`);
-            clearCart();
+           
         },
         onError: () => {
 

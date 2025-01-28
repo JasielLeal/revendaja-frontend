@@ -9,28 +9,23 @@ import { Button } from "@/components/ui/button";
 import { calculatePercentage } from "@/app/utils/formatDiscount";
 import { useCart } from "@/app/context/CartContext";
 import { useRouter } from "next/navigation";
+import { useDomain } from "@/app/context/DomainContext";
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = React.use(params);
 
-    const [subdomain, setSubdomain] = React.useState<string | null>(null);
+    const { storeData } = useDomain()
 
-    React.useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const host = window.location.host;
-            setSubdomain(host.split('.')[0]);
-        }
-    }, []);
 
     const { data } = useQuery({
         queryKey: ["findProductInStock", id],
         queryFn: () => {
-            if (subdomain) {
-                return FindProductInStock(subdomain, id);
+            if (String(storeData?.subdomain)) {
+                return FindProductInStock(String(storeData?.subdomain), id);
             }
             return null;
         },
-        enabled: !!subdomain, // Só executa a query quando `subdomain` estiver definido
+        enabled: !!String(storeData?.subdomain), // Só executa a query quando `subdomain` estiver definido
     });
 
     const product = data?.data?.product;
@@ -89,9 +84,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <p className="font-semibold mb-2 text-text line-clamp-2">{product?.name}</p>
             <p className="text-xs text-gray-400 mb-5">{product?.description}</p>
 
-            <p className="text-sm text-text text-medium mb-3">Estoque disponivel: 
+            <p className="text-sm text-text text-medium mb-3">Estoque disponivel:
                 <span className="text-text font-semibold ml-1">
-                     { product.quantity || data?.data?.quantity}
+                    {product.quantity || data?.data?.quantity}
                 </span>
 
             </p>
