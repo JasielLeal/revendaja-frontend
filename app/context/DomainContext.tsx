@@ -55,7 +55,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
             const host = window.location.host;
             const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
 
-            const mainDomain = process.env.NEXT_PUBLIC_MAINDOMAIN; // Substitua pelo domínio principal da sua aplicação
+            const mainDomain = process.env.NEXT_PUBLIC_MAINLOCAL; // Substitua pelo domínio principal da sua aplicação
 
             if (cleanHost === mainDomain) {
                 setIsMainDomain(true);

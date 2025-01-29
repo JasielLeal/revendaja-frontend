@@ -11,6 +11,8 @@ import { FieldValues, useForm } from "react-hook-form";
 import { useContext } from "react";
 import AuthContext from "@/app/context/AuthContext";
 import { LoginSchema } from "./schemas/SalePendingSchema";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
 
@@ -20,26 +22,39 @@ export default function Login() {
         criteriaMode: 'all',
     });
 
-    const { signInFc } = useContext(AuthContext)
+    const { signInFc, logoutFc } = useContext(AuthContext)
+    const route = useRouter()
+    const { mutateAsync: signIn } = useMutation({
+        mutationFn: signInFc,
+        onSuccess: (response) => {
+            console.log(response)
+            if (response?.role !== 'Owner') {
+                logoutFc()
+            }
+            route.push('/home')
+
+        },
+        onError: () => {
+
+        }
+
+    })
+
 
     async function onSub(data: FieldValues) {
-        try {
-            signInFc(data)
-        } catch (e) {
-            console.error(e)
-        }
+        await signIn(data)
     }
 
     return (
-        <div className="flex items-center justify-center flex-col w-full h-screen">
-            <div className="w-full px-5">
-                <div className="flex items-center justify-center w-full mb-5">
+        <div className="flex items-center justify-center flex-col w-full h-screen bg-[#09090b]">
+            <div className="px-5 w-[400px]">
+                <div className="flex items-center justify-center w-full">
                     <Image src={logo} alt="logo" width={150} height={150} />
                 </div>
-
+                <p className="text-gray-300 text-center  mb-5">Painel administrativo</p>
                 <form onSubmit={handleSubmit(onSub)}>
                     <div className="my-5">
-                        <Input placeholder="E-mail" {...register('email')} />
+                        <Input placeholder="E-mail" {...register('email')} className="bg-[#27272a]" />
 
                     </div>
 
@@ -48,7 +63,7 @@ export default function Login() {
                     </div>
 
                     <div>
-                        <Input placeholder="Senha" {...register('password')} />
+                        <Input placeholder="Senha" {...register('password')} className="bg-[#27272a]" />
 
                     </div>
 
@@ -56,13 +71,6 @@ export default function Login() {
                         <Button className="w-full hover:bg-secondary" variant={'default'}>Entrar</Button>
                     </div>
                 </form>
-
-                <div className="flex flex-row items-center justify-center gap-1 mt-5">
-                    <p>
-                        Não tem uma conta?
-                    </p>
-                    <Link href="/register" className="text-primary font-medium">Criar conta</Link>
-                </div>
             </div>
 
         </div>

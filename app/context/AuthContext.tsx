@@ -92,6 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             expiryTime.setTime(expiryTime.getTime() + 8 * 60 * 60 * 1000); // 8 horas
             cookie.set("token", data.token, { expires: expiryTime });
             cookie.set("user", data.user);
+
+            return data.user
         } catch (e) {
             console.log(e);
             console.log(JSON.stringify(e, null, 4));
@@ -127,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             {loading ?
                 // Spinner de carregamento
                 <div className="flex justify-center items-center h-screen">
-                    <ClipLoader  color="#4A90E2" loading={loading} size={50} />
+                    <ClipLoader color="#4A90E2" loading={loading} size={50} />
                 </div>
                 :
                 children
