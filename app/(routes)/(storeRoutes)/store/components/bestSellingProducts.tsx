@@ -8,13 +8,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function BestSellingProducts() {
-
     const { storeData } = useDomain();
     const { data: ProductsOnPromotion } = useQuery({
         queryKey: ['GetTheTopBestSellingProducts', storeData?.subdomain],
         queryFn: () => GetTheTopBestSellingProducts(storeData?.subdomain),
         enabled: !!storeData?.subdomain, 
-    })
+    });
 
     type ProductProps = {
         id: number;
@@ -24,7 +23,8 @@ export function BestSellingProducts() {
             id: number;
             normalPrice: string;
             customPrice: string;
-            discountValue: string
+            discountValue: string;
+            quantity: number; // Adicionei a propriedade quantity
             product: {
                 id: number;
                 name: string;
@@ -39,32 +39,38 @@ export function BestSellingProducts() {
                 imgUrl: string;
                 normalPrice: string;
             };
-        }
-    }
+        };
+    };
 
     const router = useRouter();
 
+    // Filtra os produtos que possuem quantidade maior que zero
+    const filteredProducts = ProductsOnPromotion?.filter(
+        (item: ProductProps) => item.stock.quantity > 0
+    );
+
     return (
         <div className="px-4 mb-10">
-            {ProductsOnPromotion?.lenght <= 0 ?
-
+            {filteredProducts?.length > 0 && (
                 <>
                     <div className="flex items-center justify-between mb-4 mt-10">
                         <p className="text-text font-medium">Mais vendidos</p>
                         <Link href={'/'} className="text-text font-medium">Ver todos</Link>
                     </div>
-                    <div className="flex overflow-x-scroll space-x-3 no-scrollbar no-">
-                        {ProductsOnPromotion && ProductsOnPromotion.map((item: ProductProps) => {
+                    <div className="flex overflow-x-scroll space-x-3 no-scrollbar">
+                        {filteredProducts.map((item: ProductProps) => {
                             const stock = item.stock;
                             const produto = stock.product || stock.customProduct;
 
-                            const discountPercentage = stock.discountValue ? calculatePercentage(Number(stock.normalPrice), Number(stock.customPrice)) : null;
+                            const discountPercentage = stock.discountValue
+                                ? calculatePercentage(Number(stock.normalPrice), Number(stock.customPrice))
+                                : null;
 
                             return (
                                 <div
                                     key={stock.id}
                                     className="flex flex-col justify-between w-36 rounded-lg relative"
-                                    style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
+                                    style={{ minWidth: "170px" }}
                                     onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
                                 >
                                     <div className="relative">
@@ -74,15 +80,26 @@ export function BestSellingProducts() {
                                             </div>
                                         )}
                                         <div className="flex items-center w-full justify-center">
-                                            <Image src={produto.imgUrl || '/path/to/defaultImage.jpg'} alt={produto.name} className="mb-3 rounded-xl" width={170} height={170} priority />
+                                            <Image
+                                                src={produto.imgUrl || '/path/to/defaultImage.jpg'}
+                                                alt={produto.name}
+                                                className="mb-3 rounded-xl"
+                                                width={170}
+                                                height={170}
+                                                priority
+                                            />
                                         </div>
                                     </div>
                                     <p className="text-xs text-gray-400">{produto.brand}</p>
                                     <p className="font-semibold mb-2 text-text text-sm line-clamp-2">{produto.name}</p>
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="line-through text-xs text-gray-500">R$ {formatCurrency(String(stock.normalPrice))}</p>
-                                            <p className="font-semibold text-xl text-text">R$ {formatCurrency(String(stock.customPrice))}</p>
+                                            <p className="line-through text-xs text-gray-500">
+                                                R$ {formatCurrency(String(stock.normalPrice))}
+                                            </p>
+                                            <p className="font-semibold text-xl text-text">
+                                                R$ {formatCurrency(String(stock.customPrice))}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -90,11 +107,7 @@ export function BestSellingProducts() {
                         })}
                     </div>
                 </>
-                :
-                <>
-
-                </>
-            }
+            )}
         </div>
     );
 }
