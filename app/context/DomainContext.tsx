@@ -61,7 +61,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
                 setIsMainDomain(true);
                 setSubdomain(null);
             } else {
-                const currentSubdomain = host.split('.')[0];
+                const currentSubdomain = host.split('.')[1];
                 setIsMainDomain(false);
                 setSubdomain(currentSubdomain);
             }

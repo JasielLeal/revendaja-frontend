@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from "@tanstack/react-query";
+import {  useQuery } from "@tanstack/react-query";
 import { FindProductInStock } from "./services/findProductInStock";
 import * as React from 'react';
 import Image from "next/image";
@@ -15,7 +15,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const { id } = React.use(params);
 
     const { storeData } = useDomain()
-
 
     const { data } = useQuery({
         queryKey: ["findProductInStock", id],
@@ -82,7 +81,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
             <p className="text-xs text-gray-400 mt-5">{product?.brand}</p>
             <p className="font-semibold mb-2 text-text line-clamp-2">{product?.name}</p>
-            <p className="text-xs text-gray-400 mb-5">{product?.description}</p>
 
             <p className="text-sm text-text text-medium mb-3">Estoque disponivel:
                 <span className="text-text font-semibold ml-1">

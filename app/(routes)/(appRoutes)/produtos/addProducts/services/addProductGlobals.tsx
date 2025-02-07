@@ -1,18 +1,11 @@
 import { backend } from "@/app/api/backend";
-import { FieldValues } from "react-hook-form";
 
-export async function AddProductsGlobals(data: FieldValues) {
-    const response = await backend.post("/products/create", {
-        name: data.name,
-        normalPrice: Number(data.normalPrice),
-        suggestedPrice: Number(data.suggestedPrice),
-        description: data.description,
-        barcode: data.barcode,
-        brand: data.brand,
-        company: data.company,
-        image: data.image,
-        category: data.category
-    })
+export async function AddProductsGlobals(data: FormData) {
+    const response = await backend.post("/products/create", data, {
+        headers: {
+            'Content-Type': 'multipart/form-data', // Garantir que o conteúdo seja enviado como multipart
+        }
+    });
 
-    return response.data
+    return response.data;
 }

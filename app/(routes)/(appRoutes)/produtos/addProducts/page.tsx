@@ -7,11 +7,11 @@ import { AddProductsSchema } from "./schemas/AddProductsSchema";
 import { FieldValues, useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { AddProductsGlobals } from "./services/addProductGlobals";
-import { useState } from "react";
+import { useRef } from "react";
 
 export default function AddProducts() {
 
-    const [image, setImage] = useState<File | null>(null);
+    const imageRef = useRef<HTMLInputElement | null>(null);  // Ref para o input file
 
     const { register, handleSubmit } = useForm({
         resolver: zodResolver(AddProductsSchema),
@@ -27,25 +27,26 @@ export default function AddProducts() {
         onError: () => {
             console.log('error');
         }
-    })
+    });
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            setImage(e.target.files[0]);
-        }
-    };
-
-    const onSubmit = (data: FieldValues) => {
+    const onSubmit = async (data: FieldValues) => {
         const formData = new FormData();
+
+        formData.append('name', data.name);
+        formData.append('brand', data.brand);
+        formData.append('company', data.company);
+        formData.append('normalPrice', data.normalPrice);
         formData.append('suggestedPrice', data.suggestedPrice);
         formData.append('barcode', data.barcode);
         formData.append('category', data.category);
-        if (image) {
-            formData.append('image', image);
+
+        // Usando o ref para acessar o arquivo sem re-renderizar
+        if (imageRef.current?.files && imageRef.current.files.length > 0) {
+            formData.append('image', imageRef.current.files[0]);
         }
 
-        // Enviar formData para o backend
-        console.log(formData);
+        await AddProductsGlobalsFn(formData);
+
     };
 
     return (
@@ -70,8 +71,8 @@ export default function AddProducts() {
                             <Input className="bg-[#27272a] w-96 text-white" {...register("company")} />
                         </div>
                         <div className="mb-4">
-                            <p className="text-[#ACACAC]">Descrição</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("description")} />
+                            <p className="text-[#ACACAC]">Categoria</p>
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("category")} />
                         </div>
                     </div>
                     <div className="flex gap-4">
@@ -90,17 +91,13 @@ export default function AddProducts() {
                             <Input className="bg-[#27272a] w-96 text-white" {...register("barcode")} />
                         </div>
                         <div className="mb-4">
-                            <p className="text-[#ACACAC]">Categoria</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("category")} />
+                            <p className="text-[#ACACAC]">Imagem</p>
+                            <Input
+                                ref={imageRef}  // Usando ref para capturar o arquivo
+                                className="bg-[#27272a] w-96 text-white placeholder:text-white"
+                                type="file"
+                            />
                         </div>
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-[#ACACAC]">Imagem</p>
-                        <Input
-                            className="bg-[#27272a] w-96 text-white"
-                            type="file"
-                            onChange={handleImageChange}
-                        />
                     </div>
 
                     <Button className="w-[780px] mt-7" >Cadastrar</Button>
@@ -108,5 +105,5 @@ export default function AddProducts() {
             </form>
 
         </>
-    )
+    );
 }

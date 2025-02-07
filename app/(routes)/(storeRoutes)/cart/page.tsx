@@ -22,6 +22,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useDomain } from "@/app/context/DomainContext";
 import { IoTrash } from "react-icons/io5";
+import { phoneNumberMaskDynamic } from "@/app/utils/phoneNumberMaskDynamic";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 
 export default function Cart() {
@@ -36,6 +38,7 @@ export default function Cart() {
 
     const { cart, addToCart, removeFromCart } = useCart();
     const [transactionType, setTransactionType] = useState("");
+
     const router = useRouter();
 
     const handleIncrement = (product: Product) => {
@@ -67,25 +70,24 @@ export default function Cart() {
 
     const { storeData } = useDomain()
 
-    const { mutateAsync: createSalePedingFn } = useMutation({
+    const { mutateAsync: createSalePedingFn, isPending } = useMutation({
         mutationFn: CreateSalePeding,
         onSuccess: (response) => {
             router.push(`/congratulations?id=${response.id}&value=${response.totalPrice}&store=${storeData?.name}&client=${response.customer}`);
-           
+
         },
         onError: () => {
 
         }
     })
 
-    const host = window.location.host;
-    const subdomain = host.split('.')[0];
-
     async function onSub(data: FieldValues) {
 
         const items = cart.map(item => ({ id: item.id, quantity: item.quantity }))
 
-        const newData = { subdomain, customer: data.customer, numberPhone: data.numberPhone, transactionType, items }
+        const newData = { subdomain: storeData?.subdomain, customer: data.customer, numberPhone: data.numberPhone, transactionType, items }
+
+        console.log(newData)
 
         await createSalePedingFn(newData)
     }
@@ -163,7 +165,16 @@ export default function Cart() {
                                 <Input placeholder="Insira seu nome" className="bg-background border mb-3 border-gray-300 " {...register("customer")} />
 
                                 <p className=" font-medium text-sm mb-1">Seu celular</p>
-                                <Input placeholder="Insira seu celular" className="bg-background border border-gray-300 mb-3" {...register("numberPhone")} />
+                                <Input
+                                    placeholder="Insira seu celular"
+                                    className="bg-background border border-gray-300 mb-3"
+                                    {...register("numberPhone", {
+                                        onChange: (e) => {
+                                            e.target.value = phoneNumberMaskDynamic(e.target.value);
+                                        }
+                                    })}
+
+                                />
 
                                 <p className="text-text font-medium text-sm mb-1">Metodo de pagamento</p>
                                 <Select onValueChange={(value) => setTransactionType(value)}>
@@ -178,7 +189,14 @@ export default function Cart() {
                                 </Select>
                             </div>
 
-                            <Button className="w-full my-5">Finalizar Compra</Button>
+                            {
+                                isPending ?
+                                    <Button className="w-full my-5" disabled>
+                                        <LoadingSpinner />
+                                    </Button>
+                                    :
+                                    <Button className="w-full my-5">Finalizar Compra</Button>
+                            }
                         </form>
 
                     </>

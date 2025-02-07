@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import Cookies from 'universal-cookie';
-
+import { v4 as uuidv4 } from 'uuid';
 export interface Product {
     id: string;
     name: string;
@@ -17,20 +17,27 @@ interface CartContextType {
     clearCart: () => void;
     addToCart: (product: Product) => void;
     removeFromCart: (productId: string) => void;
+    userId: string
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [cart, setCart] = useState<Product[]>([]);
-
+    const [userId, setUserId] = useState<string>('');
     useEffect(() => {
         const cookie = new Cookies();
         const storedCart = cookie.get('cart');
+        let storedUserId = cookie.get('userId');
 
+        if (!storedUserId) {
+            storedUserId = uuidv4();
+            cookie.set('userId', storedUserId, { expires: new Date(Date.now() + 60 * 60 * 24 * 365 * 1000) });
+        }
+        setUserId(storedUserId);
         try {
             if (storedCart) {
-                const parsedCart = JSON.parse(storedCart);
+                const parsedCart = (storedCart);
                 if (Array.isArray(parsedCart)) {
                     setCart(parsedCart);
                 }
@@ -38,7 +45,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (error) {
             console.error("Erro ao carregar o carrinho:", error);
         }
-    }, []); // ✅ Só roda ao carregar a página
+    }, []);
 
     useEffect(() => {
         const cookie = new Cookies();
@@ -76,7 +83,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, clearCart, removeFromCart }}>
+        <CartContext.Provider value={{ cart, addToCart, clearCart, removeFromCart, userId }}>
             {children}
         </CartContext.Provider>
     );

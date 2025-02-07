@@ -6,8 +6,7 @@ import { AuthProvider } from "./AuthContext";
 import { DomainProvider, useDomain } from "./DomainContext";
 import { CartProvider } from "./CartContext";
 import { Navbar } from "../components/navbar/navbar";
-import { Footer } from "../components/footer/footer";
-
+import { Footer } from "../components/footer/footer"
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const { isMainDomain } = useDomain(); // Use o contexto para verificar o domínio
@@ -36,6 +35,7 @@ export default function ClientProvider({ children }: { children: React.ReactNode
     );
 
     return (
+
         <QueryClientProvider client={queryClient}>
             <DomainProvider>
                 <CartProvider>
@@ -45,5 +45,6 @@ export default function ClientProvider({ children }: { children: React.ReactNode
                 </CartProvider>
             </DomainProvider>
         </QueryClientProvider>
+
     );
 }
