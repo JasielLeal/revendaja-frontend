@@ -58,37 +58,37 @@ export default function AddProducts() {
                     <div className="flex gap-4">
                         <div className="mb-4">
                             <p className="text-[#ACACAC] ">Nome</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("name")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("name")} id="name"/>
                         </div>
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Marca</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("brand")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("brand")} id="brand"/>
                         </div>
                     </div>
                     <div className="flex gap-4">
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Empresa</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("company")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("company")} id="company"/>
                         </div>
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Categoria</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("category")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("category")} id="category"/>
                         </div>
                     </div>
                     <div className="flex gap-4">
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Preço Normal</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("normalPrice")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("normalPrice")} id="normalPrice"/>
                         </div>
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Preço Sugerido</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("suggestedPrice")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("suggestedPrice")} id="suggestedPrice"/>
                         </div>
                     </div>
                     <div className="flex gap-4">
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Codigo de Barras</p>
-                            <Input className="bg-[#27272a] w-96 text-white" {...register("barcode")} />
+                            <Input className="bg-[#27272a] w-96 text-white" {...register("barcode")} id="barcode"/>
                         </div>
                         <div className="mb-4">
                             <p className="text-[#ACACAC]">Imagem</p>
@@ -96,11 +96,12 @@ export default function AddProducts() {
                                 ref={imageRef}  // Usando ref para capturar o arquivo
                                 className="bg-[#27272a] w-96 text-white placeholder:text-white"
                                 type="file"
+                                id="file_img"
                             />
                         </div>
                     </div>
 
-                    <Button className="w-[780px] mt-7" >Cadastrar</Button>
+                    <Button className="w-[780px] mt-7" id="sendButton">Cadastrar</Button>
                 </div>
             </form>
 

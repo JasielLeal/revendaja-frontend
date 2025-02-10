@@ -20,13 +20,13 @@ interface AuthContextData {
         role: string;
         userHasStore: boolean
     } | null;
-    signInFc(data: FieldValues): Promise<void>; // Corrigido aqui
+    signInFc(data: FieldValues): Promise<User>; // Corrigido aqui
     logoutFc(): Promise<void>;
     updateUserStoreStatus(hasStore: boolean): Promise<void>;
     loading: boolean;
 }
 
-interface User {
+export interface User {
     id: string;
     name: string;
     secondName: string;

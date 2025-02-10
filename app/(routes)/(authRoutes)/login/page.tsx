@@ -24,21 +24,18 @@ export default function Login() {
 
     const { signInFc, logoutFc } = useContext(AuthContext)
     const route = useRouter()
+
     const { mutateAsync: signIn } = useMutation({
         mutationFn: signInFc,
         onSuccess: (response) => {
             console.log(response)
-            if (response?.role !== 'Owner') {
+            if (response.role !== 'Owner') { // Agora o TypeScript reconhece 'role'
                 logoutFc()
             }
             route.push('/home')
-
         },
-        onError: () => {
-
-        }
-
-    })
+        onError: () => { }
+    });
 
 
     async function onSub(data: FieldValues) {
