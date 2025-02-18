@@ -6,7 +6,6 @@ import { AuthProvider } from "./AuthContext";
 import { DomainProvider, useDomain } from "./DomainContext";
 import { CartProvider } from "./CartContext";
 import { Navbar } from "../components/navbar/navbar";
-import { Footer } from "../components/footer/footer"
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
     const { isMainDomain } = useDomain(); // Use o contexto para verificar o domínio
@@ -15,7 +14,7 @@ function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <>
             {!isMainDomain && <Navbar />}
             {children}
-            {!isMainDomain && <Footer />}
+            {!isMainDomain}
         </>
     );
 }

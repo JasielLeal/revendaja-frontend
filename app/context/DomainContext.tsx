@@ -55,7 +55,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
             const host = window.location.host;
             const cleanHost = host.startsWith('www.') ? host.slice(4) : host;
 
-            const mainDomain = process.env.NEXT_PUBLIC_MAINDOMAIN; // Substitua pelo domínio principal da sua aplicação
+            const mainDomain = process.env.NEXT_PUBLIC_MAINLOCAL // Substitua pelo domínio principal da sua aplicação
 
             if (cleanHost === mainDomain) {
                 setIsMainDomain(true);
@@ -74,7 +74,7 @@ export const DomainProvider = ({ children }: DomainProviderProps) => {
             // Se o domínio mudou, faz a requisição e limpa o localStorage
             const fetchSubdomainData = async () => {
                 try {
-                    const response = await axios.get(`http://${process.env.NEXT_PUBLIC_BACKEND}/store/verifysubdomain/${subdomain}`);
+                    const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_DEV}/store/verifysubdomain/${subdomain}`);
                     if (response.data.exists) {
                         setStoreData(response.data.exists); // Atualiza o estado com os dados da loja
                         localStorage.setItem('storeData', JSON.stringify(response.data.exists)); // Salva os dados no localStorage

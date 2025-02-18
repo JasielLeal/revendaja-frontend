@@ -64,7 +64,7 @@ export function NewProductsList() {
     };
 
     return (
-        <>
+        <div>
             <div className="flex items-center justify-between mb-4 mt-10">
                 <p className="text-text font-medium">Produtos Recentes</p>
             </div>
@@ -89,14 +89,14 @@ export function NewProductsList() {
                         return (
                             <div
                                 key={product.id}
-                                className="flex flex-col justify-between w-36 rounded-lg"
+                                className="flex flex-col justify-between w-36 rounded-lg bg-input p-3"
                                 style={{ minWidth: "170px" }}
                                 onClick={() => router.push(`/p/${product.name}/${product.id}`)}
                             >
                                 <div>
                                     <div className="relative">
                                         {promotion.discountValue && (
-                                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                            <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
                                                 {discountPercentage.toFixed(0)}% OFF
                                             </div>
                                         )}
@@ -123,6 +123,6 @@ export function NewProductsList() {
                     })
                 )}
             </div>
-        </>
+        </div>
     );
 }

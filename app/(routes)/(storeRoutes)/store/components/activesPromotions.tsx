@@ -18,7 +18,7 @@ export function ActivesPromotions() {
     const page = 1
     const pageSize = 10
 
-    const { data: ProductsOnPromotion, isPending } = useQuery({
+    const { data: ProductsOnPromotion} = useQuery({
         queryKey: ['FindProductsOnPromotion', storeData?.subdomain],
         queryFn: async () => await FindProductsOnPromotion(storeData?.subdomain, page, pageSize),
         enabled: !!storeData?.subdomain,
@@ -56,7 +56,7 @@ export function ActivesPromotions() {
                         <div className="flex items-center justify-between mb-4 mt-4 ">
                             <p className="text-text font-medium">Promoções</p>
 
-                            <Link href={'/'} className="text-text font-medium">Ver todas</Link>
+                            <Link href={'/'} className="text-subtext font-light text-sm">Ver todas</Link>
                         </div>
                         <div className="flex overflow-x-scroll space-x-3 no-scrollbar">
                             {ProductsOnPromotion?.items && ProductsOnPromotion?.items.map((promotion: ProductProps) => {
@@ -74,16 +74,16 @@ export function ActivesPromotions() {
 
                                 return (
                                     <>
-                                        {isPending ?
+                                        
                                             <div
                                                 key={promotion.id}
-                                                className="flex flex-col justify-between w-36 rounded-lg"
+                                                className="flex flex-col justify-between w-36 rounded-lg  bg-input p-3"
                                                 style={{ minWidth: "170px" }} // garante que cada item tenha largura fixa no carrossel
                                                 onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
                                             >
                                                 <div >
                                                     <div className="relative">
-                                                        <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                                        <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
                                                             {discountPercentage.toFixed(0)}% OFF
                                                         </div>
                                                         <div className="flex items-center w-full justify-center">
@@ -114,10 +114,8 @@ export function ActivesPromotions() {
                                                 </div>
                                             </div>
                                             
-                                            :
-
-                                            <p>carregando</p>
-                                    }
+                                         
+                                  
                                     </>
                                 );
                             })}

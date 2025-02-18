@@ -55,7 +55,7 @@ export function BestSellingProducts() {
                 <>
                     <div className="flex items-center justify-between mb-4 mt-10">
                         <p className="text-text font-medium">Mais vendidos</p>
-                        <Link href={'/'} className="text-text font-medium">Ver todos</Link>
+                        <Link href={'/'} className="text-subtext font-light text-sm">Ver todos</Link>
                     </div>
                     <div className="flex overflow-x-scroll space-x-3 no-scrollbar">
                         {filteredProducts.map((item: ProductProps) => {
@@ -69,13 +69,13 @@ export function BestSellingProducts() {
                             return (
                                 <div
                                     key={stock.id}
-                                    className="flex flex-col justify-between w-36 rounded-lg relative"
+                                    className="flex flex-col justify-between w-36 rounded-lg relative bg-input p-3"
                                     style={{ minWidth: "170px" }}
                                     onClick={() => router.push(`/p/${produto.name}/${produto.id}`)}
                                 >
                                     <div className="relative">
                                         {discountPercentage !== null && (
-                                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                            <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
                                                 {discountPercentage.toFixed(0)}% OFF
                                             </div>
                                         )}

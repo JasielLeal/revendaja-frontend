@@ -16,9 +16,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
     const { signed, user } = useContext(AuthContext)
     const router = useRouter();
 
-    if (!signed) {
-        return router.push('/login')
-    }
 
     return (
         <div className="grid grid-cols-12">

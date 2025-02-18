@@ -85,8 +85,8 @@ export default function Search() {
     //fazer pagina de produtos com desconto.
 
     return (
-        <div className="px-4 mt-5">
-            <p className="font-medium text-text mb-4 text-lg">
+        <div className="px-4 mt-2">
+            <p className="font-light text-text mb-4 text-sm">
                 Você buscou por <span className="font-bold">{query}</span>
             </p>
 
@@ -112,13 +112,14 @@ export default function Search() {
                         return (
                             <div
                                 key={products.id}
-                                className="flex flex-col justify-between rounded-lg"
+                                className="flex flex-col justify-between rounded-lg bg-input p-3"
+                                style={{ minWidth: "170px" }} 
                                 onClick={() => router.push(`/p/${products.name}/${products.id}`)}
                             >
                                 {/* Imagem e Desconto */}
                                 <div className="relative w-full">
                                     {discountPercentage !== null && (
-                                        <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                        <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
                                             {discountPercentage?.toFixed(0)}% OFF
                                         </div>
                                     )}

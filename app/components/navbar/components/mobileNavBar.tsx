@@ -27,7 +27,7 @@ export function MobileNavBar() {
         <>
             <Sheet >
                 <SheetTrigger asChild >
-                    <div className="text-2xl text-white">
+                    <div className="text-2xl text-text bg-input p-2 rounded-xl">
                         <IoMenu />
                     </div>
                 </SheetTrigger>

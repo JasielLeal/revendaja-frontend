@@ -162,12 +162,12 @@ export default function Cart() {
                         <form onSubmit={handleSubmit(onSub)}>
                             <div className="mt-3">
                                 <p className="text-gray-600 font-medium text-sm mb-1">Seu nome</p>
-                                <Input placeholder="Insira seu nome" className="bg-background border mb-3 border-gray-300 " {...register("customer")} />
+                                <Input placeholder="Insira seu nome" className="mb-3" {...register("customer")} />
 
                                 <p className=" font-medium text-sm mb-1">Seu celular</p>
                                 <Input
                                     placeholder="Insira seu celular"
-                                    className="bg-background border border-gray-300 mb-3"
+                                    className="mb-3"
                                     {...register("numberPhone", {
                                         onChange: (e) => {
                                             e.target.value = phoneNumberMaskDynamic(e.target.value);

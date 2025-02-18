@@ -100,7 +100,7 @@ export default function ProductDiscounts() {
                                     {/* Imagem e Desconto */}
                                     <div className="relative w-full">
                                         {discountPercentage !== null && (
-                                            <div className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                            <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
                                                 {discountPercentage?.toFixed(0)}% OFF
                                             </div>
                                         )}

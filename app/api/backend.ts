@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "universal-cookie";
 
 export const backend = axios.create({
-  baseURL: "https://revendaja-backend.onrender.com",
+  baseURL: "http://localhost:9999",
 });
 
 backend.interceptors.request.use(
