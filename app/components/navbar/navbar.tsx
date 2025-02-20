@@ -25,7 +25,7 @@ export function Navbar() {
         }
     };
 
-    const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+    const cartItemCount = cart.products.reduce((total, item) => total + item.quantity, 0);
 
     return (
         <>

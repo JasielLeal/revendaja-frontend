@@ -36,7 +36,7 @@ export default function Cart() {
         quantity: number;
     }
 
-    const { cart, addToCart, removeFromCart } = useCart();
+    const { cart, addToCart, removeFromCart, updateUserInfo } = useCart();
     const [transactionType, setTransactionType] = useState("");
 
     const router = useRouter();
@@ -58,7 +58,7 @@ export default function Cart() {
         return valueTotal
     }
 
-    const totalCartValue = cart.reduce((total, item) => {
+    const totalCartValue = cart.products.reduce((total, item) => {
         return total + totalValueOfTheProduct(item.value, String(item.quantity));
     }, 0);
 
@@ -74,7 +74,6 @@ export default function Cart() {
         mutationFn: CreateSalePeding,
         onSuccess: (response) => {
             router.push(`/congratulations?id=${response.id}&value=${response.totalPrice}&store=${storeData?.name}&client=${response.customer}`);
-
         },
         onError: () => {
 
@@ -82,15 +81,30 @@ export default function Cart() {
     })
 
     async function onSub(data: FieldValues) {
+        // Atualiza o nome e telefone do cliente no carrinho antes de criar a venda
+        updateUserInfo(data.customer, data.numberPhone);
 
-        const items = cart.map(item => ({ id: item.id, quantity: item.quantity }))
+        // Mapeia os itens do carrinho para o formato necessário
+        const items = cart.products.map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+        }));
 
-        const newData = { subdomain: storeData?.subdomain, customer: data.customer, numberPhone: data.numberPhone, transactionType, items }
+        // Monta o objeto da nova venda
+        const newData = {
+            subdomain: storeData?.subdomain,
+            customer: data.customer,
+            numberPhone: data.numberPhone,
+            transactionType,
+            items,
+        };
 
-        console.log(newData)
+        console.log(newData);
 
-        await createSalePedingFn(newData)
+        // Chama a função de criação da venda
+        await createSalePedingFn(newData);
     }
+
 
     console.log(cart)
 
@@ -99,7 +113,7 @@ export default function Cart() {
             <h1 className="font-semibold text-text">Meu carrinho</h1>
 
             {
-                cart.length <= 0 ?
+                cart.products.length <= 0 ?
 
                     <div className="flex flex-col items-center justify-center py-10">
                         <p className="text-center text-gray-500 text-xl">
@@ -114,7 +128,7 @@ export default function Cart() {
 
                     <>
                         {
-                            cart.map((item) => (
+                            cart.products.map((item) => (
                                 <div className="flex gap-4 items-center mt-5" key={item.id}>
                                     <Image src={item.imgUrl} alt="imagem do produto" width={80} height={80} className="rounded-xl" />
                                     <div className="w-full">
@@ -159,6 +173,8 @@ export default function Cart() {
                             <p className="font-semibold text-text">Valor total</p>
                             <p>R$ {formatCurrency(String(totalCartValue))}</p>
                         </div>
+
+
                         <form onSubmit={handleSubmit(onSub)}>
                             <div className="mt-3">
                                 <p className="text-gray-600 font-medium text-sm mb-1">Seu nome</p>
@@ -198,6 +214,9 @@ export default function Cart() {
                                     <Button className="w-full my-5">Finalizar Compra</Button>
                             }
                         </form>
+
+
+
 
                     </>
 

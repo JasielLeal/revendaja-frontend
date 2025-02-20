@@ -56,7 +56,7 @@ export function ActivesPromotions() {
                         <div className="flex items-center justify-between mb-4 mt-4 ">
                             <p className="text-text font-medium">Promoções</p>
 
-                            <Link href={'/'} className="text-subtext font-light text-sm">Ver todas</Link>
+                            <Link href={'/'} prefetch={true}  className="text-subtext font-light text-sm">Ver todas</Link>
                         </div>
                         <div className="flex overflow-x-scroll space-x-3 no-scrollbar">
                             {ProductsOnPromotion?.items && ProductsOnPromotion?.items.map((promotion: ProductProps) => {
