@@ -34,19 +34,19 @@ export function NavMain({
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 transition-all duration-200
+                  className={`flex items-center cursor-pointer gap-2 rounded-md px-3 py-2 transition-all duration-200
                     ${isActive
                       ? // 🔥 Item ativo: destaque com cor do tema
                       "bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary"
                       : // 🎨 Item inativo: cores neutras, com hover agradável
-                      "text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/40"
+                      "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/40"
                     }`}
                 >
                   {item.icon && (
                     <item.icon
                       className={`size-4 transition-colors ${isActive
                           ? "text-primary"
-                          : "text-muted-foreground dark:text-muted-foreground"
+                          : " dark:text-muted-foreground"
                         }`}
                     />
                   )}

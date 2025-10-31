@@ -15,7 +15,7 @@ import {
   IconListDetails,
   IconReport,
   IconSettings,
-  IconUsers,
+  IconFile
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -32,42 +32,46 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { useUser } from "@/app/context/user-context"
+import Image from "next/image"
+import logo from "@/public/icon.png"
+import { useTheme } from "next-themes"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
-  const { user, isLoading, logout } = useUser();
+  const { user } = useUser();
+  const { theme } = useTheme()
 
   const data = {
     user: {
       name: user?.name as string,
-      email: "teste",
+      email: user?.email as string,
       avatar: "/avatars/shadcn.jpg",
     },
     navMain: [
       {
         title: "Dashboard",
-        url: "/pages/dashboard",
+        url: "/dashboard",
         icon: IconDashboard,
       },
       {
-        title: "Agendamentos",
-        url: "#",
+        title: "Estoque",
+        url: "/stock",
         icon: IconListDetails,
       },
       {
-        title: "Financeiro",
-        url: "#",
+        title: "Vendas",
+        url: "/sales",
         icon: IconChartBar,
       },
       {
-        title: "Pacientes",
-        url: "#",
+        title: "Pedidos",
+        url: "/orders",
         icon: IconFolder,
       },
       {
-        title: "Funcionários",
-        url: "#",
-        icon: IconUsers,
+        title: "Financeiro",
+        url: "/financial",
+        icon: IconFile,
       },
     ],
     navClouds: [
@@ -158,9 +162,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="/pages/dashboard">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Odontly</span>
+              <Link href="/dashboard">
+                {
+                  theme == 'dark' ?
+                    <Image alt="logo do site" src={logo} width={15} height={30} />
+                    :
+                    <Image alt="logo do site" src={logo} width={15} height={30} />
+                }
+                <span className="text-base font-semibold tracking-tighter">Revendaja</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
