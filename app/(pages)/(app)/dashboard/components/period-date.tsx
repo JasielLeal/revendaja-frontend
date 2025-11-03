@@ -13,9 +13,13 @@ interface DateRange {
     to?: string
 }
 
+interface DatePickerProps {
+    onChange: (range: DateRange | undefined) => void
+}
+
 interface PeriodFilterProps {
     onChange: (range: DateRange) => void
-    datePickerComponent: JSX.Element
+    datePickerComponent: React.ReactElement<DatePickerProps>
 }
 
 export function PeriodFilter({ onChange, datePickerComponent }: PeriodFilterProps) {

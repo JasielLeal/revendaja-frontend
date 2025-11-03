@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/query-client";
 import { Providers } from "./providers/query-client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
+
+const popins = Poppins({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+  subsets: ["latin"]
+
+})
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -29,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${popins.variable} antialiased`}
       >
         <Providers>
           {children}

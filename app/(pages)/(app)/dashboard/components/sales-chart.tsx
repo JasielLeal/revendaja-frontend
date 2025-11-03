@@ -16,7 +16,6 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Skeleton } from "@/components/ui/skeleton"
 
 interface Order {
     createdAt: string

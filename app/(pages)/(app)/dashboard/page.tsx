@@ -78,7 +78,7 @@ export default function DashboardPage() {
                 ? String(dashboardDataMutation.data.totalOrders)
                 : undefined,
             percentage: "+12%",
-            context: "Visíveis na sua loja online",
+            context: "quantidade de pedidos realizados",
         },
         {
             id: 3,
@@ -98,9 +98,11 @@ export default function DashboardPage() {
                     isLoading ?
                         <Skeleton className="h-5 w-[250px]" />
                         :
-                        <p className="text-xl font-semibold tracking-tighter">
-                            Olá, <span>{user?.name}</span>
-                        </p>
+                        <div>
+                            <p className="text-xl font-semibold tracking-tighter">
+                                Olá, <span>{user?.name}</span>
+                            </p>
+                        </div>
                 }
 
                 <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { type Icon } from "@tabler/icons-react"
 import {
@@ -32,26 +33,25 @@ export function NavMain({
 
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  tooltip={item.title}
-                  className={`flex items-center cursor-pointer gap-2 rounded-md px-3 py-2 transition-all duration-200
-                    ${isActive
-                      ? // 🔥 Item ativo: destaque com cor do tema
-                      "bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary"
-                      : // 🎨 Item inativo: cores neutras, com hover agradável
-                      "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/40"
-                    }`}
-                >
-                  {item.icon && (
-                    <item.icon
-                      className={`size-4 transition-colors ${isActive
-                          ? "text-primary"
-                          : " dark:text-muted-foreground"
-                        }`}
-                    />
-                  )}
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
+                {/* 🔗 Usa o Link do Next para navegar */}
+                <Link href={item.url} className="w-full">
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    className={`flex w-full items-center cursor-pointer gap-2 rounded-md px-3 py-2 transition-all duration-200
+                      ${isActive
+                        ? "bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary"
+                        : "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/40"
+                      }`}
+                  >
+                    {item.icon && (
+                      <item.icon
+                        className={`size-4 transition-colors ${isActive ? "text-primary" : "dark:text-muted-foreground"
+                          }`}
+                      />
+                    )}
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             )
           })}
