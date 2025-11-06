@@ -26,7 +26,7 @@ export function ProductCard({ product }: { product: StoreProduct }) {
                 />
             </div>
             <div className="flex h-[260px] flex-col p-4">
-                <div className="min-h-[80px] space-y-1">
+                <div className="min-h-20 space-y-1">
                     <h3 className="line-clamp-2 font-medium leading-tight">{product.name}</h3>
                     <p className="text-sm text-muted-foreground">{product.company}</p>
                 </div>

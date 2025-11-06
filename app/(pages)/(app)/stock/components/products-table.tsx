@@ -16,8 +16,6 @@ import { formatCurrency } from "@/lib/format-currency";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 // Loading skeleton component
 function TableRowSkeleton() {
@@ -33,8 +31,8 @@ function TableRowSkeleton() {
                 </div>
             </TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-20" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
             <TableCell><Skeleton className="h-6 w-[60px]" /></TableCell>
         </TableRow>
