@@ -5,6 +5,7 @@ export interface DashboardItem {
   name: string
   quantity: number
   price: number
+  imgUrl: string
   storeProductId: string
   createdAt: string
   updatedAt: string

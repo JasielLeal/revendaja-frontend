@@ -19,14 +19,16 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { IconTrendingUp } from "@tabler/icons-react";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SaleTable } from "./components/sales-table";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import z from "zod";
 import { FetchDashboardDataPagination } from "./services/dashboard-data-pagination";
 import { OrdersMetrics } from "./services/orders-metrics";
+import { DashboardDataTypeResponse } from "./types/dashboard-data-type";
 import { formatCurrency } from "@/lib/format-currency";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NewSale } from "./components/new-sale";
 
 export default function Sales() {
     const [month, setMonth] = React.useState<string>("");
@@ -59,54 +61,44 @@ export default function Sales() {
         to: z.string(),
     });
 
-    // ✅ Mutation das métricas (cards)
-    const dashboardMetricsMutation = useMutation({
-        mutationFn: (data: { from: string; to: string }) => {
-            const parsed = dashboardDataSchema.parse({
-                from: data.from,
-                to: data.to,
-            });
+    // Mantém o range atual (from/to) para passar para as queries
+    const [range, setRange] = React.useState<{ from: string; to: string } | null>(null);
+
+    // ✅ Query das métricas (cards) — usa useQuery para que invalidateQueries funcione
+    const dashboardMetricsQuery = useQuery<DashboardDataTypeResponse, Error>({
+        queryKey: ["show-orders-metrics", range?.from, range?.to],
+        queryFn: async () => {
+            if (!range) throw new Error("Range não definido");
+            const parsed = dashboardDataSchema.parse({ from: range.from, to: range.to });
             return OrdersMetrics(parsed.from, parsed.to);
         },
+        enabled: !!range,
     });
 
-    // ✅ Mutation da tabela (paginação)
-    const dashboardDataPaginationMutation = useMutation({
-        mutationFn: (data: {
-            from: string;
-            to: string;
-            page: number;
-            limit: number;
-            search: string;
-        }) => {
-            const parsed = dashboardDataSchema.parse({
-                from: data.from,
-                to: data.to,
-            });
+    // ✅ Query da tabela (paginação) — também usa useQuery com chave que inclui paginação e busca
+    const dashboardDataPaginationQuery = useQuery<DashboardDataTypeResponse, Error>({
+        queryKey: ["show-orders", range?.from, range?.to, page, limit, debouncedSearch],
+        queryFn: async () => {
+            if (!range) throw new Error("Range não definido");
+            const parsed = dashboardDataSchema.parse({ from: range.from, to: range.to });
             return FetchDashboardDataPagination(
                 parsed.from,
                 parsed.to,
-                data.page,
-                data.limit,
-                data.search
+                page,
+                limit,
+                debouncedSearch
             );
         },
+        enabled: !!range,
     });
 
-    // ✅ Função central para buscar tabela
+    // ✅ Função central para buscar tabela e métricas: atualiza o range (as queries observam range e re-executam)
     const fetchTable = (from: string, to: string) => {
-        dashboardDataPaginationMutation.mutate({
-            from,
-            to,
-            page,
-            limit,
-            search: debouncedSearch, // usa o valor já "debounced"
-        });
+        setRange({ from, to });
     };
 
-    // ✅ Função central para buscar métricas
     const fetchMetrics = (from: string, to: string) => {
-        dashboardMetricsMutation.mutate({ from, to });
+        setRange({ from, to });
     };
 
     // ✅ Quando mudar o mês → atualiza ambos
@@ -126,7 +118,7 @@ export default function Sales() {
         const monthIndex = parseInt(monthStr, 10) - 1;
         const range = getMonthRange(parseInt(year, 10), monthIndex);
         fetchTable(range.from, range.to);
-    }, [page, limit, debouncedSearch]);
+    }, [page, limit, debouncedSearch, month]);
 
     // ✅ Ao montar, busca mês atual
     React.useEffect(() => {
@@ -134,34 +126,45 @@ export default function Sales() {
         const currentMonth = `${now.getFullYear()}-${(now.getMonth() + 1)
             .toString()
             .padStart(2, "0")}`;
-        fetchDataForMonth(currentMonth);
+        // define initial month and range directly (avoid extra deps)
+        setMonth(currentMonth);
+        const [year, monthStr] = currentMonth.split("-");
+        const monthIndex = parseInt(monthStr, 10) - 1;
+        const initialRange = getMonthRange(parseInt(year, 10), monthIndex);
+        setRange(initialRange);
     }, []);
 
-    const isLoadingTable = dashboardDataPaginationMutation.isPending;
-    const isLoadingMetrics = dashboardMetricsMutation.isPending;
+    const isLoadingTable = dashboardDataPaginationQuery.isFetching || dashboardDataPaginationQuery.isLoading;
+    const isLoadingMetrics = dashboardMetricsQuery.isFetching || dashboardMetricsQuery.isLoading;
 
-    const dataPagination = dashboardDataPaginationMutation.data;
-    const dataMetrics = dashboardMetricsMutation.data;
+    const dataPagination = dashboardDataPaginationQuery.data;
+    const dataMetrics = dashboardMetricsQuery.data;
+
+    const metricsData = dataMetrics as DashboardDataTypeResponse | undefined;
+
+    const dataPag = dataPagination as DashboardDataTypeResponse | undefined;
+
+    console.log("datapag", dataPag)
 
     const cardData = [
         {
             id: 1,
             name: "Receita total",
-            value: dataMetrics ? formatCurrency(dataMetrics.totalRevenue) : null,
+            value: metricsData ? formatCurrency(metricsData.totalRevenue) : null,
             percentage: "+12%",
             context: "Baseado em pedidos pagos",
         },
         {
             id: 2,
             name: "Total de vendas",
-            value: dataMetrics ? String(dataMetrics.totalOrders) : null,
+            value: metricsData ? String(metricsData.totalOrders) : null,
             percentage: "+8%",
-            context: "Mensalmente",
+            context: "Contagem total de pedidos no mês selecionado.",
         },
         {
             id: 3,
             name: "Lucro estimado",
-            value: dataMetrics ? formatCurrency(dataMetrics.estimatedProfit) : null,
+            value: metricsData ? formatCurrency(metricsData.estimatedProfit) : null,
             percentage: "+10%",
             context: "Com base em 30% de margem de lucro.",
         },
@@ -171,24 +174,22 @@ export default function Sales() {
     const handleNextPage = () => setPage((prev) => prev + 1);
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-background pb-8">
             {/* Cabeçalho */}
-            <div className="flex items-center justify-between">
-                <p className="text-2xl font-semibold">Vendas</p>
-                <Button>
-                    Nova venda <Plus />
-                </Button>
+            <div className="flex items-center justify-between py-6 px-2 md:px-6">
+                <h1 className="text-3xl font-extrabold tracking-tight text-primary ">Vendas</h1>
+                <NewSale />
             </div>
 
             {/* Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-                {cardData.map((card) => (
-                    <Card key={card.id} className="@container/card">
-                        <CardHeader className="flex flex-col gap-2">
-                            <CardDescription>{card.name}</CardDescription>
-                            <CardTitle className="text-2xl font-bold tabular-nums @[250px]/card:text-3xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2 px-2 md:px-6">
+                {cardData.map((card, idx) => (
+                    <Card key={card.id} className={`relative overflow-hidden shadow-lg rounded-xl border-0 animate-in fade-in duration-500 bg-card`}>
+                        <CardHeader className="flex flex-col gap-2 pb-2">
+                            <CardDescription className="text-sm font-semibold text-muted-foreground">{card.name}</CardDescription>
+                            <CardTitle className="text-3xl font-extrabold tabular-nums text-primary">
                                 {isLoadingMetrics ? (
-                                    <Skeleton className="h-6 w-[120px]" />
+                                    <Skeleton className="h-8 w-[120px]" />
                                 ) : (
                                     card.value
                                 )}
@@ -196,18 +197,18 @@ export default function Sales() {
                             {isLoadingMetrics ? (
                                 <Skeleton className="h-4 w-[60px]" />
                             ) : (
-                                <Badge variant="outline" className="flex items-center gap-1">
-                                    <IconTrendingUp className="w-4 h-4" />
+                                <Badge variant="outline" className="flex items-center gap-1 text-xs px-2 py-1 bg-muted/40 border-none">
+                                    <IconTrendingUp className="w-4 h-4 text-green-600" />
                                     {card.percentage}
                                 </Badge>
                             )}
                         </CardHeader>
-                        <CardFooter className="flex-col items-start gap-1.5 text-sm">
+                        <CardFooter className="flex-col items-start gap-1.5 text-xs text-muted-foreground pb-3">
                             {isLoadingMetrics ? (
                                 <Skeleton className="h-4 w-[200px]" />
                             ) : (
                                 <div className="line-clamp-1 flex gap-2 items-center">
-                                    {card.context} <IconTrendingUp className="w-4 h-4" />
+                                    {card.context} <IconTrendingUp className="w-4 h-4 text-muted-foreground" />
                                 </div>
                             )}
                         </CardFooter>
@@ -216,70 +217,82 @@ export default function Sales() {
             </div>
 
             {/* Filtros */}
-            <div className="flex items-center gap-4 my-5">
-                <Input
-                    placeholder="Buscar por cliente..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                />
+            <div className="flex items-center justify-between py-6 px-2 md:px-6">
+                <div className="flex items-center gap-6 bg-muted rounded-3xl p-4 w-full">
+                    <Input
+                        placeholder="Buscar por cliente..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="max-w-xs shadow-sm bg-background text-foreground border border-input placeholder:text-muted-foreground h-10"
+                    />
 
-                <Select>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="paid">Pagas</SelectItem>
-                        <SelectItem value="pending">Pendentes</SelectItem>
-                        <SelectItem value="canceled">Canceladas</SelectItem>
-                    </SelectContent>
-                </Select>
+                    <Select>
+                        <SelectTrigger className="w-[180px] shadow-sm rounded-lg bg-background text-foreground border border-input h-10 flex items-center">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover text-foreground">
+                            <SelectItem value="paid">Pagas</SelectItem>
+                            <SelectItem value="pending">Pendentes</SelectItem>
+                            <SelectItem value="canceled">Canceladas</SelectItem>
+                        </SelectContent>
+                    </Select>
 
-                <Select value={month} onValueChange={fetchDataForMonth}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Mês" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Array.from({ length: 12 }).map((_, i) => {
-                            const monthNumber = (i + 1).toString().padStart(2, "0");
-                            const year = new Date().getFullYear();
-                            return (
-                                <SelectItem key={i} value={`${year}-${monthNumber}`}>
-                                    {new Date(year, i).toLocaleString("pt-BR", { month: "long" })}
-                                </SelectItem>
-                            );
-                        })}
-                    </SelectContent>
-                </Select>
+                    <Select value={month} onValueChange={fetchDataForMonth}>
+                        <SelectTrigger className="w-[180px] shadow-sm rounded-lg bg-background text-foreground border border-input h-10 flex items-center">
+                            <SelectValue placeholder="Mês" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover text-foreground">
+                            {Array.from({ length: 12 }).map((_, i) => {
+                                const monthNumber = (i + 1).toString().padStart(2, "0");
+                                const year = new Date().getFullYear();
+                                return (
+                                    <SelectItem key={i} value={`${year}-${monthNumber}`}>
+                                        {new Date(year, i).toLocaleString("pt-BR", { month: "long" })}
+                                    </SelectItem>
+                                );
+                            })}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             {/* Conteúdo principal */}
-            <div className="flex-1 flex flex-col justify-between">
+            <div className="flex-1 flex flex-col justify-between px-2 md:px-6">
                 {/* Tabela */}
-                {isLoadingTable ? (
-                    <div className="space-y-2">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <Skeleton key={i} className="h-10 w-full" />
-                        ))}
-                    </div>
-                ) : (
-                    <SaleTable
-                        sales={
-                            dataPagination?.orders.map((order) => ({
-                                id: order.orderNumber,
-                                customerName: order.customerName,
-                                createdAt: order.createdAt,
-                                total: order.total,
-                                profit: Math.floor(order.total * 0.3),
-                                status: order.status,
-                            })) || []
-                        }
-                    />
-                )}
+                <div className="bg-card rounded-xl shadow-lg border border-muted/30 p-2 md:p-4">
+                    {isLoadingTable ? (
+                        <div className="space-y-2 animate-pulse">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <Skeleton key={i} className="h-10 w-full rounded-lg" />
+                            ))}
+                        </div>
+                    ) : (
+                        <SaleTable
+                            sales={
+                                dataPag?.orders.map((order) => ({
+                                    id: order.orderNumber,
+                                    customerName: order.customerName,
+                                    createdAt: order.createdAt,
+                                    total: order.total,
+                                    profit: Math.floor(order.total * 0.3),
+                                    status: order.status,
+                                    products: order.items.map((item) => ({
+                                        id: item.id,
+                                        name: item.name,
+                                        image: item.imgUrl,
+                                        quantity: item.quantity,
+                                        price: item.price,
+                                    })),
+                                })) || []
+                            }
+                        />
+                    )}
+                </div>
 
                 {/* Paginação */}
-                <div className="flex justify-between items-center mt-6 mb-4">
+                <div className="flex flex-wrap justify-between items-center mt-6 mb-4 gap-4">
                     {isLoadingTable ? (
-                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full rounded-lg" />
                     ) : (
                         <>
                             <div className="flex items-center gap-3">
@@ -288,15 +301,17 @@ export default function Sales() {
                                     size="sm"
                                     onClick={handlePrevPage}
                                     disabled={page === 1}
+                                    className="rounded-lg shadow-sm"
                                 >
                                     <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
                                 </Button>
-                                <span className="text-sm">Página {page}</span>
+                                <span className="text-sm font-semibold">Página {page}</span>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={handleNextPage}
-                                    disabled={dataPagination && dataPagination.orders.length < limit}
+                                    disabled={dataPag && dataPag.orders.length < limit}
+                                    className="rounded-lg shadow-sm"
                                 >
                                     Próxima <ChevronRight className="w-4 h-4 ml-1" />
                                 </Button>
@@ -309,7 +324,7 @@ export default function Sales() {
                                     setPage(1);
                                 }}
                             >
-                                <SelectTrigger className="w-[100px]">
+                                <SelectTrigger className="w-[100px] shadow-sm rounded-lg h-10 flex items-center">
                                     <SelectValue placeholder="Limite" />
                                 </SelectTrigger>
                                 <SelectContent>

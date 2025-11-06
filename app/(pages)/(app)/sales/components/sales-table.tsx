@@ -3,10 +3,10 @@
 import * as React from "react";
 import { ColumnDef, flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
 import { formatCurrency } from "@/lib/format-currency";
 import { Badge } from "@/components/ui/badge";
+import { SaleDetailsDialog } from "./sale-details-dialog";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 
 export type Sale = {
     id: string;
@@ -23,57 +23,52 @@ interface SaleTableProps {
 
 export const SaleTable: React.FC<SaleTableProps> = ({ sales }) => {
     const columns: ColumnDef<Sale>[] = [
-        { accessorKey: "id", header: "ID" },
-        { accessorKey: "customerName", header: "Cliente" },
+        { accessorKey: "id", header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">ID</span> },
+        { accessorKey: "customerName", header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cliente</span> },
         {
             accessorKey: "createdAt",
-            header: "Data",
-            cell: ({ row }) => new Date(row.getValue("createdAt")).toLocaleDateString("pt-BR")
+            header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Data</span>,
+            cell: ({ row }) => <span className="whitespace-nowrap text-xs">{new Date(row.getValue("createdAt")).toLocaleDateString("pt-BR")}</span>
         },
         {
             accessorKey: "total",
-            header: "Total",
+            header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total</span>,
             cell: ({ row }) => {
                 const total = row.getValue("total");
-                return formatCurrency(String(total))
+                return <span className="font-semibold text-primary">{formatCurrency(String(total))}</span>
             }
         },
         {
             accessorKey: "profit",
-            header: "Lucro",
+            header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Lucro</span>,
             cell: ({ row }) => {
                 const profit = row.getValue("profit");
-                return formatCurrency(String(profit))
+                return <span className="text-green-600 font-medium">{formatCurrency(String(profit))}</span>
             }
-        }, 
+        },
         {
             accessorKey: "status",
-            header: "Status",
+            header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</span>,
             cell: ({ row }) => {
-                const statusMap: Record<string, { label: string; color: "success" | "warning" | "destructive" }> = {
-                    Approved: { label: "Aprovada", color: "success" },      // verde
-                    Pending: { label: "Pendente", color: "warning" },       // amarelo
-                    Canceled: { label: "Cancelada", color: "destructive" }, // vermelho
-                };
-
-                const status = row.getValue("status");
-                const statusInfo = statusMap[status] || { label: status, color: "default" };
-
-                return (
-                    <Badge variant="outline" className="capitalize" color={statusInfo.color}>
-                        {statusInfo.label}
-                    </Badge>
-                );
+                const status = String(row.getValue("status")).toLowerCase();
+                if (status === "approved")
+                    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold"><CheckCircle className="w-4 h-4" /> Pago</span>;
+                if (status === "pending")
+                    return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-yellow-100 text-yellow-700 text-xs font-semibold"><Clock className="w-4 h-4" /> Pendente</span>;
+                return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold"><XCircle className="w-4 h-4" /> Cancelado</span>;
             },
         },
         {
             id: "actions",
-            header: "Ações",
-            cell: ({ row }) => (
-                <Button variant="ghost" size="sm">
-                    <Eye />
-                </Button>
-            )
+            header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ações</span>,
+            cell: ({ row }) => {
+                const sale = row.original;
+                return (
+                    <div className="flex items-center justify-center">
+                        <SaleDetailsDialog sale={sale} />
+                    </div>
+                );
+            },
         }
     ];
 
@@ -88,12 +83,12 @@ export const SaleTable: React.FC<SaleTableProps> = ({ sales }) => {
 
     return (
         <div className="w-full overflow-x-auto">
-            <Table>
+            <Table className="min-w-[700px]">
                 <TableHeader>
                     {table.getHeaderGroups().map(headerGroup => (
-                        <TableRow key={headerGroup.id}>
+                        <TableRow key={headerGroup.id} className="bg-muted/40">
                             {headerGroup.headers.map(header => (
-                                <TableHead key={header.id}>
+                                <TableHead key={header.id} className="py-3 px-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                 </TableHead>
                             ))}
@@ -102,10 +97,15 @@ export const SaleTable: React.FC<SaleTableProps> = ({ sales }) => {
                 </TableHeader>
                 <TableBody>
                     {table.getRowModel().rows.length ? (
-                        table.getRowModel().rows.map(row => (
-                            <TableRow key={row.id}>
+                        table.getRowModel().rows.map((row, idx) => (
+                            <TableRow
+                                key={row.id}
+                                className={
+                                    `transition-all hover:bg-primary/5 ${idx % 2 === 0 ? 'bg-background' : 'bg-muted/10'}`
+                                }
+                            >
                                 {row.getVisibleCells().map(cell => (
-                                    <TableCell key={cell.id}>
+                                    <TableCell key={cell.id} className="py-3 px-2 text-sm">
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </TableCell>
                                 ))}
@@ -113,7 +113,7 @@ export const SaleTable: React.FC<SaleTableProps> = ({ sales }) => {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center">
+                            <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
                                 Nenhuma venda encontrada.
                             </TableCell>
                         </TableRow>

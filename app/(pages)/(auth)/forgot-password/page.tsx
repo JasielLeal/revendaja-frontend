@@ -21,7 +21,6 @@ export default function ForgotPasswordPage() {
     });
 
     const onSubmit = (data: ForgotFormData) => {
-        console.log("Redefinir senha:", data);
         setSuccess(true);
     };
 
