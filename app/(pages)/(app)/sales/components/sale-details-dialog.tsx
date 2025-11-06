@@ -45,16 +45,6 @@ export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
 
     console.log("sale chegando nos detalhes", sale)
 
-    // Helper para status badge (declarado fora de qualquer função)
-
-    function StatusBadge({ status }: { status: string }) {
-        if (status === "approved")
-            return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold"><CheckCircle className="w-4 h-4" /> Pago</span>;
-        if (status === "pending")
-            return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-yellow-100 text-yellow-700 text-xs font-semibold"><Clock className="w-4 h-4" /> Pendente</span>;
-        return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 text-red-700 text-xs font-semibold"><XCircle className="w-4 h-4" /> Cancelado</span>;
-    }
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <Button
@@ -66,7 +56,7 @@ export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
                 <Eye className="w-5 h-5" />
             </Button>
 
-            <DialogContent className="max-w-lg p-0">
+            <DialogContent className="max-w-lg p-0 max-h-[80vh] overflow-hidden">
                 <DialogHeader className="px-6 pt-6 pb-2 border-b">
                     <DialogTitle className="flex items-center gap-2 text-lg">
                         <BadgeDollarSign className="w-5 h-5 text-primary" /> Detalhes da venda
@@ -74,7 +64,7 @@ export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
                     <DialogDescription className="text-xs text-muted-foreground">Pedido #{sale.id}</DialogDescription>
                 </DialogHeader>
 
-                <div className="px-6 py-4 space-y-6">
+                <div className="px-6 py-4 space-y-6 overflow-y-auto max-h-[60vh]">
                     {/* Cliente e status */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
@@ -97,7 +87,7 @@ export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
                     {/* Itens do pedido */}
                     <div>
                         <p className="font-semibold mb-3">Itens do pedido:</p>
-                        <ul className="divide-y divide-muted-foreground/10">
+                        <ul className="divide-y divide-muted-foreground/10 max-h-[40vh] overflow-y-auto pr-2">
                             {sale?.products?.map((item) => (
                                 <li
                                     key={item.id}

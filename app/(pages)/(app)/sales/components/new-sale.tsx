@@ -242,6 +242,18 @@ export function NewSale() {
                                                         {product.company}
                                                     </p>
                                                     <p className="font-semibold text-sm line-clamp-2">{product.name}</p>
+                                                    <div className="flex items-center gap-1">
+                                                        <p className="text-xs text-muted-foreground font-medium">Estoque:</p>
+                                                        <p
+                                                            className={
+                                                                product.quantity <= 3
+                                                                    ? "text-red-500 text-xs"
+                                                                    : "text-green-500 text-xs"
+                                                            }
+                                                        >
+                                                            {product.quantity}
+                                                        </p>
+                                                    </div>
                                                     <div className="flex items-center justify-between">
                                                         <p className="text-lg font-bold text-primary">
                                                             {formatCurrency(product.price)}
