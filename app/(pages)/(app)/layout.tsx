@@ -2,6 +2,7 @@ import { UserProvider } from "@/app/context/user-context"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthGuard } from "@/app/components/auth-guard"
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
@@ -14,22 +15,24 @@ export default function Page({ children }: { children: React.ReactNode }) {
             disableTransitionOnChange
         >
             <UserProvider>
-                <SidebarProvider
-                    style={
-                        {
-                            "--sidebar-width": "calc(var(--spacing) * 72)",
-                            "--header-height": "calc(var(--spacing) * 12)",
-                        } as React.CSSProperties
-                    }
-                >
-                    <AppSidebar variant="inset" />
-                    <SidebarInset>
-                        <SiteHeader />
-                        <div className="p-4">
-                            {children}
-                        </div>
-                    </SidebarInset>
-                </SidebarProvider>
+                <AuthGuard>
+                    <SidebarProvider
+                        style={
+                            {
+                                "--sidebar-width": "calc(var(--spacing) * 72)",
+                                "--header-height": "calc(var(--spacing) * 12)",
+                            } as React.CSSProperties
+                        }
+                    >
+                        <AppSidebar variant="inset" />
+                        <SidebarInset>
+                            <SiteHeader />
+                            <div className="p-4">
+                                {children}
+                            </div>
+                        </SidebarInset>
+                    </SidebarProvider>
+                </AuthGuard>
             </UserProvider>
         </ThemeProvider>
     )

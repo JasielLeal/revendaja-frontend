@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 export const api = axios.create({
-  baseURL: "http://localhost:3333/api",
+  baseURL: "https://api-development-revendaja.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
