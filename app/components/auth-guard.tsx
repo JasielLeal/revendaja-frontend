@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUserInfo } from "@/app/hooks/use-user-info";
+import { useUserStore } from "@/hooks/use-user-store";
 import { Loader2 } from "lucide-react";
 
 interface AuthGuardProps {
@@ -12,45 +13,72 @@ interface AuthGuardProps {
 
 export function AuthGuard({ children, requireStore = true }: AuthGuardProps) {
     const router = useRouter();
-    const { data: userInfo, isLoading, error } = useUserInfo();
+    const { data: userInfo, isLoading: isLoadingUser, error: userError } = useUserInfo();
+    const { data: userStore, isLoading: isLoadingStore, error: storeError } = useUserStore();
 
     useEffect(() => {
-        if (isLoading) return;
+        // Aguarda carregar as informações do usuário
+        if (isLoadingUser) return;
 
         // Se não conseguiu buscar dados do usuário, redireciona para login
-        if (error || !userInfo) {
+        if (userError || !userInfo) {
             router.replace("/sign-in");
             return;
         }
 
         // Se o plano é free, redireciona para assinatura
-        if (userInfo.plan === "Free") {
+        if (userInfo.plan === "free") {
             router.replace("/subscription");
             return;
         }
 
-        // Se requireStore é true e precisamos verificar se tem loja
+        // Se requireStore é true, verifica se precisa carregar dados da loja
         if (requireStore) {
-            // Por enquanto, sempre redireciona para criar loja se não for free
-            // TODO: Aqui você pode adicionar uma verificação de loja real
-            router.replace("/create-store");
-        }
-    }, [userInfo, isLoading, error, router, requireStore]);
+            // Aguarda carregar dados da loja
+            if (isLoadingStore) return;
 
-    // Mostra loading enquanto verifica
-    if (isLoading) {
+            // Se houve erro ao carregar loja (exceto 404), tenta novamente
+            if (storeError && storeError instanceof Error) {
+                console.error("Erro ao carregar loja:", storeError);
+                // Para outros erros que não sejam 404, você pode escolher o comportamento
+                // Por enquanto, vamos continuar para criar loja
+            }
+
+            // Se não tem loja (userStore é null), redireciona para criar
+            if (userStore === null) {
+                router.replace("/create-store");
+                return;
+            }
+
+            // Se chegou até aqui, tem loja e pode prosseguir
+        }
+    }, [
+        userInfo,
+        isLoadingUser,
+        userError,
+        userStore,
+        isLoadingStore,
+        storeError,
+        router,
+        requireStore
+    ]);
+
+    // Mostra loading enquanto verifica usuário ou loja (quando necessário)
+    if (isLoadingUser || (requireStore && isLoadingStore)) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center space-y-4">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                    <p className="text-muted-foreground">Verificando informações...</p>
+                    <p className="text-muted-foreground">
+                        {isLoadingUser ? "Verificando informações..." : "Carregando loja..."}
+                    </p>
                 </div>
             </div>
         );
     }
 
     // Não renderiza nada se ainda está redirecionando
-    if (!userInfo || userInfo.plan === "free") {
+    if (!userInfo || userInfo.plan === "free" || (requireStore && userStore === null)) {
         return null;
     }
 

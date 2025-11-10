@@ -67,7 +67,7 @@ export function NewSale() {
         defaultValues: {
             customerName: "",
             customerPhone: "",
-            status: "pending" as const,
+            status: "approved" as const,
             paymentMethod: "pix",
             items: [],
         },
@@ -117,18 +117,71 @@ export function NewSale() {
 
     // Funções de manipulação de itens
     function handleAddItem(productId: string) {
-        const existing = items.find((i) => i.storeProductId === productId)
+        const product = getProductById(productId);
+
+        // Verificar se o produto existe
+        if (!product) {
+            toast.error("Produto não encontrado");
+            return;
+        }
+
+        // Verificar se há estoque disponível
+        if (product.quantity <= 0) {
+            toast.error("Este produto está sem estoque!");
+            return;
+        }
+
+        const existing = items.find((i) => i.storeProductId === productId);
+
         if (existing) {
+            // Verificar se a quantidade atual + 1 não excede o estoque
+            if (existing.quantity >= product.quantity) {
+                toast.error(`Estoque insuficiente! Disponível: ${product.quantity} unidades`);
+                return;
+            }
+
             const updated = items.map((i) =>
                 i.storeProductId === productId ? { ...i, quantity: i.quantity + 1 } : i
-            )
-            setItems(updated)
-            form.setValue("items", updated)
+            );
+            setItems(updated);
+            form.setValue("items", updated);
+            toast.success(`${product.name} adicionado ao carrinho`);
         } else {
-            const updated = [...items, { storeProductId: productId, quantity: 1 }]
-            setItems(updated)
-            form.setValue("items", updated)
+            const updated = [...items, { storeProductId: productId, quantity: 1 }];
+            setItems(updated);
+            form.setValue("items", updated);
+            toast.success(`${product.name} adicionado ao carrinho`);
         }
+    }
+
+    function handleUpdateItemQuantity(productId: string, newQuantity: number) {
+        const product = getProductById(productId);
+
+        if (!product) {
+            toast.error("Produto não encontrado");
+            return;
+        }
+
+        if (newQuantity <= 0) {
+            // Remove o item se a quantidade for 0 ou negativa
+            const updated = items.filter((item) => item.storeProductId !== productId);
+            setItems(updated);
+            form.setValue("items", updated);
+            return;
+        }
+
+        if (newQuantity > product.quantity) {
+            toast.error(`Estoque insuficiente! Disponível: ${product.quantity} unidades`);
+            return;
+        }
+
+        const updated = items.map((item) =>
+            item.storeProductId === productId
+                ? { ...item, quantity: newQuantity }
+                : item
+        );
+        setItems(updated);
+        form.setValue("items", updated);
     }
 
     function handleRemoveItem(index: number) {
@@ -149,6 +202,17 @@ export function NewSale() {
     const queryClient = useQueryClient();
 
     function handleSubmit(data: FormData) {
+        // Validação final de estoque antes de submeter
+        const invalidItems = items.filter(item => {
+            const product = getProductById(item.storeProductId);
+            return !product || product.quantity < item.quantity;
+        });
+
+        if (invalidItems.length > 0) {
+            toast.error("Alguns itens não têm estoque suficiente. Verifique as quantidades.");
+            return;
+        }
+
         const payload: CreateOrderBody = {
             customerName: data.customerName,
             customerPhone: data.customerPhone || "",
@@ -207,9 +271,6 @@ export function NewSale() {
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                            <Button variant="link" size="sm">
-                                Cadastrar Produto
-                            </Button>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -224,17 +285,32 @@ export function NewSale() {
                                     {products.map((product) => (
                                         <Card
                                             key={product.id}
-                                            className="cursor-pointer transition-all hover:shadow-md hover:border-primary/20"
-                                            onClick={() => handleAddItem(product.id)}
+                                            className={`cursor-pointer transition-all hover:shadow-md ${product.quantity <= 0
+                                                ? 'opacity-60 cursor-not-allowed border-destructive/20 bg-muted/50'
+                                                : 'hover:border-primary/20'
+                                                }`}
+                                            onClick={() => {
+                                                if (product.quantity > 0) {
+                                                    handleAddItem(product.id);
+                                                }
+                                            }}
                                         >
-                                            <CardContent className="p-4">
+                                            <CardContent className="p-4 relative">
+                                                {/* Badge de sem estoque */}
+                                                {product.quantity <= 0 && (
+                                                    <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded-md text-xs font-medium z-10">
+                                                        Sem estoque
+                                                    </div>
+                                                )}
+
                                                 <div className="flex justify-center mb-3">
                                                     <Image
                                                         src={product.imgUrl}
                                                         width={120}
                                                         height={120}
                                                         alt={product.name}
-                                                        className="rounded-lg object-cover"
+                                                        className={`rounded-lg object-cover ${product.quantity <= 0 ? 'grayscale' : ''
+                                                            }`}
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
@@ -246,12 +322,14 @@ export function NewSale() {
                                                         <p className="text-xs text-muted-foreground font-medium">Estoque:</p>
                                                         <p
                                                             className={
-                                                                product.quantity <= 3
-                                                                    ? "text-red-500 text-xs"
-                                                                    : "text-green-500 text-xs"
+                                                                product.quantity <= 0
+                                                                    ? "text-red-600 text-xs font-bold"
+                                                                    : product.quantity <= 3
+                                                                        ? "text-orange-500 text-xs font-medium"
+                                                                        : "text-green-500 text-xs"
                                                             }
                                                         >
-                                                            {product.quantity}
+                                                            {product.quantity <= 0 ? 'Esgotado' : product.quantity}
                                                         </p>
                                                     </div>
                                                     <div className="flex items-center justify-between">
@@ -260,11 +338,15 @@ export function NewSale() {
                                                         </p>
                                                         <Button
                                                             size="sm"
-                                                            variant="secondary"
+                                                            variant={product.quantity <= 0 ? "secondary" : "secondary"}
+                                                            disabled={product.quantity <= 0}
                                                             onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                handleAddItem(product.id)
+                                                                e.stopPropagation();
+                                                                if (product.quantity > 0) {
+                                                                    handleAddItem(product.id);
+                                                                }
                                                             }}
+                                                            className={product.quantity <= 0 ? "opacity-50" : ""}
                                                         >
                                                             <Plus className="w-4 h-4" />
                                                         </Button>
@@ -421,7 +503,28 @@ export function NewSale() {
                                                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                             <span>{formatCurrency(product.price)}</span>
                                                             <span>×</span>
-                                                            <span>{item.quantity}</span>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0"
+                                                                    onClick={() => handleUpdateItemQuantity(item.storeProductId, item.quantity - 1)}
+                                                                >
+                                                                    -
+                                                                </Button>
+                                                                <span className="w-8 text-center">{item.quantity}</span>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0"
+                                                                    onClick={() => handleUpdateItemQuantity(item.storeProductId, item.quantity + 1)}
+                                                                >
+                                                                    +
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            Estoque disponível: {product.quantity}
                                                         </div>
                                                     </div>
                                                     <div className="text-right">

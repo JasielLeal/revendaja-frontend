@@ -8,9 +8,15 @@ import { ptBR } from "date-fns/locale"
 import Image from "next/image"
 import type { StoreProduct } from "../../sales/hooks/use-store-products"
 
-export function ProductCard({ product }: { product: StoreProduct }) {
+export function ProductCard({
+    product,
+    onClick
+}: {
+    product: StoreProduct
+    onClick?: () => void
+}) {
     return (
-        <Card className="group overflow-hidden">
+        <Card className="group overflow-hidden cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
             <div className="relative aspect-square">
                 <div className="absolute right-2 top-2 z-10">
                     <Badge variant={product.quantity > 0 ? "default" : "destructive"}>

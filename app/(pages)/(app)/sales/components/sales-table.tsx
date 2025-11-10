@@ -3,10 +3,10 @@
 import * as React from "react";
 import { ColumnDef, flexRender, useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency } from "@/lib/format-currency";
-import { Badge } from "@/components/ui/badge";
 import { SaleDetailsDialog } from "./sale-details-dialog";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Clock, ShoppingCart } from "lucide-react";
 
 export type Sale = {
     id: string;
@@ -113,8 +113,13 @@ export const SaleTable: React.FC<SaleTableProps> = ({ sales }) => {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                                Nenhuma venda encontrada.
+                            <TableCell colSpan={columns.length} className="p-0">
+                                <EmptyState
+                                    icon={ShoppingCart}
+                                    title="Nenhuma venda encontrada"
+                                    description="Ainda não há vendas registradas. Que tal fazer a primeira venda?"
+                                    className="py-12"
+                                />
                             </TableCell>
                         </TableRow>
                     )}
