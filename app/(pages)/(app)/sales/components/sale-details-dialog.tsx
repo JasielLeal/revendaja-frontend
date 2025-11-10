@@ -9,7 +9,11 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Eye, User, Phone, CalendarDays, BadgeDollarSign, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Eye, User, Phone, CalendarDays, BadgeDollarSign, CheckCircle, XCircle, Clock, Trash2, RotateCcw } from "lucide-react";
+import { useDeleteOrder, useUpdateOrderStatus } from "../hooks/use-order-actions";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // Helper para status badge (declarado fora da função principal, logo após os imports)
 function StatusBadge({ status }: { status: string }) {
@@ -25,6 +29,7 @@ import Image from "next/image";
 interface SaleDetailsDialogProps {
     sale: {
         id: string;
+        orderNumber: string;
         customerName: string;
         customerPhone?: string;
         createdAt: string;
@@ -42,8 +47,38 @@ interface SaleDetailsDialogProps {
 
 export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
     const [open, setOpen] = React.useState(false);
+    const [selectedStatus, setSelectedStatus] = useState(sale.status);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const deleteOrderMutation = useDeleteOrder();
+    const updateStatusMutation = useUpdateOrderStatus();
 
     console.log("sale chegando nos detalhes", sale)
+
+    const handleDeleteOrder = async () => {
+        try {
+            await deleteOrderMutation.mutateAsync(sale.id);
+            toast.success('Venda deletada com sucesso!');
+            setOpen(false);
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            toast.error('Erro ao deletar venda');
+        }
+    };
+
+    const handleUpdateStatus = async () => {
+        try {
+            await updateStatusMutation.mutateAsync({
+                orderId: sale.id,
+                status: selectedStatus
+            });
+            toast.success('Status atualizado com sucesso!');
+            setOpen(false);
+        } catch (error) {
+            console.error('Error updating status:', error);
+            toast.error('Erro ao atualizar status');
+        }
+    };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -61,7 +96,7 @@ export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
                     <DialogTitle className="flex items-center gap-2 text-lg">
                         <BadgeDollarSign className="w-5 h-5 text-primary" /> Detalhes da venda
                     </DialogTitle>
-                    <DialogDescription className="text-xs text-muted-foreground">Pedido #{sale.id}</DialogDescription>
+                    <DialogDescription className="text-xs text-muted-foreground">Pedido #{sale.orderNumber}</DialogDescription>
                 </DialogHeader>
 
                 <div className="px-6 py-4 space-y-6 overflow-y-auto max-h-[60vh]">
@@ -116,6 +151,79 @@ export function SaleDetailsDialog({ sale }: SaleDetailsDialogProps) {
                         <div className="flex items-center justify-between text-sm">
                             <span>Lucro estimado:</span>
                             <span className="text-green-600">{formatCurrency(sale.total * 0.3)}</span>
+                        </div>
+                    </div>
+
+                    {/* Ações */}
+                    <div className="border-t pt-4 space-y-4">
+                        <h4 className="font-semibold text-sm">Ações:</h4>
+
+                        {/* Atualizar status - apenas para pedidos pendentes */}
+                        {sale.status === "pending" && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Atualizar status:</label>
+                                <div className="flex gap-2">
+                                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                                        <SelectTrigger className="flex-1">
+                                            <SelectValue placeholder="Selecionar status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="pending">Pendente</SelectItem>
+                                            <SelectItem value="approved">Pago</SelectItem>
+                                            <SelectItem value="cancelled">Cancelado</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <Button
+                                        onClick={handleUpdateStatus}
+                                        disabled={selectedStatus === sale.status || updateStatusMutation.isPending}
+                                        size="sm"
+                                    >
+                                        <RotateCcw className="w-4 h-4 mr-1" />
+                                        {updateStatusMutation.isPending ? 'Atualizando...' : 'Atualizar'}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Deletar venda */}
+                        <div className="space-y-2">
+                            {!showDeleteConfirm ? (
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="w-full"
+                                >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Deletar venda
+                                </Button>
+                            ) : (
+                                <div className="space-y-2">
+                                    <p className="text-sm text-muted-foreground">
+                                        Tem certeza que deseja deletar esta venda? Esta ação não pode ser desfeita.
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setShowDeleteConfirm(false)}
+                                            className="flex-1"
+                                        >
+                                            Cancelar
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={handleDeleteOrder}
+                                            disabled={deleteOrderMutation.isPending}
+                                            className="flex-1"
+                                        >
+                                            <Trash2 className="w-4 h-4 mr-1" />
+                                            {deleteOrderMutation.isPending ? 'Deletando...' : 'Confirmar'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -270,7 +270,8 @@ export default function Sales() {
                         <SaleTable
                             sales={
                                 dataPag?.orders.map((order) => ({
-                                    id: order.orderNumber,
+                                    id: order.id,
+                                    orderNumber: order.orderNumber,
                                     customerName: order.customerName,
                                     createdAt: order.createdAt,
                                     total: order.total,

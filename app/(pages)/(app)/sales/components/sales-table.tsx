@@ -10,6 +10,7 @@ import { CheckCircle, XCircle, Clock, ShoppingCart } from "lucide-react";
 
 export type Sale = {
     id: string;
+    orderNumber: string;
     customerName: string;
     createdAt: string;
     total: number;
@@ -23,7 +24,7 @@ interface SaleTableProps {
 
 export const SaleTable: React.FC<SaleTableProps> = ({ sales }) => {
     const columns: ColumnDef<Sale>[] = [
-        { accessorKey: "id", header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">ID</span> },
+        { accessorKey: "orderNumber", header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Pedido</span> },
         { accessorKey: "customerName", header: () => <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cliente</span> },
         {
             accessorKey: "createdAt",
