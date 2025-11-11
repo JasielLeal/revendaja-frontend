@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["revendaja.s3.amazonaws.com"],
+    domains: ["revendaja.s3.amazonaws.com", "images.unsplash.com"],
   },
   allowedDevOrigins: [
     "www.*.localhost:3000",

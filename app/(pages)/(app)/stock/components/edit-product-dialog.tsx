@@ -16,9 +16,9 @@ interface EditProductDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     onSave: (productId: string, updates: {
-        price?: number
-        quantity?: number
-        status?: string
+        price: number
+        quantity: number
+        status: string
     }) => void
 }
 
@@ -55,30 +55,17 @@ export function EditProductDialog({ product, open, onOpenChange, onSave }: EditP
     const handleSave = () => {
         if (!product) return
 
-        const updates: {
-            price?: number
-            quantity?: number
-            status?: string
-        } = {}
-
-        // Always include price and quantity when changing to Inactive
-        if (status === "Inactive" && status !== product.status) {
-            updates.price = parseFloat(price) || product.price
-            updates.quantity = parseInt(quantity) || product.quantity
-            updates.status = status
-        } else {
-            // Normal logic for other changes
-            if (price !== String(product.price)) {
-                updates.price = parseFloat(price)
-            }
-
-            if (quantity !== String(product.quantity)) {
-                updates.quantity = parseInt(quantity)
-            }
-
-            if (status !== product.status) {
-                updates.status = status
-            }
+        // Sempre enviar todos os valores - ou os alterados ou os originais
+        const updates = {
+            price: price !== String(product.price) && price !== ''
+                ? parseFloat(price) || product.price
+                : product.price,
+            quantity: quantity !== String(product.quantity) && quantity !== ''
+                ? parseInt(quantity) || product.quantity
+                : product.quantity,
+            status: status !== product.status && status !== ''
+                ? status
+                : product.status
         }
 
         onSave(product.id, updates)
