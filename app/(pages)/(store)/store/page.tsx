@@ -6,22 +6,19 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import {
     Heart,
-    Search,
     ShoppingBag,
     Star,
     MapPin,
     Phone,
     Clock,
     Instagram,
-    Facebook
+    Facebook,
 } from "lucide-react"
 import { formatCurrency } from "@/lib/format-currency"
 import { useStoreBySubdomain } from "./hooks/use-store"
-import { useBanner } from "./hooks/use-banner"
 import { useStoreProducts, type StoreProduct } from "./hooks/use-store-products"
 
 // Função para extrair subdomain do hostname
@@ -57,7 +54,7 @@ function getSubdomainFromHostname(): string {
 
 // Função para validar se é uma URL válida
 function isValidUrl(string: string): boolean {
-    if (!string) return false
+    if (!string || typeof string !== 'string') return false
     try {
         new URL(string)
         return true
@@ -68,38 +65,27 @@ function isValidUrl(string: string): boolean {
 }
 
 // Função para obter URL de imagem segura
-function getSafeImageUrl(bannerUrl: string, bannerData?: { url: string } | null): string {
-    if (isValidUrl(bannerUrl)) {
+function getSafeImageUrl(bannerUrl: string | { mobile: string; desktop: string } | undefined): string {
+    // Se bannerUrl é um objeto com mobile/desktop
+    if (bannerUrl && typeof bannerUrl === 'object') {
+        return bannerUrl.desktop || bannerUrl.mobile || "/template.jpg"
+    }
+
+    // Se é uma string e é uma URL válida
+    if (bannerUrl && typeof bannerUrl === 'string' && isValidUrl(bannerUrl)) {
         return bannerUrl
     }
 
-    // Se temos dados do banner da API, usar a URL retornada
-    if (bannerData?.url) {
-        return bannerData.url
-    }
-
-    // Se bannerUrl é apenas uma cor ou string inválida, usar imagem padrão
+    // Fallback para imagem padrão
     return "/template.jpg"
 }
 
 export default function StoreTemplate() {
     const router = useRouter()
     const [subdomain] = useState(() => getSubdomainFromHostname())
-    const [searchQuery, setSearchQuery] = useState("")
-
-    // Função para lidar com pesquisa
-    const handleSearch = (query: string) => {
-        if (query.trim()) {
-            router.push(`/search?q=${encodeURIComponent(query.trim())}`)
-        }
-    }
 
     // Buscar dados da loja
     const { data: storeData, isLoading, error } = useStoreBySubdomain(subdomain)
-
-    // Buscar dados do banner se bannerUrl não for uma URL válida
-    const shouldFetchBanner = storeData && !isValidUrl(storeData.bannerUrl)
-    const { data: bannerData } = useBanner(shouldFetchBanner ? storeData.bannerUrl : null)
 
     // Buscar produtos da loja (8 mais novos) - apenas se não há busca
     const { data: productsData, isLoading: productsLoading } = useStoreProducts({
@@ -159,135 +145,43 @@ export default function StoreTemplate() {
     const products = rawProducts.map(transformProduct)
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-rose-50 via-white to-amber-50">
-            {/* Header da Loja */}
-            <header className="bg-white/90 backdrop-blur-sm border-b border-rose-100 sticky top-0 z-50">
+        <div className="min-h-screen ">
+
+
+            {/* Banner Hero - Estilo Moderno */}
+            <section className="relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        {/* Logo */}
-                        <div className="flex items-center space-x-3">
-                            <div className="relative h-10 w-10 rounded-full overflow-hidden">
-                                <Image
-                                    src={getSafeImageUrl(storeData.bannerUrl, bannerData)}
-                                    alt={storeData.name}
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div>
-                                <h1 className="text-lg font-bold text-gray-900">{storeData.name}</h1>
-                                <p className="text-xs text-gray-500">@{storeData.subdomain}</p>
-                            </div>
-                        </div>
-
-                        {/* Busca e Ações */}
-                        <div className="flex items-center space-x-4">
-                            {/* Busca */}
-                            <div className="relative">
-                                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                                <Input
-                                    placeholder="Buscar produtos..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleSearch(searchQuery)
-                                        }
-                                    }}
-                                    className="pl-9 w-80"
-                                />
-                            </div>
-
-                            <Button variant="ghost" size="icon">
-                                <Heart className="h-5 w-5" />
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                                <ShoppingBag className="h-5 w-5" />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            {/* Banner Hero */}
-            <section className="relative h-[400px] overflow-hidden">
-                <Image
-                    src={getSafeImageUrl(storeData.bannerUrl, bannerData)}
-                    alt="Banner da loja"
-                    fill
-                    className="object-cover"
-                />
-                <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent" />
-                <div className="absolute inset-0 flex items-center justify-start">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                        <div className="max-w-lg">
-                            <h2 className="text-4xl font-bold text-white mb-4">
-                                Bem-vindo à {storeData.name}
-                            </h2>
-                            <p className="text-xl text-white/90 mb-6">
-                                Descubra nossa seleção exclusiva de produtos
-                            </p>
-                            <div className="flex items-center gap-4 text-white/80 text-sm mb-6">
-                                <div className="flex items-center gap-1">
-                                    <MapPin className="h-4 w-4" />
-                                    {storeData.address}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    <Phone className="h-4 w-4" />
-                                    {storeData.phone}
-                                </div>
-                            </div>
-                            <Button size="lg" style={{ backgroundColor: storeData.primaryColor }} className="text-white hover:opacity-90">
-                                Explorar Produtos
-                            </Button>
-                        </div>
+                    <div className="relative h-[380px] rounded-2xl overflow-hidden">
+                        <Image
+                            src={getSafeImageUrl(storeData.bannerUrl)}
+                            alt="Banner da loja"
+                            fill
+                            className="object-cover"
+                        />
                     </div>
                 </div>
             </section>
-
-            {/* Features */}
-            <section className="py-12 bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Stats da loja */}
-                    <div className="text-center">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="p-4">
-                                <div className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
-                                    {storeData.totalProducts}
-                                </div>
-                                <div className="text-sm text-gray-600">Produtos disponíveis</div>
-                            </div>
-                            <div className="p-4">
-                                <div className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
-                                    {storeData.categories.length}
-                                </div>
-                                <div className="text-sm text-gray-600">Categorias</div>
-                            </div>
-                            <div className="p-4">
-                                <div className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
-                                    @{storeData.subdomain}
-                                </div>
-                                <div className="text-sm text-gray-600">Nossa loja online</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <Separator />
 
             {/* Grid de Produtos */}
-            <main className="py-12">
+            <main className="py-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            Produtos em Destaque
-                        </h2>
+                    <div className="flex items-center justify-between mb-10">
+                        <div>
+                            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                                Produtos em Destaque
+                            </h2>
+                            <p className="text-gray-600">Confira nossa seleção especial para você</p>
+                        </div>
                         <Button
-                            variant={'link'}
+                            variant="outline"
+                            className="gap-2 font-medium"
+                            style={{ borderColor: storeData.primaryColor, color: storeData.primaryColor }}
                             onClick={() => router.push('/search')}
                         >
-                            Ver todos
+                            Ver todos os produtos
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                         </Button>
                     </div>
 
@@ -309,25 +203,30 @@ export default function StoreTemplate() {
                             <p className="text-gray-500">Nenhum produto disponível no momento.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {products.map((product) => (
-                                <Card key={product.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-md">
+                                <Card key={product.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-gray-300 bg-white">
                                     <div className="relative">
                                         {/* Badges */}
-                                        <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+                                        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
                                             {product.isNew && (
-                                                <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white">
-                                                    Novo
+                                                <Badge className=" text-white text-xs font-semibold px-2 py-1" style={{ background: storeData.primaryColor }}>
+                                                    NOVO
                                                 </Badge>
                                             )}
                                             {product.isBestseller && (
-                                                <Badge className="bg-amber-500 hover:bg-amber-600 text-white">
-                                                    Best Seller
+                                                <Badge className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold px-2 py-1">
+                                                    MAIS VENDIDO
+                                                </Badge>
+                                            )}
+                                            {product.originalPrice && product.originalPrice > product.price && (
+                                                <Badge className="bg-green-500 text-white text-xs font-semibold px-2 py-1">
+                                                    -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                                                 </Badge>
                                             )}
                                         </div>
 
-                                        {/* Botões de Ação */}
+                                        {/* Botão favoritar */}
                                         <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Button variant="ghost" size="icon" className="bg-white/80 hover:bg-white">
                                                 <Heart className="h-4 w-4" />
@@ -335,81 +234,76 @@ export default function StoreTemplate() {
                                         </div>
 
                                         {/* Imagem */}
-                                        <div className="relative aspect-4/5 overflow-hidden">
+                                        <div className="relative aspect-square overflow-hidden bg-gray-50">
                                             <Image
                                                 src={product.image}
                                                 alt={product.name}
                                                 fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
                                             />
                                         </div>
                                     </div>
 
                                     <CardContent className="p-4">
                                         {/* Marca */}
-                                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                                        <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: storeData.primaryColor }}>
                                             {product.brand}
                                         </p>
 
                                         {/* Nome */}
-                                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm leading-tight h-10 flex items-start">
+                                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm leading-tight h-10">
                                             {product.name}
                                         </h3>
 
                                         {/* Rating */}
-                                        <div className="flex items-center gap-1 mb-3 h-4">
-                                            <div className="flex items-center">
+                                        <div className="flex items-center gap-1.5 mb-3">
+                                            <div className="flex items-center gap-0.5">
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star
                                                         key={i}
-                                                        className={`h-3 w-3 ${i < Math.floor(product.rating)
-                                                            ? 'text-amber-400 fill-current'
-                                                            : 'text-gray-300'
+                                                        className={`h-3.5 w-3.5 ${i < Math.floor(product.rating)
+                                                            ? 'text-amber-400 fill-amber-400'
+                                                            : 'text-gray-300 fill-gray-300'
                                                             }`}
                                                     />
                                                 ))}
                                             </div>
-                                            <span className="text-xs text-gray-500">
-                                                {product.rating} ({product.reviews})
+                                            <span className="text-xs text-gray-600 font-medium">
+                                                {product.rating}
                                             </span>
                                         </div>
 
                                         {/* Preço */}
-                                        <div className="flex items-center gap-2 mb-3 min-h-6">
-                                            <span className="font-bold text-gray-900">
-                                                {formatCurrency(product.price)}
-                                            </span>
+                                        <div className="mb-3 h-14">
+                                            <div className="flex items-baseline gap-2 mb-0.5">
+                                                <span className="text-xl font-bold text-gray-900">
+                                                    {formatCurrency(product.price)}
+                                                </span>
+                                                {product.originalPrice && product.originalPrice > product.price && (
+                                                    <span className="text-xs text-gray-500 line-through">
+                                                        {formatCurrency(product.originalPrice)}
+                                                    </span>
+                                                )}
+                                            </div>
                                             {product.originalPrice && product.originalPrice > product.price && (
-                                                <span className="text-xs text-gray-500 line-through">
-                                                    {formatCurrency(product.originalPrice)}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {/* Stock */}
-                                        <div className="mb-3 h-4 flex items-center">
-                                            {product.stock > 10 ? (
-                                                <span className="text-xs text-emerald-600">
-                                                    ✓ Em estoque
-                                                </span>
-                                            ) : product.stock > 0 ? (
-                                                <span className="text-xs text-amber-600">
-                                                    ⚠ Últimas {product.stock} unidades
-                                                </span>
-                                            ) : (
-                                                <span className="text-xs text-red-600">
-                                                    ✗ Indisponível
-                                                </span>
+                                                <p className="text-xs text-green-600 font-medium">
+                                                    Economize {formatCurrency(product.originalPrice - product.price)}
+                                                </p>
                                             )}
                                         </div>
 
                                         {/* Botão */}
                                         <Button
-                                            className="w-full text-white hover:opacity-90"
+                                            className="w-full text-white font-semibold h-10 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
                                             style={{ backgroundColor: storeData.primaryColor }}
                                             disabled={product.stock === 0}
                                         >
-                                            {product.stock === 0 ? 'Indisponível' : 'Adicionar ao Carrinho'}
+                                            {product.stock === 0 ? 'Indisponível' : (
+                                                <span className="flex items-center justify-center gap-2">
+                                                    <ShoppingBag className="h-3.5 w-3.5" />
+                                                    Adicionar
+                                                </span>
+                                            )}
                                         </Button>
                                     </CardContent>
                                 </Card>

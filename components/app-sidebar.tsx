@@ -34,6 +34,7 @@ import { useUser } from "@/app/context/user-context"
 import Image from "next/image"
 import logo from "@/public/icon.png"
 import { useTheme } from "next-themes"
+import { NavStore } from "./nav-store"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
@@ -72,6 +73,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/financial",
         icon: IconFile,
       },
+      {
+        title: "Configurações",
+        url: "/settings",
+        icon: IconSettings,
+      }
     ],
     navClouds: [
       {
@@ -122,11 +128,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
     ],
     navSecondary: [
-      {
-        title: "Configurações",
-        url: "#",
-        icon: IconSettings,
-      },
       {
         title: "Ajuda",
         url: "#",

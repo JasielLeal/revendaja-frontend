@@ -35,6 +35,7 @@ export default function Sales() {
     const [page, setPage] = React.useState<number>(1);
     const [limit, setLimit] = React.useState<number>(10);
     const [search, setSearch] = React.useState<string>("");
+    const [status, setStatus] = React.useState<string>("all");
 
     // 🔹 Estado separado que será usado após debounce
     const [debouncedSearch, setDebouncedSearch] = React.useState(search);
@@ -47,6 +48,11 @@ export default function Sales() {
         }, 500);
         return () => clearTimeout(handler);
     }, [search]);
+
+    // 🔹 Reset da página quando status muda
+    React.useEffect(() => {
+        setPage(1);
+    }, [status]);
 
     // Utilitário para gerar range do mês
     const getMonthRange = (year: number, monthIndex: number) => {
@@ -77,7 +83,7 @@ export default function Sales() {
 
     // ✅ Query da tabela (paginação) — também usa useQuery com chave que inclui paginação e busca
     const dashboardDataPaginationQuery = useQuery<DashboardDataTypeResponse, Error>({
-        queryKey: ["show-orders", range?.from, range?.to, page, limit, debouncedSearch],
+        queryKey: ["show-orders", range?.from, range?.to, page, limit, debouncedSearch, status],
         queryFn: async () => {
             if (!range) throw new Error("Range não definido");
             const parsed = dashboardDataSchema.parse({ from: range.from, to: range.to });
@@ -86,7 +92,8 @@ export default function Sales() {
                 parsed.to,
                 page,
                 limit,
-                debouncedSearch
+                debouncedSearch,
+                status === "all" ? undefined : status // Se for "all", não enviar status
             );
         },
         enabled: !!range,
@@ -111,14 +118,14 @@ export default function Sales() {
         fetchMetrics(range.from, range.to);
     };
 
-    // ✅ Atualiza tabela quando paginação ou busca (debounced) muda
+    // ✅ Atualiza tabela quando paginação, busca (debounced) ou status muda
     React.useEffect(() => {
         if (!month) return;
         const [year, monthStr] = month.split("-");
         const monthIndex = parseInt(monthStr, 10) - 1;
         const range = getMonthRange(parseInt(year, 10), monthIndex);
         fetchTable(range.from, range.to);
-    }, [page, limit, debouncedSearch, month]);
+    }, [page, limit, debouncedSearch, status, month]);
 
     // ✅ Ao montar, busca mês atual
     React.useEffect(() => {
@@ -183,7 +190,7 @@ export default function Sales() {
 
             {/* Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2 px-2 md:px-6">
-                {cardData.map((card, idx) => (
+                {cardData.map((card) => (
                     <Card key={card.id} className={`relative overflow-hidden shadow-lg rounded-xl border-0 animate-in fade-in duration-500 bg-card`}>
                         <CardHeader className="flex flex-col gap-2 pb-2">
                             <CardDescription className="text-sm font-semibold text-muted-foreground">{card.name}</CardDescription>
@@ -226,14 +233,14 @@ export default function Sales() {
                         className="max-w-xs shadow-sm bg-background text-foreground border border-input placeholder:text-muted-foreground h-10"
                     />
 
-                    <Select>
+                    <Select value={status} onValueChange={setStatus}>
                         <SelectTrigger className="w-[180px] shadow-sm rounded-lg bg-background text-foreground border border-input h-10 flex items-center">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent className="bg-popover text-foreground">
-                            <SelectItem value="paid">Pagas</SelectItem>
+                            <SelectItem value="all">Todas</SelectItem>
+                            <SelectItem value="approved">Pagas</SelectItem>
                             <SelectItem value="pending">Pendentes</SelectItem>
-                            <SelectItem value="canceled">Canceladas</SelectItem>
                         </SelectContent>
                     </Select>
 
