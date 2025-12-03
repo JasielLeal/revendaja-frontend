@@ -10,6 +10,7 @@ import {
     ShoppingBag,
 } from "lucide-react"
 import { useStoreBySubdomain } from "./hooks/use-store"
+import { CartProvider, useCart } from "@/app/context/cart-context"
 import Link from "next/link"
 
 // Função para extrair subdomain do hostname
@@ -31,15 +32,18 @@ function getSubdomainFromHostname(): string {
     }
 }
 
-export default function StoreLayout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
+interface StoreData {
+    name: string
+    primaryColor: string
+    categories: string[]
+    // Add other fields as needed
+}
+
+function StoreHeader({ storeData }: { storeData: StoreData }) {
     const router = useRouter()
-    const [subdomain] = useState(() => getSubdomainFromHostname())
     const [searchQuery, setSearchQuery] = useState("")
     const [isScrolled, setIsScrolled] = useState(false)
+    const { totalItems } = useCart()
 
     // Função para lidar com pesquisa
     const handleSearch = (query: string) => {
@@ -60,35 +64,8 @@ export default function StoreLayout({
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
-    // Buscar dados da loja
-    const { data: storeData, isLoading, error } = useStoreBySubdomain(subdomain)
-
-    // Loading state
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Carregando loja...</p>
-                </div>
-            </div>
-        )
-    }
-
-    // Error state
-    if (error || !storeData) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Loja não encontrada</h1>
-                    <p className="text-gray-600">Verifique se o endereço está correto.</p>
-                </div>
-            </div>
-        )
-    }
-
     return (
-        <div className="min-h-screen">
+        <>
             {/* Header da Loja */}
             <header className={`bg-white sticky top-0 z-50 transition-shadow duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -140,9 +117,11 @@ export default function StoreLayout({
                                     <ShoppingBag className="h-6 w-6" />
 
                                     {/* Badge */}
-                                    <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                                        3
-                                    </span>
+                                    {totalItems > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                            {totalItems}
+                                        </span>
+                                    )}
                                 </Button>
                             </Link>
                         </div>
@@ -167,9 +146,51 @@ export default function StoreLayout({
                     </nav>
                 </div>
             </div>
+        </>
+    )
+}
 
-            {/* Conteúdo da página */}
-            {children}
-        </div>
+export default function StoreLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    const [subdomain] = useState(() => getSubdomainFromHostname())
+
+    // Buscar dados da loja
+    const { data: storeData, isLoading, error } = useStoreBySubdomain(subdomain)
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Carregando loja...</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Error state
+    if (error || !storeData) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Loja não encontrada</h1>
+                    <p className="text-gray-600">Verifique se o endereço está correto.</p>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <CartProvider>
+            <div className="min-h-screen">
+                <StoreHeader storeData={storeData} />
+                {/* Conteúdo da página */}
+                {children}
+            </div>
+        </CartProvider>
     )
 }

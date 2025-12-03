@@ -20,6 +20,7 @@ import {
 import { formatCurrency } from "@/lib/format-currency"
 import { useStoreBySubdomain } from "./hooks/use-store"
 import { useStoreProducts, type StoreProduct } from "./hooks/use-store-products"
+import { useCart } from "@/app/context/cart-context"
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -83,6 +84,7 @@ function getSafeImageUrl(bannerUrl: string | { mobile: string; desktop: string }
 export default function StoreTemplate() {
     const router = useRouter()
     const [subdomain] = useState(() => getSubdomainFromHostname())
+    const { addItem } = useCart()
 
     // Buscar dados da loja
     const { data: storeData, isLoading, error } = useStoreBySubdomain(subdomain)
@@ -297,6 +299,15 @@ export default function StoreTemplate() {
                                             className="w-full text-white font-semibold h-10 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
                                             style={{ backgroundColor: storeData.primaryColor }}
                                             disabled={product.stock === 0}
+                                            onClick={() => addItem({
+                                                id: product.id,
+                                                name: product.name,
+                                                brand: product.brand,
+                                                price: product.price,
+                                                originalPrice: product.originalPrice,
+                                                image: product.image,
+                                                stock: product.stock
+                                            })}
                                         >
                                             {product.stock === 0 ? 'Indisponível' : (
                                                 <span className="flex items-center justify-center gap-2">

@@ -22,6 +22,7 @@ import { formatCurrency } from "@/lib/format-currency"
 import { useStoreBySubdomain } from "../hooks/use-store"
 import { useSearchProducts } from "./hooks/use-search-products"
 import { StoreProduct } from "../hooks/use-store-products"
+import { useCart } from "@/app/context/cart-context"
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -46,6 +47,7 @@ export default function SearchPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [subdomain] = useState(() => getSubdomainFromHostname())
+    const { addItem } = useCart()
 
     // Ler diretamente da URL ao invés de usar estado
     const searchQuery = searchParams.get('q') || ""
@@ -453,8 +455,17 @@ export default function SearchPage() {
                                                         className="w-full text-white hover:opacity-90"
                                                         style={{ backgroundColor: storeData.primaryColor }}
                                                         disabled={product.stock === 0}
+                                                        onClick={() => addItem({
+                                                            id: product.id,
+                                                            name: product.name,
+                                                            brand: product.brand,
+                                                            price: product.price,
+                                                            originalPrice: product.originalPrice,
+                                                            image: product.image,
+                                                            stock: product.stock
+                                                        })}
                                                     >
-                                                        {product.stock === 0 ? 'Indisponível' : 'Adicionar'}
+                                                        {product.stock === 0 ? 'Indisponível' : 'Adicionar ao Carrinho'}
                                                     </Button>
                                                 </CardContent>
                                             </Card>
