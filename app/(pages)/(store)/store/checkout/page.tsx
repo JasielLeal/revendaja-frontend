@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { useCreateOrder } from "./hooks/use-create-order"
 import {
     ArrowLeft,
     CreditCard,
@@ -22,7 +23,6 @@ import {
 import { formatCurrency } from "@/lib/format-currency"
 import { useCart } from "@/app/context/cart-context"
 import { useStoreBySubdomain } from "../hooks/use-store"
-import { clear } from "console"
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -49,27 +49,77 @@ export default function CheckoutPage() {
     const { items, totalPrice, clearCart } = useCart()
     const { data: storeData, isLoading } = useStoreBySubdomain(subdomain)
     const [orderNumber] = useState(() => Math.random().toString(36).substr(2, 9).toUpperCase())
+    const { mutateAsync: createOrder, isPending: isCreatingOrder } = useCreateOrder()
 
-    // Estados do formulário
-    const [step, setStep] = useState(1) // 1: Dados, 2: Pagamento, 3: Confirmação
-    const [formData, setFormData] = useState({
-        // Dados pessoais
-        name: '',
-        email: '',
-        phone: '',
-        cpf: '',
-        // Tipo de entrega
-        deliveryType: 'delivery', // 'delivery' ou 'pickup'
-        // Endereço
-        zipCode: '',
-        street: '',
-        number: '',
-        complement: '',
-        neighborhood: '',
-        city: '',
-        state: '',
-        // Pagamento
-        paymentMethod: 'pix',
+    // Estados do formulário - Carregar dados salvos do localStorage
+    const [formData, setFormData] = useState(() => {
+        if (typeof window === 'undefined') {
+            return {
+                name: '',
+                email: '',
+                phone: '',
+                cpf: '',
+                deliveryType: 'delivery',
+                zipCode: '',
+                street: '',
+                number: '',
+                complement: '',
+                neighborhood: '',
+                city: '',
+                state: '',
+                paymentMethod: 'pix',
+            }
+        }
+
+        const savedData = localStorage.getItem('checkout_user_data')
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData)
+                return {
+                    ...parsed,
+                    deliveryType: 'delivery', // Sempre resetar para delivery
+                    paymentMethod: parsed.paymentMethod || 'pix',
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados salvos:', error)
+            }
+        }
+
+        return {
+            name: '',
+            email: '',
+            phone: '',
+            cpf: '',
+            deliveryType: 'delivery',
+            zipCode: '',
+            street: '',
+            number: '',
+            complement: '',
+            neighborhood: '',
+            city: '',
+            state: '',
+            paymentMethod: 'pix',
+        }
+    })
+
+    const [step, setStep] = useState(1)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [useNewAddress, setUseNewAddress] = useState(false)
+
+    // Verificar se há endereço salvo diretamente na inicialização
+    const [hasSavedAddress] = useState(() => {
+        if (typeof window === 'undefined') return false
+
+        const savedData = localStorage.getItem('checkout_user_data')
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData)
+                return !!(parsed.street && parsed.number && parsed.city)
+            } catch {
+                return false
+            }
+        }
+        return false
     })
 
     // Calcular valores
@@ -77,51 +127,85 @@ export default function CheckoutPage() {
     const shipping = formData.deliveryType === 'pickup' ? 0 : (subtotal > 200 ? 0 : 15)
     const total = subtotal + shipping
 
+    type FormDataType = typeof formData;
+
     const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }))
+        setFormData((prev: FormDataType) => ({ ...prev, [field]: value }))
     }
 
     const handleSubmitOrder = async () => {
-        // Preparar dados do pedido
-        const orderData = {
-            customer: {
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
-                cpf: formData.cpf,
-            },
-            deliveryType: formData.deliveryType,
-            address: formData.deliveryType === 'delivery' ? {
-                zipCode: formData.zipCode,
-                street: formData.street,
-                number: formData.number,
-                complement: formData.complement,
-                neighborhood: formData.neighborhood,
-                city: formData.city,
-                state: formData.state,
-            } : null,
+        if (isSubmitting || isCreatingOrder) return
+        setIsSubmitting(true)
+
+        // Salvar dados do usuário no localStorage para próximas compras
+        const userDataToSave = {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            cpf: formData.cpf,
+            street: formData.street,
+            number: formData.number,
+            complement: formData.complement,
+            neighborhood: formData.neighborhood,
+            city: formData.city,
+            state: formData.state,
+            zipCode: formData.zipCode,
             paymentMethod: formData.paymentMethod,
+        }
+        localStorage.setItem('checkout_user_data', JSON.stringify(userDataToSave))
+
+        const paymentMethodLabel = formData.paymentMethod === 'pix'
+            ? 'Pix'
+            : formData.paymentMethod === 'credit_card'
+                ? 'Credito'
+                : 'Dinheiro'
+
+        const orderPayload = {
+            customerName: formData.name,
+            customerPhone: formData.phone?.replace(/\D/g, '') || '',
+            status: 'approved',
+            subdomain: subdomain,
+            paymentMethod: paymentMethodLabel,
+            createdAt: new Date().toISOString().split('T')[0],
+            isDelivery: formData.deliveryType === 'delivery',
+            deliveryStreet: formData.deliveryType === 'delivery' ? formData.street : undefined,
+            deliveryNumber: formData.deliveryType === 'delivery' ? formData.number : undefined,
+            deliveryNeighborhood: formData.deliveryType === 'delivery' ? formData.neighborhood : undefined,
             items: items.map(item => ({
-                id: item.id,
-                name: item.name,
+                storeProductId: item.id,
                 quantity: item.quantity,
-                price: item.price,
             })),
-            subtotal,
-            shipping,
-            total,
         }
 
-        console.log('Finalizando pedido:', orderData)
+        try {
+            await createOrder(orderPayload)
 
-        // Aqui você faria a requisição para o backend
-        // await api.post(`/web/store/${subdomain}/orders`, orderData)
+            // Simular processamento
+            setStep(3)
 
-        // Simular processamento
-        setStep(3)
+            // Limpar carrinho após 3 segundos e abrir WhatsApp
+            setTimeout(() => {
+                clearCart()
 
-        // Limpar carrinho 
-        clearCart()
+                // Redirecionar para WhatsApp da loja para confirmar pagamento
+                const message = encodeURIComponent(
+                    `Olá! Acabei de realizar um pedido:\n\n` +
+                    `Pedido: #${orderNumber}\n` +
+                    `Valor: ${formatCurrency(total)}\n` +
+                    `Forma de pagamento: ${paymentMethodLabel}\n` +
+                    `${formData.deliveryType === 'delivery' ? 'Entrega' : 'Retirada na loja'}`
+                )
+
+                if (storeData?.phone) {
+                    window.open(`https://wa.me/${storeData.phone.replace(/\D/g, '')}?text=${message}`, '_blank')
+                }
+            }, 3000)
+        } catch (error) {
+            console.error('Erro ao criar pedido', error)
+            alert('Não foi possível finalizar o pedido. Tente novamente.')
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     if (isLoading) {
@@ -287,8 +371,8 @@ export default function CheckoutPage() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.deliveryType === 'delivery'
-                                                            ? 'border-primary bg-primary/5'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input
@@ -308,8 +392,8 @@ export default function CheckoutPage() {
 
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.deliveryType === 'pickup'
-                                                            ? 'border-primary bg-primary/5'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input
@@ -341,8 +425,69 @@ export default function CheckoutPage() {
                                         </CardContent>
                                     </Card>
 
-                                    {/* Endereço - Só aparece se for entrega */}
-                                    {formData.deliveryType === 'delivery' && (
+                                    {/* Seleção de Endereço - Só aparece se tiver endereço salvo e for entrega */}
+                                    {hasSavedAddress && formData.deliveryType === 'delivery' && (
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle className="flex items-center gap-2">
+                                                    <MapPin className="h-5 w-5" />
+                                                    Selecionar Endereço
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-4">
+                                                <div className="space-y-3">
+                                                    <label
+                                                        className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${!useNewAddress
+                                                            ? 'border-primary bg-primary/5'
+                                                            : 'border-gray-200 hover:border-gray-300'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="addressChoice"
+                                                            checked={!useNewAddress}
+                                                            onChange={() => setUseNewAddress(false)}
+                                                            className="w-4 h-4 mt-0.5"
+                                                            style={{ accentColor: storeData.primaryColor }}
+                                                        />
+                                                        <div className="flex-1">
+                                                            <p className="font-semibold text-sm mb-1">Usar endereço salvo</p>
+                                                            <p className="text-sm text-gray-600">
+                                                                {formData.street}, {formData.number}
+                                                                {formData.complement && ` - ${formData.complement}`}
+                                                            </p>
+                                                            <p className="text-sm text-gray-600">
+                                                                {formData.neighborhood} - {formData.city}/{formData.state}
+                                                            </p>
+                                                        </div>
+                                                    </label>
+
+                                                    <label
+                                                        className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${useNewAddress
+                                                            ? 'border-primary bg-primary/5'
+                                                            : 'border-gray-200 hover:border-gray-300'
+                                                            }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name="addressChoice"
+                                                            checked={useNewAddress}
+                                                            onChange={() => setUseNewAddress(true)}
+                                                            className="w-4 h-4"
+                                                            style={{ accentColor: storeData.primaryColor }}
+                                                        />
+                                                        <div className="flex-1">
+                                                            <p className="font-semibold text-sm">Usar novo endereço</p>
+                                                            <p className="text-xs text-gray-600">Preencher novo endereço de entrega</p>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+
+                                    {/* Endereço - Só aparece se for entrega E (não tiver endereço salvo OU escolheu novo endereço) */}
+                                    {formData.deliveryType === 'delivery' && (!hasSavedAddress || useNewAddress) && (
                                         <Card>
                                             <CardHeader>
                                                 <CardTitle className="flex items-center gap-2">
@@ -443,8 +588,8 @@ export default function CheckoutPage() {
                                             <div className="space-y-3">
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.paymentMethod === 'pix'
-                                                            ? 'border-primary bg-primary/5'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input
@@ -467,8 +612,8 @@ export default function CheckoutPage() {
 
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.paymentMethod === 'credit_card'
-                                                            ? 'border-primary bg-primary/5'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input
@@ -482,14 +627,14 @@ export default function CheckoutPage() {
                                                     />
                                                     <div className="flex-1">
                                                         <p className="font-semibold text-sm">Cartão de Crédito</p>
-                                                        <p className="text-xs text-gray-600">Débito ou crédito</p>
+                                                        <p className="text-xs text-gray-600">Pagamento instantâneo</p>
                                                     </div>
                                                 </label>
 
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.paymentMethod === 'money'
-                                                            ? 'border-primary bg-primary/5'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <input
@@ -524,8 +669,9 @@ export default function CheckoutPage() {
                                             className="flex-1 text-white"
                                             style={{ backgroundColor: storeData.primaryColor }}
                                             onClick={handleSubmitOrder}
+                                            disabled={isSubmitting || isCreatingOrder}
                                         >
-                                            Finalizar Pedido
+                                            {isSubmitting || isCreatingOrder ? 'Enviando...' : 'Finalizar Pedido'}
                                         </Button>
                                     </div>
                                 </>

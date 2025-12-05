@@ -15,8 +15,6 @@ import {
     ShoppingBag,
     ArrowLeft,
     Tag,
-    Truck,
-    ShieldCheck
 } from "lucide-react"
 import { formatCurrency } from "@/lib/format-currency"
 import { useCart } from "@/app/context/cart-context"
@@ -46,7 +44,7 @@ export default function CartPage() {
     const [couponCode, setCouponCode] = useState("")
     const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
 
-    const { items, removeItem, updateQuantity, clearCart, totalPrice } = useCart()
+    const { items, removeItem, updateQuantity, totalPrice } = useCart()
     const { data: storeData, isLoading } = useStoreBySubdomain(subdomain)
 
     // Calcular valores

@@ -11,14 +11,14 @@ export interface CreateOrderResponse {
         paymentMethod: string
     }
 }
-
 export interface CreateOrderBody {
     customerName: string
     customerPhone: string
     status: string
+    subdomain: string
     paymentMethod: string
-    createdAt?: string
-    isDelivery?: boolean
+    createdAt: string
+    isDelivery: boolean
     deliveryStreet?: string
     deliveryNumber?: string
     deliveryNeighborhood?: string
@@ -28,12 +28,13 @@ export interface CreateOrderBody {
     }[]
 }
 
+
 export function useCreateOrder() {
     return useMutation<CreateOrderResponse, Error, CreateOrderBody>({
         mutationFn: async (data: CreateOrderBody) => {
             try {
                 const response = await api.post<CreateOrderResponse>(
-                    `/orders`,
+                    `/orders/online`,
                     data
                 )
 
