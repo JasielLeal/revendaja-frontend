@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -21,6 +22,21 @@ import { formatCurrency } from "@/lib/format-currency"
 import { useStoreBySubdomain } from "./hooks/use-store"
 import { useStoreProducts, type StoreProduct } from "./hooks/use-store-products"
 import { useCart } from "@/app/context/cart-context"
+
+interface FavoriteProduct {
+    id: string
+    name: string
+    brand: string
+    category: string
+    price: number
+    originalPrice?: number
+    image: string
+    rating: number
+    reviews: number
+    stock: number
+    isNew: boolean
+    isBestseller: boolean
+}
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -84,7 +100,39 @@ function getSafeImageUrl(bannerUrl: string | { mobile: string; desktop: string }
 export default function StoreTemplate() {
     const router = useRouter()
     const [subdomain] = useState(() => getSubdomainFromHostname())
+    const [favorites, setFavorites] = useState<FavoriteProduct[]>(() => {
+        if (typeof window === 'undefined') return []
+        const savedFavorites = localStorage.getItem('favorites')
+        if (savedFavorites) {
+            try {
+                return JSON.parse(savedFavorites)
+            } catch (error) {
+                console.error('Erro ao carregar favoritos:', error)
+                return []
+            }
+        }
+        return []
+    })
     const { addItem } = useCart()
+
+    // Verificar se produto está nos favoritos
+    const isFavorite = (productId: string) => {
+        return favorites.some(fav => fav.id === productId)
+    }
+
+    // Adicionar ou remover dos favoritos
+    const toggleFavorite = (product: FavoriteProduct) => {
+        let updated: FavoriteProduct[]
+
+        if (isFavorite(product.id)) {
+            updated = favorites.filter(fav => fav.id !== product.id)
+        } else {
+            updated = [...favorites, product]
+        }
+
+        setFavorites(updated)
+        localStorage.setItem('favorites', JSON.stringify(updated))
+    }
 
     // Buscar dados da loja
     const { data: storeData, isLoading, error } = useStoreBySubdomain(subdomain)
@@ -147,21 +195,27 @@ export default function StoreTemplate() {
     const products = rawProducts.map(transformProduct)
 
     return (
-        <div className="min-h-screen ">
+        <div className="min-h-screen bg-gray-50">
 
-
-            {/* Banner Hero - Estilo Moderno */}
-            <section className="relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="relative h-[380px] rounded-2xl overflow-hidden">
+            {/* Banner Hero - Moderno e Dinâmico */}
+            <section className="relative bg-linear-to-b from-white to-gray-50">
+                <div className="w-full">
+                    <div className="relative h-[420px] overflow-hidden shadow-2xl">
+                        {/* Imagem do Banner */}
                         <Image
                             src={getSafeImageUrl(storeData.bannerUrl)}
                             alt="Banner da loja"
                             fill
                             className="object-cover"
+                            priority
                         />
+
+                        {/* Overlay Gradiente */}
+                        <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent"></div>
+
                     </div>
                 </div>
+
             </section>
 
             {/* Grid de Produtos */}
@@ -230,8 +284,29 @@ export default function StoreTemplate() {
 
                                         {/* Botão favoritar */}
                                         <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button variant="ghost" size="icon" className="bg-white/80 hover:bg-white">
-                                                <Heart className="h-4 w-4" />
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className={`hover:bg-white`}
+                                                onClick={(e) => {
+                                                    e.preventDefault()
+                                                    toggleFavorite({
+                                                        id: product.id,
+                                                        name: product.name,
+                                                        brand: product.brand,
+                                                        category: product.category,
+                                                        price: product.price,
+                                                        originalPrice: product.originalPrice,
+                                                        image: product.image,
+                                                        rating: product.rating,
+                                                        reviews: product.reviews,
+                                                        stock: product.stock,
+                                                        isNew: product.isNew,
+                                                        isBestseller: product.isBestseller,
+                                                    })
+                                                }}
+                                            >
+                                                <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
                                             </Button>
                                         </div>
 
@@ -257,23 +332,7 @@ export default function StoreTemplate() {
                                             {product.name}
                                         </h3>
 
-                                        {/* Rating */}
-                                        <div className="flex items-center gap-1.5 mb-3">
-                                            <div className="flex items-center gap-0.5">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <Star
-                                                        key={i}
-                                                        className={`h-3.5 w-3.5 ${i < Math.floor(product.rating)
-                                                            ? 'text-amber-400 fill-amber-400'
-                                                            : 'text-gray-300 fill-gray-300'
-                                                            }`}
-                                                    />
-                                                ))}
-                                            </div>
-                                            <span className="text-xs text-gray-600 font-medium">
-                                                {product.rating}
-                                            </span>
-                                        </div>
+                                       
 
                                         {/* Preço */}
                                         <div className="mb-3 h-14">

@@ -53,7 +53,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const addItem = (newItem: Omit<CartItem, 'quantity'>, goToCart = true) => {
         setItems(prev => {
             const existingItem = prev.find(item => item.id === newItem.id)
-
+            console.log('Adding item to cart:', newItem)
             if (existingItem) {
                 // Se já existe, incrementa quantidade
                 return prev.map(item =>

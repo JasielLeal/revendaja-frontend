@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,8 @@ import {
     Heart,
     Search,
     ShoppingBag,
+    Menu,
+    User,
 } from "lucide-react"
 import { useStoreBySubdomain } from "./hooks/use-store"
 import { CartProvider, useCart } from "@/app/context/cart-context"
@@ -42,8 +44,27 @@ interface StoreData {
 function StoreHeader({ storeData }: { storeData: StoreData }) {
     const router = useRouter()
     const [searchQuery, setSearchQuery] = useState("")
-    const [isScrolled, setIsScrolled] = useState(false)
     const { totalItems } = useCart()
+
+    // Carregar nome do cliente do localStorage com inicialização lazy
+    const [customerName] = useState<string | null>(() => {
+        if (typeof window === 'undefined') return null
+
+        const savedData = localStorage.getItem('checkout_user_data')
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData)
+                if (parsed.name) {
+                    // Pegar apenas o primeiro nome e capitalizar primeira letra
+                    const firstName = parsed.name.split(' ')[0]
+                    return firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase()
+                }
+            } catch (error) {
+                console.error('Erro ao carregar nome do cliente:', error)
+            }
+        }
+        return null
+    })
 
     // Função para lidar com pesquisa
     const handleSearch = (query: string) => {
@@ -52,38 +73,34 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
         }
     }
 
-    // Detectar scroll para adicionar sombra no header
-    useEffect(() => {
-        if (typeof window === 'undefined') return
-
-        const handleScroll = () => {
-            setIsScrolled(window.scrollY > 10)
-        }
-
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
-
     return (
         <>
             {/* Header da Loja */}
-            <header className={`bg-white sticky top-0 z-50 transition-shadow duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
+            <header className="bg-white border-b sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Top Bar */}
-                    <div className="flex items-center justify-between h-20">
+                    <div className="flex items-center justify-between py-4">
                         {/* Logo */}
-                        <Link href="/">
-                            <h1 className="text-2xl font-bold cursor-pointer" style={{ color: storeData.primaryColor }}>
-                                {storeData.name}
-                            </h1>
+                        <Link href="/" className="shrink-0">
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-xl"
+                                    style={{ backgroundColor: storeData.primaryColor }}
+                                >
+                                    {storeData.name.charAt(0).toUpperCase()}
+                                </div>
+                                <h1 className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
+                                    {storeData.name}
+                                </h1>
+                            </div>
                         </Link>
 
                         {/* Busca Central */}
-                        <div className="flex-1 max-w-2xl mx-8">
-                            <div className="relative">
+                        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+                            <div className="relative w-full">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 <Input
-                                    placeholder="O que você está procurando?"
+                                    placeholder="Buscar produtos, marcas..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyDown={(e) => {
@@ -91,61 +108,163 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                             handleSearch(searchQuery)
                                         }
                                     }}
-                                    className="pl-12 pr-4 h-12 text-base border-gray-300 focus:border-gray-400"
+                                    className="pl-12 pr-4 h-11 text-sm border-gray-300 rounded-full transition-all"
+                                    style={{
+                                        '--tw-ring-color': storeData.primaryColor,
+                                    } as React.CSSProperties}
+                                    onFocus={(e) => {
+                                        e.currentTarget.style.borderColor = storeData.primaryColor
+                                        e.currentTarget.style.boxShadow = `0 0 0 3px ${storeData.primaryColor}20`
+                                    }}
+                                    onBlur={(e) => {
+                                        e.currentTarget.style.borderColor = '#d1d5db'
+                                        e.currentTarget.style.boxShadow = 'none'
+                                    }}
                                 />
                             </div>
                         </div>
 
-                        {/* Ações */}
-                        <div className="flex items-center gap-3">
-                            {/* Favoritos */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="hover:bg-gray-100 rounded-full"
+                        {/* Ações do Header */}
+                        <div className="flex items-center gap-2">
+                            {/* Conta */}
+                            <p
+                                className="hidden lg:flex gap-2 text-gray-700 hover:text-gray-900  lg:items-center "
                             >
-                                <Heart className="h-6 w-6" />
-                            </Button>
+                                <User className="h-5 w-5" />
+                                <div className="text-left">
+                                    <p className="text-xs text-gray-500">Olá, {customerName || 'visitante'}</p>
+                                </div>
+                            </p>
 
-                            {/* Carrinho */}
-                            <Link href="/cart" className="relative block">
+                            {/* Favoritos */}
+                            <Link href="/favorites">
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="hover:bg-gray-100 rounded-full relative"
+                                    className="relative hover:bg-gray-100 rounded-full"
                                 >
-                                    <ShoppingBag className="h-6 w-6" />
+                                    <Heart className="h-6 w-6 text-gray-700" />
+                                </Button>
+                            </Link>
 
-                                    {/* Badge */}
+                            {/* Carrinho */}
+                            <Link href="/cart">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="relative hover:bg-gray-100 rounded-full"
+                                >
+                                    <ShoppingBag className="h-6 w-6 text-gray-700" />
                                     {totalItems > 0 && (
-                                        <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                                        <span
+                                            className="absolute -top-1 -right-1 text-white text-[11px] font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center"
+                                            style={{ backgroundColor: storeData.primaryColor }}
+                                        >
                                             {totalItems}
                                         </span>
                                     )}
                                 </Button>
                             </Link>
+
+                            {/* Menu Mobile */}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="md:hidden hover:bg-gray-100 rounded-full"
+                            >
+                                <Menu className="h-6 w-6 text-gray-700" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Busca Mobile */}
+                    <div className="md:hidden pb-3">
+                        <div className="relative w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                                placeholder="Buscar produtos..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSearch(searchQuery)
+                                    }
+                                }}
+                                className="pl-10 pr-4 h-10 text-sm border-gray-300 rounded-full transition-all"
+                                style={{
+                                    '--tw-ring-color': storeData.primaryColor,
+                                } as React.CSSProperties}
+                                onFocus={(e) => {
+                                    e.currentTarget.style.borderColor = storeData.primaryColor
+                                    e.currentTarget.style.boxShadow = `0 0 0 3px ${storeData.primaryColor}20`
+                                }}
+                                onBlur={(e) => {
+                                    e.currentTarget.style.borderColor = '#d1d5db'
+                                    e.currentTarget.style.boxShadow = 'none'
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
-            </header>
 
-            {/* Navigation Bar - Fora do header sticky */}
-            <div className="bg-white">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <nav className="flex items-center justify-start h-12 overflow-x-auto">
-                        {storeData.categories.slice(0, 6).map((category) => (
+                {/* Navigation Bar - Categorias */}
+                <div className="border-t bg-gray-50/50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <nav className="flex items-center gap-1 h-12 overflow-x-auto scrollbar-hide">
+                            {/* Todas as categorias */}
                             <Link
-                                key={category}
-                                href={`/search?category=${encodeURIComponent(category)}`}
-                                style={{ "--store-color": storeData.primaryColor } as React.CSSProperties}
-                                className="mr-4 py-2 text-sm font-medium text-gray-700 rounded-md whitespace-nowrap hover:text-(--store-color)"
+                                href="/search"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 whitespace-nowrap rounded-md transition-colors"
+                                style={{
+                                    '--hover-bg': `${storeData.primaryColor}15`,
+                                } as React.CSSProperties}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = `${storeData.primaryColor}15`
+                                    e.currentTarget.style.color = storeData.primaryColor
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent'
+                                    e.currentTarget.style.color = '#374151'
+                                }}
                             >
-                                <p>{category}</p>
+                                Todos os Produtos
                             </Link>
-                        ))}
-                    </nav>
+
+                            {/* Categorias dinâmicas */}
+                            {storeData.categories.slice(0, 8).map((category) => (
+                                <Link
+                                    key={category}
+                                    href={`/search?category=${encodeURIComponent(category)}`}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 whitespace-nowrap rounded-md transition-colors"
+                                    style={{
+                                        '--hover-bg': `${storeData.primaryColor}15`,
+                                    } as React.CSSProperties}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = `${storeData.primaryColor}15`
+                                        e.currentTarget.style.color = storeData.primaryColor
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent'
+                                        e.currentTarget.style.color = '#374151'
+                                    }}
+                                >
+                                    {category}
+                                </Link>
+                            ))}
+
+                            {/* Ver mais categorias */}
+                            {storeData.categories.length > 8 && (
+                                <Link
+                                    href="/search"
+                                    className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 whitespace-nowrap rounded-md transition-colors"
+                                >
+                                    Ver mais +
+                                </Link>
+                            )}
+                        </nav>
+                    </div>
                 </div>
-            </div>
+            </header>
         </>
     )
 }

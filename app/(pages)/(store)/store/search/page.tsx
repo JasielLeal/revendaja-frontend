@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
@@ -13,16 +13,29 @@ import { Separator } from "@/components/ui/separator"
 import {
     Heart,
     Search,
-    Star,
     Filter,
     X,
     ChevronDown
 } from "lucide-react"
 import { formatCurrency } from "@/lib/format-currency"
 import { useStoreBySubdomain } from "../hooks/use-store"
-import { useSearchProducts } from "./hooks/use-search-products"
-import { StoreProduct } from "../hooks/use-store-products"
+import { useInfinitSearchProducts } from "./hooks/use-infinite-search-products"
 import { useCart } from "@/app/context/cart-context"
+
+interface FavoriteProduct {
+    id: string
+    name: string
+    brand: string
+    category: string
+    price: number
+    originalPrice?: number
+    image: string
+    rating: number
+    reviews: number
+    stock: number
+    isNew: boolean
+    isBestseller: boolean
+}
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -48,29 +61,94 @@ export default function SearchPage() {
     const searchParams = useSearchParams()
     const [subdomain] = useState(() => getSubdomainFromHostname())
     const { addItem } = useCart()
+    const [favorites, setFavorites] = useState<FavoriteProduct[]>(() => {
+        if (typeof window === 'undefined') return []
+        const savedFavorites = localStorage.getItem('favorites')
+        if (savedFavorites) {
+            try {
+                return JSON.parse(savedFavorites)
+            } catch (error) {
+                console.error('Erro ao carregar favoritos:', error)
+                return []
+            }
+        }
+        return []
+    })
+
+    // Verificar se produto está nos favoritos
+    const isFavorite = (productId: string) => {
+        return favorites.some(fav => fav.id === productId)
+    }
+
+    // Adicionar ou remover dos favoritos
+    const toggleFavorite = (product: FavoriteProduct) => {
+        let updated: FavoriteProduct[]
+
+        if (isFavorite(product.id)) {
+            updated = favorites.filter(fav => fav.id !== product.id)
+        } else {
+            updated = [...favorites, product]
+        }
+
+        setFavorites(updated)
+        localStorage.setItem('favorites', JSON.stringify(updated))
+    }
 
     // Ler diretamente da URL ao invés de usar estado
     const searchQuery = searchParams.get('q') || ""
     const selectedCategory = searchParams.get('category') || ""
 
-    const [currentPage, setCurrentPage] = useState(1)
     const [sortBy, setSortBy] = useState<string>("relevance")
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
     const [selectedBrands, setSelectedBrands] = useState<string[]>([])
     const [showMobileFilters, setShowMobileFilters] = useState(false)
+    const observerTarget = useRef<HTMLDivElement>(null)
 
     // Buscar dados da loja
     const { data: storeData, isLoading: storeLoading, error } = useStoreBySubdomain(subdomain)
 
-    // Buscar produtos com filtros - usando o hook específico de pesquisa
-    const { data: productsData, isLoading: productsLoading } = useSearchProducts({
-        subdomain: subdomain,
-        pageSize: 20, // Mais produtos na página de pesquisa
-        page: currentPage,
-        search: searchQuery || undefined,
-        category: selectedCategory !== "all" && selectedCategory !== "" ? selectedCategory : undefined,
-        enabled: !!subdomain
-    })
+    // Buscar produtos com infinite scroll
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading: productsLoading,
+    } = useInfinitSearchProducts(
+        subdomain,
+        9,
+        searchQuery || undefined,
+        selectedCategory !== "all" && selectedCategory !== "" ? selectedCategory : undefined
+    )
+
+    // Combinar todos os produtos de todas as páginas
+    const allProducts = data?.pages.flatMap(page => page.data) ?? []
+    const totalProducts = data?.pages[0]?.pagination.total ?? 0
+    // Observer para infinite scroll
+    useEffect(() => {
+        const target = observerTarget.current
+
+        if (!target) {
+            return
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+
+                if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+
+                    fetchNextPage()
+                }
+            },
+            { threshold: 0.1 }
+        )
+
+        observer.observe(target)
+
+        return () => {
+            observer.disconnect()
+        }
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage])
 
     // Loading state
     if (storeLoading) {
@@ -97,10 +175,18 @@ export default function SearchPage() {
     }
 
     // Produtos transformados
-    const rawProducts = productsData?.data || []
-    const pagination = productsData?.pagination
+    interface RawProduct {
+        id: string
+        name: string
+        brand: string
+        category: string
+        price: number
+        catalogPrice: number
+        imgUrl?: string
+        quantity: number
+    }
 
-    const transformProduct = (product: StoreProduct) => ({
+    const transformProduct = (product: RawProduct) => ({
         id: product.id,
         name: product.name,
         brand: product.brand,
@@ -116,14 +202,12 @@ export default function SearchPage() {
         description: `${product.brand} - ${product.category}`
     })
 
-    const products = rawProducts.map(transformProduct)
+    const products = allProducts.map(transformProduct)
 
     // Extrair marcas únicas dos produtos
-    const uniqueBrands = Array.from(new Set(rawProducts.map(p => p.brand))).sort()
+    const uniqueBrands = Array.from(new Set(allProducts.map((p: RawProduct) => p.brand))).sort()
 
     const handleCategoryChange = (category: string) => {
-        setCurrentPage(1)
-
         // Atualizar URL
         const params = new URLSearchParams()
         if (searchQuery) params.set('q', searchQuery)
@@ -138,24 +222,17 @@ export default function SearchPage() {
                 ? prev.filter(b => b !== brand)
                 : [...prev, brand]
         )
-        setCurrentPage(1)
     }
 
     const clearFilters = () => {
         setSelectedBrands([])
         setPriceRange([0, 1000])
-        setCurrentPage(1)
 
         // Atualizar URL removendo filtros
         const params = new URLSearchParams()
         if (searchQuery) params.set('q', searchQuery)
 
         router.push(`/search?${params.toString()}`)
-    }
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
     return (
@@ -270,9 +347,9 @@ export default function SearchPage() {
                                         <h2 className="text-2xl font-bold text-gray-900 mb-1">
                                             {searchQuery ? `Resultado de busca para "${searchQuery}"` : 'Todos os produtos'}
                                         </h2>
-                                        {pagination && (
+                                        {totalProducts > 0 && (
                                             <p className="text-sm text-gray-600">
-                                                Total de {pagination.total} produtos
+                                                Mostrando {allProducts.length} de {totalProducts} produtos
                                             </p>
                                         )}
                                     </div>
@@ -386,8 +463,29 @@ export default function SearchPage() {
 
                                                     {/* Botão favoritar */}
                                                     <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <Button variant="ghost" size="icon" className="bg-white/80 hover:bg-white">
-                                                            <Heart className="h-4 w-4" />
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="hover:bg-white"
+                                                            onClick={(e) => {
+                                                                e.preventDefault()
+                                                                toggleFavorite({
+                                                                    id: product.id,
+                                                                    name: product.name,
+                                                                    brand: product.brand,
+                                                                    category: product.category,
+                                                                    price: product.price,
+                                                                    originalPrice: product.originalPrice,
+                                                                    image: product.image,
+                                                                    rating: product.rating,
+                                                                    reviews: product.reviews,
+                                                                    stock: product.stock,
+                                                                    isNew: product.isNew,
+                                                                    isBestseller: product.isBestseller,
+                                                                })
+                                                            }}
+                                                        >
+                                                            <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
                                                         </Button>
                                                     </div>
 
@@ -413,23 +511,7 @@ export default function SearchPage() {
                                                         {product.name}
                                                     </h3>
 
-                                                    {/* Rating */}
-                                                    <div className="flex items-center gap-1 mb-3 h-4">
-                                                        <div className="flex items-center">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <Star
-                                                                    key={i}
-                                                                    className={`h-3 w-3 ${i < Math.floor(product.rating)
-                                                                        ? 'text-amber-400 fill-current'
-                                                                        : 'text-gray-300'
-                                                                        }`}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                        <span className="text-xs text-gray-500">
-                                                            {product.rating} ({product.reviews})
-                                                        </span>
-                                                    </div>
+
 
                                                     {/* Preço */}
                                                     <div className="flex items-center gap-2 mb-3 h-14">
@@ -472,55 +554,18 @@ export default function SearchPage() {
                                         ))}
                                     </div>
 
-                                    {/* Paginação */}
-                                    {pagination && pagination.totalPages > 1 && (
-                                        <div className="flex justify-center items-center gap-2">
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => handlePageChange(currentPage - 1)}
-                                                disabled={currentPage === 1}
-                                            >
-                                                Anterior
-                                            </Button>
-
-                                            <div className="flex items-center gap-1">
-                                                {[...Array(pagination.totalPages)].map((_, i) => {
-                                                    const page = i + 1
-                                                    if (
-                                                        page === 1 ||
-                                                        page === pagination.totalPages ||
-                                                        (page >= currentPage - 2 && page <= currentPage + 2)
-                                                    ) {
-                                                        return (
-                                                            <Button
-                                                                key={page}
-                                                                variant={currentPage === page ? "default" : "outline"}
-                                                                size="sm"
-                                                                onClick={() => handlePageChange(page)}
-                                                                style={currentPage === page ? { backgroundColor: storeData.primaryColor } : {}}
-                                                            >
-                                                                {page}
-                                                            </Button>
-                                                        )
-                                                    } else if (
-                                                        page === currentPage - 3 ||
-                                                        page === currentPage + 3
-                                                    ) {
-                                                        return <span key={page} className="px-2">...</span>
-                                                    }
-                                                    return null
-                                                })}
+                                    {/* Observer para Infinite Scroll */}
+                                    <div ref={observerTarget} className="w-full py-8 flex justify-center min-h-[100px]">
+                                        {isFetchingNextPage && (
+                                            <div className="flex items-center gap-2 text-gray-600">
+                                                <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-gray-600"></div>
+                                                <span className="text-sm">Carregando mais produtos...</span>
                                             </div>
-
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => handlePageChange(currentPage + 1)}
-                                                disabled={currentPage === pagination.totalPages}
-                                            >
-                                                Próxima
-                                            </Button>
-                                        </div>
-                                    )}
+                                        )}
+                                        {!hasNextPage && allProducts.length > 0 && (
+                                            <p className="text-sm text-gray-500">Você viu todos os produtos</p>
+                                        )}
+                                    </div>
                                 </>
                             )}
                         </div>
