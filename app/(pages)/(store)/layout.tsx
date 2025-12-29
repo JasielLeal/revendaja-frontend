@@ -89,7 +89,7 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                 >
                                     {storeData.name.charAt(0).toUpperCase()}
                                 </div>
-                                <h1 className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
+                                <h1 className="text-xl font-bold" style={{ color: storeData.primaryColor }}>
                                     {storeData.name}
                                 </h1>
                             </div>
@@ -165,15 +165,6 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                     )}
                                 </Button>
                             </Link>
-
-                            {/* Menu Mobile */}
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="md:hidden hover:bg-gray-100 rounded-full"
-                            >
-                                <Menu className="h-6 w-6 text-gray-700" />
-                            </Button>
                         </div>
                     </div>
 
@@ -210,11 +201,11 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                 {/* Navigation Bar - Categorias */}
                 <div className="border-t bg-gray-50/50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <nav className="flex items-center gap-1 h-12 overflow-x-auto scrollbar-hide">
+                        <nav className="hidden lg:flex lg:flex-wrap lg:items-center lg:gap-2 lg:gap-y-2 lg:py-2" role="navigation" aria-label="Categorias">
                             {/* Todas as categorias */}
                             <Link
                                 href="/search"
-                                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 whitespace-nowrap rounded-md transition-colors"
+                                className="px-3 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md transition-colors"
                                 style={{
                                     '--hover-bg': `${storeData.primaryColor}15`,
                                 } as React.CSSProperties}
@@ -231,11 +222,11 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                             </Link>
 
                             {/* Categorias dinâmicas */}
-                            {storeData.categories.slice(0, 8).map((category) => (
+                            {storeData.categories.map((category) => (
                                 <Link
                                     key={category}
                                     href={`/search?category=${encodeURIComponent(category)}`}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 whitespace-nowrap rounded-md transition-colors"
+                                    className="px-3 sm:px-4 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md transition-colors"
                                     style={{
                                         '--hover-bg': `${storeData.primaryColor}15`,
                                     } as React.CSSProperties}
@@ -252,11 +243,11 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                 </Link>
                             ))}
 
-                            {/* Ver mais categorias */}
-                            {storeData.categories.length > 8 && (
+                            {/* Mostrar link 'Ver mais' apenas quando houver muitas categorias */}
+                            {storeData.categories.length > 12 && (
                                 <Link
                                     href="/search"
-                                    className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 whitespace-nowrap rounded-md transition-colors"
+                                    className="px-3 sm:px-4 py-1 text-sm font-medium text-gray-500 hover:text-gray-900 rounded-md transition-colors"
                                 >
                                     Ver mais +
                                 </Link>

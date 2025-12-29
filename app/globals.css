@@ -116,6 +116,16 @@
   font-family: "Geist"
 }
 
+/* Oculta scrollbar no Chrome, Edge, Safari */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Oculta scrollbar no Firefox */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
 
 @layer base {
   * {

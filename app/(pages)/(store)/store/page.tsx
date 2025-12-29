@@ -223,10 +223,10 @@ export default function StoreTemplate() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between mb-10">
                         <div>
-                            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                                 Produtos em Destaque
                             </h2>
-                            <p className="text-gray-600">Confira nossa seleção especial para você</p>
+                            <p className="hidden lg:block text-gray-600">Confira nossa seleção especial para você</p>
                         </div>
                         <Button
                             variant="outline"
@@ -259,125 +259,127 @@ export default function StoreTemplate() {
                             <p className="text-gray-500">Nenhum produto disponível no momento.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {products.map((product) => (
-                                <Card key={product.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-gray-300 bg-white">
-                                    <div className="relative">
-                                        {/* Badges */}
-                                        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                                            {product.isNew && (
-                                                <Badge className=" text-white text-xs font-semibold px-2 py-1" style={{ background: storeData.primaryColor }}>
-                                                    NOVO
-                                                </Badge>
-                                            )}
-                                            {product.isBestseller && (
-                                                <Badge className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold px-2 py-1">
-                                                    MAIS VENDIDO
-                                                </Badge>
-                                            )}
-                                            {product.originalPrice && product.originalPrice > product.price && (
-                                                <Badge className="bg-green-500 text-white text-xs font-semibold px-2 py-1">
-                                                    -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
-                                                </Badge>
-                                            )}
-                                        </div>
+                        <div className="">
+                            <div className="flex gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible hide-scrollbar">
+                                {products.map((product) => (
+                                    <div key={product.id} role="listitem" className="shrink-0 w-[64%] sm:w-[44%] md:w-[28%] lg:w-auto">
+                                        <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-gray-300 bg-white">
+                                            <div className="relative">
+                                                {/* Badges */}
+                                                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                                                    {product.isNew && (
+                                                        <Badge className=" text-white text-xs font-semibold px-2 py-1" style={{ background: storeData.primaryColor }}>
+                                                            NOVO
+                                                        </Badge>
+                                                    )}
+                                                    {product.isBestseller && (
+                                                        <Badge className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold px-2 py-1">
+                                                            MAIS VENDIDO
+                                                        </Badge>
+                                                    )}
+                                                    {product.originalPrice && product.originalPrice > product.price && (
+                                                        <Badge className="bg-green-500 text-white text-xs font-semibold px-2 py-1">
+                                                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                                                        </Badge>
+                                                    )}
+                                                </div>
 
-                                        {/* Botão favoritar */}
-                                        <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className={`hover:bg-white`}
-                                                onClick={(e) => {
-                                                    e.preventDefault()
-                                                    toggleFavorite({
+                                                {/* Botão favoritar */}
+                                                <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className={`hover:bg-white`}
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            toggleFavorite({
+                                                                id: product.id,
+                                                                name: product.name,
+                                                                brand: product.brand,
+                                                                category: product.category,
+                                                                price: product.price,
+                                                                originalPrice: product.originalPrice,
+                                                                image: product.image,
+                                                                rating: product.rating,
+                                                                reviews: product.reviews,
+                                                                stock: product.stock,
+                                                                isNew: product.isNew,
+                                                                isBestseller: product.isBestseller,
+                                                            })
+                                                        }}
+                                                    >
+                                                        <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                                                    </Button>
+                                                </div>
+
+                                                {/* Imagem */}
+                                                <div className="relative aspect-square overflow-hidden bg-gray-50">
+                                                    <Image
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <CardContent className="p-3">
+                                                {/* Marca */}
+                                                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: storeData.primaryColor }}>
+                                                    {product.brand}
+                                                </p>
+
+                                                {/* Nome */}
+                                                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-xs leading-tight h-8">
+                                                    {product.name}
+                                                </h3>
+
+                                                {/* Preço */}
+                                                <div className="mb-3 h-14">
+                                                    <div className="flex items-baseline gap-2 mb-0.5">
+                                                        <span className="text-lg font-bold text-gray-900">
+                                                            {formatCurrency(product.price)}
+                                                        </span>
+                                                        {product.originalPrice && product.originalPrice > product.price && (
+                                                            <span className="text-xs text-gray-500 line-through">
+                                                                {formatCurrency(product.originalPrice)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {product.originalPrice && product.originalPrice > product.price && (
+                                                        <p className="text-xs text-green-600 font-medium">
+                                                            Economize {formatCurrency(product.originalPrice - product.price)}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* Botão */}
+                                                <Button
+                                                    className="w-full text-white font-semibold h-9 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
+                                                    style={{ backgroundColor: storeData.primaryColor }}
+                                                    disabled={product.stock === 0}
+                                                    onClick={() => addItem({
                                                         id: product.id,
                                                         name: product.name,
                                                         brand: product.brand,
-                                                        category: product.category,
                                                         price: product.price,
                                                         originalPrice: product.originalPrice,
                                                         image: product.image,
-                                                        rating: product.rating,
-                                                        reviews: product.reviews,
-                                                        stock: product.stock,
-                                                        isNew: product.isNew,
-                                                        isBestseller: product.isBestseller,
-                                                    })
-                                                }}
-                                            >
-                                                <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                                            </Button>
-                                        </div>
-
-                                        {/* Imagem */}
-                                        <div className="relative aspect-square overflow-hidden bg-gray-50">
-                                            <Image
-                                                src={product.image}
-                                                alt={product.name}
-                                                fill
-                                                className="object-cover group-hover:scale-110 transition-transform duration-700"
-                                            />
-                                        </div>
+                                                        stock: product.stock
+                                                    })}
+                                                >
+                                                    {product.stock === 0 ? 'Indisponível' : (
+                                                        <span className="flex items-center justify-center gap-2">
+                                                            <ShoppingBag className="h-3.5 w-3.5" />
+                                                            Adicionar
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
                                     </div>
-
-                                    <CardContent className="p-4">
-                                        {/* Marca */}
-                                        <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: storeData.primaryColor }}>
-                                            {product.brand}
-                                        </p>
-
-                                        {/* Nome */}
-                                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-sm leading-tight h-10">
-                                            {product.name}
-                                        </h3>
-
-                                       
-
-                                        {/* Preço */}
-                                        <div className="mb-3 h-14">
-                                            <div className="flex items-baseline gap-2 mb-0.5">
-                                                <span className="text-xl font-bold text-gray-900">
-                                                    {formatCurrency(product.price)}
-                                                </span>
-                                                {product.originalPrice && product.originalPrice > product.price && (
-                                                    <span className="text-xs text-gray-500 line-through">
-                                                        {formatCurrency(product.originalPrice)}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {product.originalPrice && product.originalPrice > product.price && (
-                                                <p className="text-xs text-green-600 font-medium">
-                                                    Economize {formatCurrency(product.originalPrice - product.price)}
-                                                </p>
-                                            )}
-                                        </div>
-
-                                        {/* Botão */}
-                                        <Button
-                                            className="w-full text-white font-semibold h-10 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
-                                            style={{ backgroundColor: storeData.primaryColor }}
-                                            disabled={product.stock === 0}
-                                            onClick={() => addItem({
-                                                id: product.id,
-                                                name: product.name,
-                                                brand: product.brand,
-                                                price: product.price,
-                                                originalPrice: product.originalPrice,
-                                                image: product.image,
-                                                stock: product.stock
-                                            })}
-                                        >
-                                            {product.stock === 0 ? 'Indisponível' : (
-                                                <span className="flex items-center justify-center gap-2">
-                                                    <ShoppingBag className="h-3.5 w-3.5" />
-                                                    Adicionar
-                                                </span>
-                                            )}
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
