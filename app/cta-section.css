@@ -1,0 +1,64 @@
+.cta-section-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 110px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.cta-bar-1 {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 40%;
+    height: 32px;
+    background: #f54900;
+    border-radius: 6px;
+    transform: skewY(-5deg);
+}
+
+.cta-bar-2 {
+    position: absolute;
+    left: 3%;
+    bottom: 18px;
+    width: 13%;
+    height: 20px;
+    background: #ff9951;
+    border-radius: 4px;
+    transform: skewY(-5deg);
+}
+
+.cta-bar-3 {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 40%;
+    height: 32px;
+    background: #ff9951;
+    border-radius: 6px;
+    transform: skewY(-5deg);
+}
+
+.cta-bar-4 {
+    position: absolute;
+    right: 3%;
+    bottom: 18px;
+    width: 13%;
+    height: 20px;
+    background: #f54900;
+    border-radius: 4px;
+    transform: skewY(-5deg);
+}
+
+.cta-bar-5 {
+    position: absolute;
+    right: 3%;
+    bottom: 36px;
+    width: 13%;
+    height: 20px;
+    background: #f54900;
+    border-radius: 4px;
+    transform: skewY(-5deg);
+}
