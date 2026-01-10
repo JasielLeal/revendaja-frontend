@@ -7,9 +7,8 @@ console.log(
   process.env.STRIPE_SECRET_KEY?.substring(0, 7)
 );
 
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2025-10-29.clover",
-});
+export const stripe = new Stripe(
+  "sk_test_51QY5lG2M4f5OsxL2VAutqGRT3UkBS44GsebdHUofEfOxlo1Sf7os5rUdElX34Lyvc2cJrkwWQF0iY2MtBGLNLxPh00iJUGgVhx" as string
+);
 
 console.log("✅ [STRIPE] Stripe initialized successfully");
