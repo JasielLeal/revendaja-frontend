@@ -267,7 +267,7 @@ export default function SearchPage() {
                                 {/* Categorias */}
                                 <div className="mb-6">
                                     <h4 className="font-semibold text-sm text-gray-900 mb-3">Categorias</h4>
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 max-h-48 overflow-y-auto">
                                         <button
                                             onClick={() => handleCategoryChange("")}
                                             className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${!selectedCategory || selectedCategory === "all"
@@ -341,7 +341,7 @@ export default function SearchPage() {
                         <div className="flex-1 min-w-0">
 
                             {/* Header dos Resultados */}
-                            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                            <div className="bg-white rounded-lg shadow-sm p-6 mb-6 sticky top-0 z-10">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                     <div>
                                         <h2 className="text-2xl font-bold text-gray-900 mb-1">

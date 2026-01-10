@@ -8,12 +8,20 @@ import {
     Heart,
     Search,
     ShoppingBag,
-    Menu,
     User,
+    ChevronDown,
 } from "lucide-react"
 import { useStoreBySubdomain } from "./hooks/use-store"
 import { CartProvider, useCart } from "@/app/context/cart-context"
 import Link from "next/link"
+import {
+    Menubar,
+    MenubarContent,
+    MenubarItem,
+    MenubarMenu,
+    MenubarTrigger,
+} from "@/components/ui/menubar"
+
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -44,6 +52,7 @@ interface StoreData {
 function StoreHeader({ storeData }: { storeData: StoreData }) {
     const router = useRouter()
     const [searchQuery, setSearchQuery] = useState("")
+    const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({})
     const { totalItems } = useCart()
 
     // Carregar nome do cliente do localStorage com inicialização lazy
@@ -221,37 +230,89 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                 Todos os Produtos
                             </Link>
 
-                            {/* Categorias dinâmicas */}
-                            {storeData.categories.map((category) => (
-                                <Link
-                                    key={category}
-                                    href={`/search?category=${encodeURIComponent(category)}`}
-                                    className="px-3 sm:px-4 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md transition-colors"
-                                    style={{
-                                        '--hover-bg': `${storeData.primaryColor}15`,
-                                    } as React.CSSProperties}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = `${storeData.primaryColor}15`
-                                        e.currentTarget.style.color = storeData.primaryColor
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'transparent'
-                                        e.currentTarget.style.color = '#374151'
-                                    }}
-                                >
-                                    {category}
-                                </Link>
-                            ))}
+                            {/* Categorias dinâmicas com agrupamento de perfumes */}
+                            {(() => {
+                                const perfumeCategories = ['Perfume Feminino', 'Perfume Masculino', 'Perfume Unissex', 'Body Splash']
+                                const otherCategories = storeData.categories.filter(
+                                    cat => !perfumeCategories.includes(cat)
+                                )
+                                const hasPerfumes = storeData.categories.some(cat => perfumeCategories.includes(cat))
 
-                            {/* Mostrar link 'Ver mais' apenas quando houver muitas categorias */}
-                            {storeData.categories.length > 12 && (
-                                <Link
-                                    href="/search"
-                                    className="px-3 sm:px-4 py-1 text-sm font-medium text-gray-500 hover:text-gray-900 rounded-md transition-colors"
-                                >
-                                    Ver mais +
-                                </Link>
-                            )}
+                                return (
+                                    <>
+                                        {/* Menu Perfumes com dropdown */}
+                                        {hasPerfumes && (
+                                            <div
+                                                onMouseEnter={() => setOpenMenus({ ...openMenus, perfumes: true })}
+                                                onMouseLeave={() => setOpenMenus({ ...openMenus, perfumes: false })}
+                                            >
+                                                <Menubar className="border-0 bg-transparent p-0 h-auto shadow-none">
+                                                    <MenubarMenu>
+                                                        <MenubarTrigger
+                                                            className="px-3 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md transition-colors cursor-pointer"
+                                                            style={{
+                                                                '--hover-bg': `${storeData.primaryColor}15`,
+                                                            } as React.CSSProperties}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.backgroundColor = `${storeData.primaryColor}15`
+                                                                e.currentTarget.style.color = storeData.primaryColor
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                if (!openMenus.perfumes) {
+                                                                    e.currentTarget.style.backgroundColor = 'transparent'
+                                                                    e.currentTarget.style.color = '#374151'
+                                                                }
+                                                            }}
+                                                        >
+                                                            <span className="flex items-center gap-1">
+                                                                Perfumes
+                                                                <ChevronDown className="h-4 w-4" />
+                                                            </span>
+                                                        </MenubarTrigger>
+                                                        <MenubarContent className="min-w-[200px]">
+                                                            {storeData.categories
+                                                                .filter(cat => perfumeCategories.includes(cat))
+                                                                .map((category) => (
+                                                                    <MenubarItem key={category} asChild>
+                                                                        <Link
+                                                                            href={`/search?category=${encodeURIComponent(category)}`}
+                                                                            className="cursor-pointer"
+                                                                        >
+                                                                            {category.replace('Perfume ', '')}
+                                                                        </Link>
+                                                                    </MenubarItem>
+                                                                ))}
+                                                        </MenubarContent>
+                                                    </MenubarMenu>
+                                                </Menubar>
+                                            </div>
+                                        )}
+
+                                        {/* Outras categorias */}
+                                        {otherCategories.map((category) => (
+                                            <Link
+                                                key={category}
+                                                href={`/search?category=${encodeURIComponent(category)}`}
+                                                className="px-3 sm:px-4 py-1 text-sm font-medium text-gray-700 hover:text-gray-900 rounded-md transition-colors"
+                                                style={{
+                                                    '--hover-bg': `${storeData.primaryColor}15`,
+                                                } as React.CSSProperties}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = `${storeData.primaryColor}15`
+                                                    e.currentTarget.style.color = storeData.primaryColor
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = 'transparent'
+                                                    e.currentTarget.style.color = '#374151'
+                                                }}
+                                            >
+                                                {category}
+                                            </Link>
+                                        ))}
+                                    </>
+                                )
+                            })()}
+
                         </nav>
                     </div>
                 </div>

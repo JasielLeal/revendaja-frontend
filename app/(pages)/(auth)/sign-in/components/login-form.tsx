@@ -48,7 +48,7 @@ export default function LoginForm() {
                 description: "Redirecionando para o dashboard..."
             });
             // Simular um cookie store (você pode ajustar conforme sua implementação)
-            document.cookie = `revendaja-token=${data.tokenAcess}; path=/`;
+            document.cookie = `revendaja-token=${data.token}; path=/`;
             setTimeout(() => router.replace("/dashboard"), 1000);
         },
         onError: (error: AxiosError<{ error: string }>) => {

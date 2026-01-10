@@ -11,6 +11,7 @@ import Image from "next/image"
 import { AddProductDialog } from "./components/add-product-dialog"
 import { formatCurrency } from "@/lib/format-currency"
 import { useDebounce } from "@/app/hooks/use-debounce"
+import Link from "next/link"
 
 export default function NewProduct() {
     const [query, setQuery] = useState("")
@@ -32,9 +33,17 @@ export default function NewProduct() {
     return (
         <div className="container mx-auto p-6 max-w-7xl space-y-8">
             {/* Header */}
-            <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight">Catálogo de Produtos</h1>
-                <p className="text-muted-foreground">Selecione produtos do catálogo para adicionar ao seu estoque</p>
+            <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight">Catálogo de Produtos</h1>
+                    <p className="text-muted-foreground">Selecione produtos do catálogo para adicionar ao seu estoque</p>
+                </div>
+
+                <div>
+                    <Button variant="secondary" className="mb-4">
+                        <Link href={"/stock/new-custom-product"}>Adicionar Produto</Link>
+                    </Button>
+                </div>
             </div>
 
             {/* Search Bar */}
