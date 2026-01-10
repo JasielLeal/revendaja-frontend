@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_PRODUCTION_BACKEND_URL,
+  baseURL: "https://revendaja-backend-beta-production.up.railway.app/api",
   headers: {
     "Content-Type": "application/json",
   },
