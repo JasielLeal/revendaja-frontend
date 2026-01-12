@@ -180,6 +180,7 @@ export default function NewCustomProduct() {
                         <SelectItem value="infantil">Infantil</SelectItem>
                         <SelectItem value="desodorantes">Desodorantes</SelectItem>
                         <SelectItem value="body-splash">Body Splash</SelectItem>
+                        <SelectItem value="maquiagem">Maquiagem</SelectItem>
                     </SelectGroup>
                 </SelectContent>
             </Select>
