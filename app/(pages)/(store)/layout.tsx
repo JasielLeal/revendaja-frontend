@@ -92,12 +92,6 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                         {/* Logo */}
                         <Link href="/" className="shrink-0">
                             <div className="flex items-center gap-2">
-                                <div
-                                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-xl"
-                                    style={{ backgroundColor: storeData.primaryColor }}
-                                >
-                                    {storeData.name.charAt(0).toUpperCase()}
-                                </div>
                                 <h1 className="text-xl font-bold" style={{ color: storeData.primaryColor }}>
                                     {storeData.name}
                                 </h1>
@@ -177,7 +171,7 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                         </div>
                     </div>
 
-                    {/* Busca Mobile */}
+                    {/* Busca Mobile */} 
                     <div className="md:hidden pb-3">
                         <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
