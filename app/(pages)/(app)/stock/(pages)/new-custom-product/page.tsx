@@ -171,16 +171,16 @@ export default function NewCustomProduct() {
                 <SelectContent>
                     <SelectGroup>
                         <SelectLabel>Categoria</SelectLabel>
-                        <SelectItem value="perfume-feminino">Perfume Feminino</SelectItem>
-                        <SelectItem value="perfume-masculino">Perfume Masculino</SelectItem>
-                        <SelectItem value="perfume-unissex">Perfume Unissex</SelectItem>
-                        <SelectItem value="oleos">Oleos</SelectItem>
-                        <SelectItem value="hidratantes-cremes">Hidratantes e Cremes</SelectItem>
-                        <SelectItem value="corpo-banho">Corpo e Banho</SelectItem>
-                        <SelectItem value="infantil">Infantil</SelectItem>
-                        <SelectItem value="desodorantes">Desodorantes</SelectItem>
-                        <SelectItem value="body-splash">Body Splash</SelectItem>
-                        <SelectItem value="maquiagem">Maquiagem</SelectItem>
+                        <SelectItem value="Perfume Feminino">Perfume Feminino</SelectItem>
+                        <SelectItem value="Perfume Masculino">Perfume Masculino</SelectItem>
+                        <SelectItem value="Perfume Unissex">Perfume Unissex</SelectItem>
+                        <SelectItem value="Oleos">Oleos</SelectItem>
+                        <SelectItem value="Hidratantes e Cremes">Hidratantes e Cremes</SelectItem>
+                        <SelectItem value="Corpo e Banho">Corpo e Banho</SelectItem>
+                        <SelectItem value="Infantil">Infantil</SelectItem>
+                        <SelectItem value="Desodorantes">Desodorantes</SelectItem>
+                        <SelectItem value="Body Splash">Body Splash</SelectItem>
+                        <SelectItem value="Maquiagem">Maquiagem</SelectItem>
                     </SelectGroup>
                 </SelectContent>
             </Select>
