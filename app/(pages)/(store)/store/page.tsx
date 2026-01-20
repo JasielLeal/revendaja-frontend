@@ -21,6 +21,7 @@ import {
 import { formatCurrency } from "@/lib/format-currency"
 import { useStoreBySubdomain } from "./hooks/use-store"
 import { useStoreProducts, type StoreProduct } from "./hooks/use-store-products"
+import { useStoreProductsOnSale } from "./hooks/use-store-products-on-sale"
 import { useCart } from "@/app/context/cart-context"
 
 interface FavoriteProduct {
@@ -144,6 +145,11 @@ export default function StoreTemplate() {
         search: undefined // Não usar busca na página principal
     })
 
+    // Buscar produtos em promoção
+    const { data: onSaleProductsData, isLoading: onSaleProductsLoading } = useStoreProductsOnSale({
+        subdomain: subdomain
+    })
+
     // Loading state
     if (isLoading) {
         return (
@@ -191,53 +197,90 @@ export default function StoreTemplate() {
         description: `${product.brand} - ${product.category}`
     })
 
+    // Função para transformar produto em promoção (formato simplificado)
+    const transformOnSaleProduct = (product: any) => ({
+        id: product.id,
+        name: product.name,
+        brand: product.brand,
+        category: product.category,
+        price: product.price,
+        originalPrice: product.catalogPrice && product.catalogPrice > product.price ? product.catalogPrice : undefined,
+        image: product.imgUrl || "/template.jpg",
+        rating: 4.5,
+        reviews: 0,
+        stock: product.quantity,
+        isNew: false,
+        isBestseller: false,
+        description: `${product.brand} - ${product.category}`
+    })
+
+    console.log("Preço originais dos produtos", rawProducts.map(p => p.catalogPrice))
+
     // Produtos transformados
     const products = rawProducts.map(transformProduct)
 
     return (
         <div className="min-h-screen bg-gray-50">
 
-            {/* Banner Hero - Moderno e Dinâmico */}
-            <section className="relative bg-linear-to-b from-white to-gray-50">
-                <div className="w-full">
-                    <div className="relative h-[420px] overflow-hidden shadow-2xl">
+
+            {/* Banner Hero - Compacto e Promocional para Mobile */}
+            <section className="relative bg-gray-50 rounded-2xl">
+                <div className="w-full px-4 py-4 lg:px-0 lg:py-0">
+                    <div className="lg:max-w-7xl lg:mx-auto lg:px-8">
+                        <div className="relative h-[180px] lg:h-[420px] overflow-hidden rounded-2xl lg:rounded-none shadow-lg lg:shadow-2xl"
+                        >
                         {/* Imagem do Banner */}
                         <Image
                             src={getSafeImageUrl(storeData.bannerUrl)}
                             alt="Banner da loja"
                             fill
-                            className="object-cover"
+                            className="object-cover lg:object-cover rounded-2xl"
                             priority
                         />
 
-                        {/* Overlay Gradiente */}
-                        <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent"></div>
-
+                        {/* Overlay Gradiente - Apenas Desktop */}
+                        <div className="hidden lg:block absolute inset-0 bg-linear-to-r from-black/60 via-black/30 to-transparent rounded-2xl"></div>
                     </div>
                 </div>
+            </div>
+            </section>
 
+            {/* Categorias Horizontais - Mobile */}
+            <section className="lg:hidden py-4 px-4 bg-gray-50">
+                <div className="flex gap-4 overflow-x-auto hide-scrollbar">
+                    {storeData.categories.slice(0, 5).map((category) => (
+                        <button
+                            key={category}
+                            onClick={() => router.push(`/search?category=${encodeURIComponent(category)}`)}
+                            className="flex items-center px-4 py-2 rounded-full gap-2 flex-shrink-0"
+                            style={{background: `${storeData.primaryColor}`}}
+                        >
+
+                            <ShoppingBag  className="text-white"/>
+
+                            <span className="text-sm text-white">{category}</span>
+                        </button>
+                    ))}
+                </div>
             </section>
 
             {/* Grid de Produtos */}
-            <main className="py-16">
+            <main className="py-4 lg:py-16 bg-gray-50 lg:bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center justify-between mb-4 lg:mb-10">
                         <div>
-                            <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                                Produtos em Destaque
+                            <h2 className="text-lg sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-0 lg:mb-2">
+                                Novos
                             </h2>
                             <p className="hidden lg:block text-gray-600">Confira nossa seleção especial para você</p>
                         </div>
                         <Button
-                            variant="outline"
-                            className="gap-2 font-medium"
-                            style={{ borderColor: storeData.primaryColor, color: storeData.primaryColor }}
+                            variant="ghost"
+                            className="gap-1 font-medium text-sm lg:text-base p-0 lg:px-4 h-auto hover:bg-transparent"
+                            style={{ color: storeData.primaryColor }}
                             onClick={() => router.push('/search')}
                         >
-                            Ver todos os produtos
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                            Ver tudo
                         </Button>
                     </div>
 
@@ -260,32 +303,29 @@ export default function StoreTemplate() {
                         </div>
                     ) : (
                         <div className="">
-                            <div className="flex gap-4 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible hide-scrollbar">
+                            <div className="flex gap-3 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible hide-scrollbar">
                                 {products.map((product) => (
-                                    <div key={product.id} role="listitem" className="shrink-0 w-[64%] sm:w-[44%] md:w-[28%] lg:w-auto">
-                                        <Card className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-gray-300 bg-white">
+                                    <div key={product.id} role="listitem" className="shrink-0 w-[48%] sm:w-[50%] md:w-[30%] lg:w-auto">
+                                        <Card 
+                                            className={`group overflow-hidden hover:shadow-lg lg:hover:shadow-2xl shadow-sm lg:shadow-md bg-white rounded-xl lg:rounded-lg ${
+                                                product.originalPrice && product.originalPrice > product.price 
+                                                ? 'border-2 relative' 
+                                                : 'border-0 lg:border lg:border-gray-200'
+                                            }`}
+                                            
+                                        >
                                             <div className="relative">
-                                                {/* Badges */}
-                                                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                                                    {product.isNew && (
-                                                        <Badge className=" text-white text-xs font-semibold px-2 py-1" style={{ background: storeData.primaryColor }}>
-                                                            NOVO
-                                                        </Badge>
-                                                    )}
-                                                    {product.isBestseller && (
-                                                        <Badge className="bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold px-2 py-1">
-                                                            MAIS VENDIDO
-                                                        </Badge>
-                                                    )}
+                                                {/* Badges - Apenas desktop ou com desconto significativo */}
+                                                <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
                                                     {product.originalPrice && product.originalPrice > product.price && (
-                                                        <Badge className="bg-green-500 text-white text-xs font-semibold px-2 py-1">
-                                                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                                                        <Badge className="text-white text-xs lg:text-sm font-bold px-2 py-1 lg:px-3 lg:py-1.5 shadow-lg" style={{ background: storeData.primaryColor }}>
+                                                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                                                         </Badge>
                                                     )}
                                                 </div>
 
-                                                {/* Botão favoritar */}
-                                                <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {/* Botão favoritar - Apenas Desktop */}
+                                                <div className="hidden lg:block absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
@@ -313,49 +353,70 @@ export default function StoreTemplate() {
                                                 </div>
 
                                                 {/* Imagem */}
-                                                <div className="relative aspect-square overflow-hidden bg-gray-50">
+                                                <div className="relative aspect-square overflow-hidden rounded-t-xl lg:rounded-t-lg">
                                                     <Image
                                                         src={product.image}
                                                         alt={product.name}
                                                         fill
-                                                        className="object-cover group-hover:scale-110 transition-transform duration-700"
+                                                        className="object-cover group-hover:scale-105 lg:group-hover:scale-110 transition-transform duration-500 lg:duration-700"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <CardContent className="p-3">
-                                                {/* Marca */}
-                                                <p className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: storeData.primaryColor }}>
+                                            <CardContent className="p-2 lg:p-3">
+                                                {/* Marca - Mobile Clean */}
+                                                <p className="text-[10px] lg:text-xs font-medium lg:font-semibold text-gray-500 lg:uppercase tracking-wide mb-0.5 lg:mb-1.5">
                                                     {product.brand}
                                                 </p>
 
                                                 {/* Nome */}
-                                                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 text-xs leading-tight h-8">
+                                                <h3 className="font-medium lg:font-semibold text-gray-900 mb-1 lg:mb-2 line-clamp-2 text-xs lg:text-xs leading-tight h-7 lg:h-8">
                                                     {product.name}
                                                 </h3>
 
-                                                {/* Preço */}
-                                                <div className="mb-3 h-14">
-                                                    <div className="flex items-baseline gap-2 mb-0.5">
-                                                        <span className="text-lg font-bold text-gray-900">
-                                                            {formatCurrency(product.price)}
-                                                        </span>
+                                                {/* Preço - Com destaque para desconto */}
+                                                <div className="mb-2 lg:mb-3 flex items-center justify-between lg:block">
+                                                    <div className="flex flex-col lg:flex-row lg:items-baseline gap-0.5 lg:gap-2">
                                                         {product.originalPrice && product.originalPrice > product.price && (
-                                                            <span className="text-xs text-gray-500 line-through">
-                                                                {formatCurrency(product.originalPrice)}
+                                                            <span className="text-[10px] lg:text-xs text-gray-400 line-through order-1 lg:order-2">
+                                                                De {formatCurrency(product.originalPrice)}
                                                             </span>
                                                         )}
+                                                        <span 
+                                                            className="text-sm lg:text-lg font-bold order-2 lg:order-1"
+                                                            style={product.originalPrice && product.originalPrice > product.price ? {
+                                                                color: storeData.primaryColor
+                                                            } : undefined}
+                                                        >
+                                                            {formatCurrency(product.price)}
+                                                        </span>
                                                     </div>
-                                                    {product.originalPrice && product.originalPrice > product.price && (
-                                                        <p className="text-xs text-green-600 font-medium">
-                                                            Economize {formatCurrency(product.originalPrice - product.price)}
-                                                        </p>
-                                                    )}
+
+                                                    {/* Botão Mobile - Ícone Circular */}
+                                                    <Button
+                                                        size="icon"
+                                                        className="lg:hidden w-8 h-8 rounded-full text-white shadow-md"
+                                                        style={{ backgroundColor: storeData.primaryColor }}
+                                                        disabled={product.stock === 0}
+                                                        onClick={() => addItem({
+                                                            id: product.id,
+                                                            name: product.name,
+                                                            brand: product.brand,
+                                                            price: product.price,
+                                                            originalPrice: product.originalPrice,
+                                                            image: product.image,
+                                                            stock: product.stock
+                                                        })}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </Button>
                                                 </div>
 
-                                                {/* Botão */}
+                                                {/* Botão Desktop */}
                                                 <Button
-                                                    className="w-full text-white font-semibold h-9 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
+                                                    className="hidden lg:flex w-full text-white font-semibold h-9 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
                                                     style={{ backgroundColor: storeData.primaryColor }}
                                                     disabled={product.stock === 0}
                                                     onClick={() => addItem({
@@ -385,66 +446,333 @@ export default function StoreTemplate() {
                 </div>
             </main>
 
-            {/* Footer da Loja */}
-            <footer className="bg-gray-900 text-white py-12">
+            {/* Seção de Promoções */}
+            <section className="py-4 lg:py-16 bg-gray-50 lg:bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Informações da Loja */}
+                    <div className="flex items-center justify-between mb-4 lg:mb-10">
                         <div>
-                            <h3 className="font-bold text-lg mb-4">{storeData.name}</h3>
-                            <p className="text-gray-300 mb-4">Sua loja online de confiança</p>
-                            <div className="flex items-center space-x-4">
-                                <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white">
-                                    <Instagram className="h-5 w-5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white">
-                                    <Facebook className="h-5 w-5" />
-                                </Button>
+                            <h2 className="text-lg sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-0 lg:mb-2">
+                                Promoções
+                            </h2>
+                            <p className="hidden lg:block text-gray-600">Aproveite as melhores ofertas</p>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            className="gap-1 font-medium text-sm lg:text-base p-0 lg:px-4 h-auto hover:bg-transparent"
+                            style={{ color: storeData.primaryColor }}
+                            onClick={() => router.push('/search?onSale=true')}
+                        >
+                            Ver tudo
+                        </Button>
+                    </div>
+
+                    {onSaleProductsLoading ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {[...Array(8)].map((_, i) => (
+                                <div key={i} className="bg-white rounded-lg shadow-md p-4 animate-pulse">
+                                    <div className="aspect-4/5 bg-gray-200 rounded-lg mb-4"></div>
+                                    <div className="space-y-2">
+                                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : !onSaleProductsData || onSaleProductsData.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-gray-500">Nenhuma promoção disponível no momento.</p>
+                        </div>
+                    ) : (
+                        <div className="">
+                            <div className="flex gap-3 overflow-x-auto pb-4 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible hide-scrollbar">
+                                {onSaleProductsData.map(transformOnSaleProduct).map((product) => (
+                                    <div key={product.id} role="listitem" className="shrink-0 w-[48%] sm:w-[50%] md:w-[30%] lg:w-auto">
+                                        <Card 
+                                            className={`group overflow-hidden hover:shadow-lg lg:hover:shadow-2xl shadow-sm lg:shadow-md bg-white rounded-xl lg:rounded-lg ${
+                                                product.originalPrice && product.originalPrice > product.price 
+                                                ? 'border-2 relative' 
+                                                : 'border-0 lg:border lg:border-gray-200'
+                                            }`}
+                                            
+                                        >
+                                            <div className="relative">
+                                                {/* Badges - Apenas desktop ou com desconto significativo */}
+                                                <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                                                    {product.originalPrice && product.originalPrice > product.price && (
+                                                        <Badge className="text-white text-xs lg:text-sm font-bold px-2 py-1 lg:px-3 lg:py-1.5 shadow-lg" style={{ background: storeData.primaryColor }}>
+                                                            -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                                                        </Badge>
+                                                    )}
+                                                </div>
+
+                                                {/* Botão favoritar - Apenas Desktop */}
+                                                <div className="hidden lg:block absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className={`hover:bg-white`}
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            toggleFavorite({
+                                                                id: product.id,
+                                                                name: product.name,
+                                                                brand: product.brand,
+                                                                category: product.category,
+                                                                price: product.price,
+                                                                originalPrice: product.originalPrice,
+                                                                image: product.image,
+                                                                rating: product.rating,
+                                                                reviews: product.reviews,
+                                                                stock: product.stock,
+                                                                isNew: product.isNew,
+                                                                isBestseller: product.isBestseller,
+                                                            })
+                                                        }}
+                                                    >
+                                                        <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                                                    </Button>
+                                                </div>
+
+                                                {/* Imagem */}
+                                                <div className="relative aspect-square overflow-hidden rounded-t-xl lg:rounded-t-lg">
+                                                    <Image
+                                                        src={product.image}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover group-hover:scale-105 lg:group-hover:scale-110 transition-transform duration-500 lg:duration-700"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <CardContent className="p-2 lg:p-3">
+                                                {/* Marca - Mobile Clean */}
+                                                <p className="text-[10px] lg:text-xs font-medium lg:font-semibold text-gray-500 lg:uppercase tracking-wide mb-0.5 lg:mb-1.5">
+                                                    {product.brand}
+                                                </p>
+
+                                                {/* Nome */}
+                                                <h3 className="font-medium lg:font-semibold text-gray-900 mb-1 lg:mb-2 line-clamp-2 text-xs lg:text-xs leading-tight h-7 lg:h-8">
+                                                    {product.name}
+                                                </h3>
+
+                                                {/* Preço - Com destaque para desconto */}
+                                                <div className="mb-2 lg:mb-3 flex items-center justify-between lg:block">
+                                                    <div className="flex flex-col lg:flex-row lg:items-baseline gap-0.5 lg:gap-2">
+                                                        {product.originalPrice && product.originalPrice > product.price && (
+                                                            <span className="text-[10px] lg:text-xs text-gray-400 line-through order-1 lg:order-2">
+                                                                De {formatCurrency(product.originalPrice)}
+                                                            </span>
+                                                        )}
+                                                        <span 
+                                                            className="text-sm lg:text-lg font-bold order-2 lg:order-1"
+                                                            style={product.originalPrice && product.originalPrice > product.price ? {
+                                                                color: storeData.primaryColor
+                                                            } : undefined}
+                                                        >
+                                                            {formatCurrency(product.price)}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Botão Mobile - Ícone Circular */}
+                                                    <Button
+                                                        size="icon"
+                                                        className="lg:hidden w-8 h-8 rounded-full text-white shadow-md"
+                                                        style={{ backgroundColor: storeData.primaryColor }}
+                                                        disabled={product.stock === 0}
+                                                        onClick={() => addItem({
+                                                            id: product.id,
+                                                            name: product.name,
+                                                            brand: product.brand,
+                                                            price: product.price,
+                                                            originalPrice: product.originalPrice,
+                                                            image: product.image,
+                                                            stock: product.stock
+                                                        })}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </Button>
+                                                </div>
+
+                                                {/* Botão Desktop */}
+                                                <Button
+                                                    className="hidden lg:flex w-full text-white font-semibold h-9 hover:opacity-90 transition-all shadow-md hover:shadow-lg"
+                                                    style={{ backgroundColor: storeData.primaryColor }}
+                                                    disabled={product.stock === 0}
+                                                    onClick={() => addItem({
+                                                        id: product.id,
+                                                        name: product.name,
+                                                        brand: product.brand,
+                                                        price: product.price,
+                                                        originalPrice: product.originalPrice,
+                                                        image: product.image,
+                                                        stock: product.stock
+                                                    })}
+                                                >
+                                                    {product.stock === 0 ? 'Indisponível' : (
+                                                        <span className="flex items-center justify-center gap-2">
+                                                            <ShoppingBag className="h-3.5 w-3.5" />
+                                                            Adicionar
+                                                        </span>
+                                                    )}
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Main Footer Content */}
+                    <div className="py-8 lg:py-12">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8">
+                            {/* Sobre a Loja */}
+                            <div className="lg:col-span-2">
+                                <h3 className="font-bold text-xl lg:text-2xl mb-3 lg:mb-4" style={{ color: storeData.primaryColor }}>
+                                    {storeData.name}
+                                </h3>
+                                <p className="text-gray-400 mb-4 text-sm lg:text-base leading-relaxed">
+                                    Sua loja online de confiança com os melhores produtos e atendimento personalizado.
+                                </p>
+                                
+                                {/* Redes Sociais */}
+                                <div className="mb-4">
+                                    <p className="text-sm font-semibold mb-2 text-gray-300">Siga-nos</p>
+                                    <div className="flex items-center space-x-3">
+                                        <Button 
+                                            variant="outline" 
+                                            size="icon" 
+                                            className="border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white h-9 w-9 transition-all"
+                                        >
+                                            <Instagram className="h-4 w-4" />
+                                        </Button>
+                                        <Button 
+                                            variant="outline" 
+                                            size="icon" 
+                                            className="border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white h-9 w-9 transition-all"
+                                        >
+                                            <Facebook className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Links Rápidos */}
+                            <div>
+                                <h4 className="font-semibold mb-3 lg:mb-4 text-sm lg:text-base text-white">Links Rápidos</h4>
+                                <ul className="space-y-2 text-xs lg:text-sm">
+                                    <li>
+                                        <Link href="/" className="text-gray-400 hover:text-white transition-colors">
+                                            Início
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/search" className="text-gray-400 hover:text-white transition-colors">
+                                            Produtos
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/favorites" className="text-gray-400 hover:text-white transition-colors">
+                                            Favoritos
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/cart" className="text-gray-400 hover:text-white transition-colors">
+                                            Carrinho
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Atendimento */}
+                            <div>
+                                <h4 className="font-semibold mb-3 lg:mb-4 text-sm lg:text-base text-white">Atendimento</h4>
+                                <ul className="space-y-2 text-xs lg:text-sm">
+                                    <li>
+                                        <button className="text-gray-400 hover:text-white transition-colors text-left">
+                                            Central de Ajuda
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="text-gray-400 hover:text-white transition-colors text-left">
+                                            Política de Troca
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="text-gray-400 hover:text-white transition-colors text-left">
+                                            Política de Privacidade
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="text-gray-400 hover:text-white transition-colors text-left">
+                                            Termos de Uso
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* Contato */}
+                            <div>
+                                <h4 className="font-semibold mb-3 lg:mb-4 text-sm lg:text-base text-white">Contato</h4>
+                                <div className="space-y-3 text-xs lg:text-sm">
+                                    <div className="flex items-start gap-2">
+                                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5 shrink-0" />
+                                        <span className="text-gray-400">{storeData.address}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="h-4 w-4 text-gray-500 shrink-0" />
+                                        <span className="text-gray-400">{storeData.phone}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-gray-500 shrink-0" />
+                                        <span className="text-gray-400">Seg-Dom: 9h-18h</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Contato */}
-                        <div>
-                            <h4 className="font-semibold mb-4">Contato</h4>
-                            <div className="space-y-3 text-sm">
-                                <div className="flex items-start gap-2">
-                                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
-                                    <span className="text-gray-300">{storeData.address}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-gray-400" />
-                                    <span className="text-gray-300">{storeData.phone}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className="h-4 w-4 text-gray-400" />
-                                    <span className="text-gray-300">Seg-Dom: 9h-18h</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Categorias */}
-                        <div>
-                            <h4 className="font-semibold mb-4">Categorias</h4>
-                            <ul className="space-y-2 text-sm">
-                                {storeData.categories.map((category) => (
-                                    <li key={category}>
+                        {/* Categorias - Versão Desktop */}
+                        {storeData.categories.length > 0 && (
+                            <div className="hidden lg:block mt-8 pt-8 border-t border-gray-800">
+                                <h4 className="font-semibold mb-4 text-sm text-white">Categorias</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {storeData.categories.map((category) => (
                                         <Button
-                                            variant="link"
-                                            className="text-gray-300 hover:text-white p-0 h-auto"
+                                            key={category}
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-gray-700 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs transition-all"
                                             onClick={() => router.push(`/search?category=${encodeURIComponent(category)}`)}
                                         >
                                             {category}
                                         </Button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    <Separator className="my-8 bg-gray-700" />
+                    {/* Bottom Footer */}
+                    <div className="border-t border-gray-800">
+                        <div className="py-6 lg:py-8">
+                            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
+                                {/* Copyright */}
+                                <div className="text-center lg:text-left">
+                                    <p className="text-gray-400 text-xs lg:text-sm">
+                                        © {new Date().getFullYear()} {storeData.name}. Todos os direitos reservados.
+                                    </p>
+                                </div>
 
-                    <div className="text-center text-gray-400 text-sm">
-                        © 2025 {storeData.name}. Todos os direitos reservados.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </footer>

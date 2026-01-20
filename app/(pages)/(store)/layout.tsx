@@ -85,7 +85,7 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
     return (
         <>
             {/* Header da Loja */}
-            <header className="bg-white border-b sticky top-0 z-50">
+            <header className="bg-gray-50 top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Top Bar */}
                     <div className="flex items-center justify-between py-4">
@@ -102,7 +102,8 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                         <div className="hidden md:flex flex-1 max-w-xl mx-8">
                             <div className="relative w-full">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                <Input
+                                <input
+                                    type="text"
                                     placeholder="Buscar produtos, marcas..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -111,16 +112,17 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                             handleSearch(searchQuery)
                                         }
                                     }}
-                                    className="pl-12 pr-4 h-11 text-sm border-gray-300 rounded-full transition-all"
+                                    className="w-full pl-12 pr-4 h-11 text-sm rounded-full transition-all bg-white"
                                     style={{
-                                        '--tw-ring-color': storeData.primaryColor,
-                                    } as React.CSSProperties}
+                                        border: `1px solid #d1d5db`,
+                                        outline: 'none'
+                                    }}
                                     onFocus={(e) => {
-                                        e.currentTarget.style.borderColor = storeData.primaryColor
+                                        e.currentTarget.style.border = `2px solid ${storeData.primaryColor}`
                                         e.currentTarget.style.boxShadow = `0 0 0 3px ${storeData.primaryColor}20`
                                     }}
                                     onBlur={(e) => {
-                                        e.currentTarget.style.borderColor = '#d1d5db'
+                                        e.currentTarget.style.border = `1px solid #d1d5db`
                                         e.currentTarget.style.boxShadow = 'none'
                                     }}
                                 />
@@ -175,7 +177,8 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                     <div className="md:hidden pb-3">
                         <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <Input
+                            <input
+                                type="text"
                                 placeholder="Buscar produtos..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -184,16 +187,17 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                                         handleSearch(searchQuery)
                                     }
                                 }}
-                                className="pl-10 pr-4 h-10 text-sm border-gray-300 rounded-full transition-all"
+                                className="w-full pl-10 pr-4 h-10 text-sm rounded-full transition-all bg-white"
                                 style={{
-                                    '--tw-ring-color': storeData.primaryColor,
-                                } as React.CSSProperties}
+                                    border: `1px solid #d1d5db`,
+                                    outline: 'none'
+                                }}
                                 onFocus={(e) => {
-                                    e.currentTarget.style.borderColor = storeData.primaryColor
+                                    e.currentTarget.style.border = `2px solid ${storeData.primaryColor}`
                                     e.currentTarget.style.boxShadow = `0 0 0 3px ${storeData.primaryColor}20`
                                 }}
                                 onBlur={(e) => {
-                                    e.currentTarget.style.borderColor = '#d1d5db'
+                                    e.currentTarget.style.border = `1px solid #d1d5db`
                                     e.currentTarget.style.boxShadow = 'none'
                                 }}
                             />
@@ -202,7 +206,7 @@ function StoreHeader({ storeData }: { storeData: StoreData }) {
                 </div>
 
                 {/* Navigation Bar - Categorias */}
-                <div className="border-t bg-gray-50/50">
+                <div className=" bg-gray-50/50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <nav className="hidden lg:flex lg:flex-wrap lg:items-center lg:gap-2 lg:gap-y-2 lg:py-2" role="navigation" aria-label="Categorias">
                             {/* Todas as categorias */}
