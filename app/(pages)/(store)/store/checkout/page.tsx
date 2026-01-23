@@ -311,11 +311,33 @@ export default function CheckoutPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Cabeçalho */}
-                    <div className="mb-8">
+                    <div className="mb-2">
 
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-md md:text-4xl text-center font-bold text-gray-900">
                             Finalizar Compra
                         </h1>
+                    </div>
+
+                    {/* Progress indicator (responsive) */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                        <div className="flex items-center justify-center gap-6">
+                            {['Carrinho', 'Confirmação', 'Finalizar'].map((step, i) => {
+                                const stepIndex = i + 1
+                                const active = stepIndex === 2
+                                return (
+                                    <div key={step} className="flex items-center gap-3">
+                                        <div
+                                            className={`flex items-center justify-center rounded-full ${active ? 'w-8 h-8 scale-100' : 'w-7 h-7 scale-95'} transition-all duration-300 ${active ? '' : ''}`}
+                                            style={active ? { background: storeData.primaryColor } : { background: '#E6E6E6' }}
+                                        >
+                                            <span className={`text-white text-xs font-semibold`}>{stepIndex}</span>
+                                        </div>
+                                        <div className="sm:block text-xs text-gray-600">{step}</div>
+                                        {i < 2 && <div className="hidden sm:block w-12 h-[2px]" style={{ background: '#E6E6E6' }} />}
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
 
 
@@ -327,14 +349,8 @@ export default function CheckoutPage() {
                             {step === 1 && (
                                 <>
                                     {/* Dados Pessoais */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <User className="h-5 w-5" />
-                                                Dados Pessoais
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
+                                    <div>
+                                        <div className="space-y-4">
                                             <div>
                                                 <Label htmlFor="name" className="mb-1">Nome</Label>
                                                 <Input
@@ -342,6 +358,7 @@ export default function CheckoutPage() {
                                                     placeholder="Seu nome"
                                                     value={formData.name}
                                                     onChange={(e) => handleInputChange('name', e.target.value)}
+                                                    className="bg-white"
                                                 />
                                             </div>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -351,23 +368,24 @@ export default function CheckoutPage() {
                                                         id="phone"
                                                         placeholder="(00) 00000-0000"
                                                         value={formData.phone}
+                                                        className="bg-white"
                                                         onChange={(e) => handleInputChange('phone', e.target.value)}
                                                     />
                                                 </div>
                                             </div>
 
-                                        </CardContent>
-                                    </Card>
+                                        </div>
+                                    </div>
 
                                     {/* Tipo de Entrega */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
+                                    <div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
                                                 <Truck className="h-5 w-5" />
                                                 Tipo de Entrega
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-4">
+                                            </div>
+                                        </div>
+                                        <div className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.deliveryType === 'delivery'
@@ -422,19 +440,19 @@ export default function CheckoutPage() {
                                                     </p>
                                                 </div>
                                             )}
-                                        </CardContent>
-                                    </Card>
+                                        </div>
+                                    </div>
 
                                     {/* Seleção de Endereço - Só aparece se tiver endereço salvo e for entrega */}
                                     {hasSavedAddress && formData.deliveryType === 'delivery' && (
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
+                                        <div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
                                                     <MapPin className="h-5 w-5" />
                                                     Selecionar Endereço
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-4">
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
                                                 <div className="space-y-3">
                                                     <label
                                                         className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${!useNewAddress
@@ -482,91 +500,85 @@ export default function CheckoutPage() {
                                                         </div>
                                                     </label>
                                                 </div>
-                                            </CardContent>
-                                        </Card>
+                                            </div>
+                                        </div>
                                     )}
 
                                     {/* Endereço - Só aparece se for entrega E (não tiver endereço salvo OU escolheu novo endereço) */}
                                     {formData.deliveryType === 'delivery' && (!hasSavedAddress || useNewAddress) && (
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
+                                        <div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
                                                     <MapPin className="h-5 w-5" />
                                                     Endereço de Entrega
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-4">
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
                                                 <div>
-                                                    <Label htmlFor="street" className="mb-1">Rua</Label>
                                                     <Input
                                                         id="street"
                                                         placeholder="Nome da rua"
                                                         value={formData.street}
+                                                        className="bg-white mt-2"
                                                         onChange={(e) => handleInputChange('street', e.target.value)}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <Label htmlFor="number" className="mb-1">Número</Label>
                                                         <Input
                                                             id="number"
                                                             placeholder="123"
                                                             value={formData.number}
+                                                            className="bg-white"
                                                             onChange={(e) => handleInputChange('number', e.target.value)}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <Label htmlFor="neighborhood" className="mb-1">Bairro</Label>
                                                         <Input
                                                             id="neighborhood"
                                                             placeholder="Nome do bairro"
                                                             value={formData.neighborhood}
+                                                            className="bg-white"
                                                             onChange={(e) => handleInputChange('neighborhood', e.target.value)}
                                                         />
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <Label htmlFor="complement" className="mb-1">Complemento</Label>
+
                                                     <Input
                                                         id="complement"
                                                         placeholder="Apto, Bloco..."
+                                                        className="bg-white"
                                                         value={formData.complement}
                                                         onChange={(e) => handleInputChange('complement', e.target.value)}
                                                     />
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <Label htmlFor="city" className="mb-1">Cidade</Label>
+                                                        
                                                         <Input
                                                             id="city"
                                                             placeholder="Sua cidade"
                                                             value={formData.city}
+                                                            className="bg-white"
                                                             onChange={(e) => handleInputChange('city', e.target.value)}
                                                         />
                                                     </div>
                                                     <div>
-                                                        <Label htmlFor="state" className="mb-1">Estado</Label>
+                        
                                                         <Input
                                                             id="state"
                                                             placeholder="UF"
+                                                            className="bg-white"
                                                             maxLength={2}
                                                             value={formData.state}
                                                             onChange={(e) => handleInputChange('state', e.target.value.toUpperCase())}
                                                         />
                                                     </div>
                                                 </div>
-                                            </CardContent>
-                                        </Card>
+                                            </div>
+                                        </div>
                                     )}
-
-                                    <Button
-                                        size="lg"
-                                        className="w-full text-white"
-                                        style={{ backgroundColor: storeData.primaryColor }}
-                                        onClick={() => setStep(2)}
-                                    >
-                                        Continuar para Pagamento
-                                    </Button>
                                 </>
                             )}
 
@@ -741,33 +753,17 @@ export default function CheckoutPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Segurança */}
-                                <Card>
-                                    <CardContent className="p-6 space-y-3">
-                                        <div className="flex items-start gap-3">
-                                            <ShieldCheck className="h-5 w-5 text-green-600 mt-0.5" />
-                                            <div>
-                                                <p className="font-medium text-sm text-gray-900">Compra 100% Segura</p>
-                                                <p className="text-xs text-gray-600">Pagamento confirmado via WhatsApp</p>
-                                            </div>
-                                        </div>
-                                        <Separator />
-                                        <div className="flex items-start gap-3">
-                                            <Truck className="h-5 w-5 text-blue-600 mt-0.5" />
-                                            <div>
-                                                <p className="font-medium text-sm text-gray-900">
-                                                    {formData.deliveryType === 'pickup' ? 'Retirada na Loja' : 'Entrega Garantida'}
-                                                </p>
-                                                <p className="text-xs text-gray-600">
-                                                    {formData.deliveryType === 'pickup' ? 'Retire no endereço da loja' : 'Acompanhe seu pedido'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
                             </div>
                         </div>
+
+                        <Button
+                            size="lg"
+                            className="w-full text-white"
+                            style={{ backgroundColor: storeData.primaryColor }}
+                            onClick={() => setStep(2)}
+                        >
+                            Continuar para Pagamento
+                        </Button>
 
                     </div>
                 </div>

@@ -77,6 +77,13 @@ export default function CartPage() {
         return null
     }
 
+    // Agrupar itens por marca para exibir como no mock
+    const groupedItems = items.reduce<Record<string, typeof items>>((acc, item) => {
+        if (!acc[item.brand]) acc[item.brand] = []
+        acc[item.brand].push(item)
+        return acc
+    }, {})
+
     // Carrinho vazio
     if (items.length === 0) {
         return (
@@ -112,113 +119,135 @@ export default function CartPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <main className="py-8">
+            <main className="py-4 pb-28">
+
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                     {/* Cabeçalho */}
-                    <div className="mb-8">
+                    <div className="mb-2">
 
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-md md:text-4xl text-center font-bold text-gray-900">
                             Carrinho de Compras
                         </h1>
-                        <p className="text-gray-600 mt-2">
-                            {items.length} {items.length === 1 ? 'item' : 'itens'} no carrinho
-                        </p>
+                    </div>
+
+                    {/* Progress indicator (responsive) */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+                        <div className="flex items-center justify-center gap-6">
+                            {['Carrinho', 'Confirmação', 'Finalizar'].map((step, i) => {
+                                const stepIndex = i + 1
+                                const active = stepIndex === 1
+                                return (
+                                    <div key={step} className="flex items-center gap-3">
+                                        <div
+                                            className={`flex items-center justify-center rounded-full ${active ? 'w-8 h-8 scale-100' : 'w-7 h-7 scale-95'} transition-all duration-300 ${active ? '' : ''}`}
+                                            style={active ? { background: storeData.primaryColor } : { background: '#E6E6E6' }}
+                                        >
+                                            <span className={`text-white text-xs font-semibold`}>{stepIndex}</span>
+                                        </div>
+                                        <div className="sm:block text-xs text-gray-600">{step}</div>
+                                        {i < 2 && <div className="hidden sm:block w-12 h-[2px]" style={{ background: '#E6E6E6' }} />}
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                        {/* Lista de Produtos */}
-                        <div className="lg:col-span-2 space-y-4">
-                            {items.map((item) => (
-                                <Card key={item.id} className="overflow-hidden">
-                                    <CardContent className="">
-                                        <div className="flex gap-6">
-                                            {/* Imagem */}
-                                            <div className="relative w-24 h-24 shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                            </div>
-
-                                            {/* Informações */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between gap-4 mb-2">
-                                                    <div>
-                                                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-                                                            {item.brand}
-                                                        </p>
-                                                        <h3 className="font-semibold text-gray-900 line-clamp-2">
-                                                            {item.name}
-                                                        </h3>
-                                                    </div>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => removeItem(item.id)}
-                                                        className="text-gray-400 hover:text-red-600 shrink-0"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-
-                                                <div className="flex items-end justify-between mt-4">
-                                                    {/* Controle de Quantidade */}
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex items-center border rounded-lg">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                                                disabled={item.quantity <= 1}
-                                                                className="h-8 w-8 p-0"
-                                                            >
-                                                                <Minus className="h-3 w-3" />
-                                                            </Button>
-                                                            <span className="w-12 text-center text-sm font-medium">
-                                                                {item.quantity}
-                                                            </span>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                                                disabled={item.quantity >= item.stock}
-                                                                className="h-8 w-8 p-0"
-                                                            >
-                                                                <Plus className="h-3 w-3" />
-                                                            </Button>
+                        {/* Lista de Produtos agrupada por marca */}
+                        <div className="lg:col-span-2 space-y-6">
+                            {Object.entries(groupedItems).map(([brand, brandItems]) => (
+                                <div key={brand}>
+                                    <div>
+                                        {brandItems.map((item) => (
+                                            <div key={item.id} className="overflow-hidden">
+                                                <div>
+                                                    <div className="flex gap-6">
+                                                        {/* Imagem */}
+                                                        <div className="relative w-16 h-16 shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+                                                            <Image
+                                                                src={item.image}
+                                                                alt={item.name}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
                                                         </div>
-                                                        {item.quantity >= item.stock && (
-                                                            <span className="text-xs text-amber-600">
-                                                                Estoque máximo
-                                                            </span>
-                                                        )}
-                                                    </div>
 
-                                                    {/* Preço */}
-                                                    <div className="text-right">
-                                                        {item.originalPrice && item.originalPrice > item.price && (
-                                                            <p className="text-xs text-gray-400 line-through">
-                                                                {formatCurrency(item.originalPrice * item.quantity)}
-                                                            </p>
-                                                        )}
-                                                        <p className="text-lg font-bold text-gray-900">
-                                                            {formatCurrency(item.price * item.quantity)}
-                                                        </p>
+                                                        {/* Informações */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex justify-between gap-4 mb-2">
+                                                                <div>
+
+                                                                    <h3 className="font-semibold text-gray-900 line-clamp-2 text-xs">
+                                                                        {item.name}
+                                                                    </h3>
+                                                                    <p className="text-xs text-gray-500 mb-1">
+                                                                        {item.brand}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex items-end justify-between mt-4">
+
+                                                                {/* Preço */}
+                                                                <div>
+                                                                    {item.originalPrice && item.originalPrice > item.price && (
+                                                                        <p className="text-xs text-gray-400 line-through">
+                                                                            {formatCurrency(item.originalPrice * item.quantity)}
+                                                                        </p>
+                                                                    )}
+                                                                    <p className="text-sm font-bold text-gray-900">
+                                                                        {formatCurrency(item.price * item.quantity)}
+                                                                    </p>
+                                                                </div>
+
+                                                                {/* Controle de Quantidade */}
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex items-center border rounded-lg">
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                                            disabled={item.quantity <= 1}
+                                                                            className="h-9 w-9 p-0 sm:h-8 sm:w-8"
+                                                                        >
+                                                                            <Minus className="h-3 w-3" />
+                                                                        </Button>
+                                                                        <span className="w-12 text-center text-sm font-medium">
+                                                                            {item.quantity}
+                                                                        </span>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                                            disabled={item.quantity >= item.stock}
+                                                                            className="h-9 w-9 p-0 sm:h-8 sm:w-8"
+                                                                        >
+                                                                            <Plus className="h-3 w-3" />
+                                                                        </Button>
+                                                                    </div>
+                                                                    {item.quantity >= item.stock && (
+                                                                        <span className="text-xs text-amber-600">
+                                                                            Estoque máximo
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+
+
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
                         </div>
 
                         {/* Resumo do Pedido */}
-                        <div className="lg:col-span-1">
+                        <div className="lg:col-span-1 hidden lg:block">
                             <div className="sticky top-24 space-y-4">
 
                                 {/* Card Resumo */}
@@ -273,12 +302,6 @@ export default function CartPage() {
                                                 Finalizar Compra
                                             </Button>
                                         </Link>
-
-                                        <Link href="/store">
-                                            <Button variant="outline" size="lg" className="w-full">
-                                                Continuar Comprando
-                                            </Button>
-                                        </Link>
                                     </CardContent>
                                 </Card>
 
@@ -318,6 +341,29 @@ export default function CartPage() {
 
                     </div>
                 </div>
+                {/* Mobile fixed checkout bar */}
+                <div className="lg:hidden fixed inset-x-0 bottom-0 border-t bg-white p-3 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                        <div>
+                            <div className="text-sm text-gray-600">Total</div>
+                            <div className="text-lg font-bold" style={{ color: storeData.primaryColor }}>{formatCurrency(total)}</div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <Link href="/checkout">
+                                <button className="relative inline-flex items-center px-4 py-2 rounded-full text-white font-semibold shadow-md" style={{ backgroundColor: storeData.primaryColor }} aria-label="Finalizar compra">
+                                    Finalizar
+                                    <span className="ml-3 inline-flex items-center justify-center rounded-full w-6 h-6 font-bold shadow-sm" style={{ background: '#FFFFFF', color: storeData.primaryColor }}>
+                                        {items.length}
+                                    </span>
+                                </button>
+                            </Link>
+                            <Link href="/store">
+                                <Button variant="outline" className="hidden sm:inline-flex">Continuar</Button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     )

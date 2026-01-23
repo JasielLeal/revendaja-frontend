@@ -1,52 +1,36 @@
-import Link from "next/link";
-import {
-    PiArrowRightBold,
-} from "react-icons/pi";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import heroImage from "@/public/hero.png"
+import { MotionSection } from "./motion-section";
 
 export function Hero() {
     return (
-        <section className="relative overflow-hidden bg-[#f7fafd] text-[#18182A] isolate">
-            <div className="max-w-7xl mx-auto px-6 py-20 lg:py-24 relative z-10 flex flex-col lg:flex-row items-center gap-14">
-                <div className="flex-1 flex flex-col gap-6">
-
-                    {/* Headline */}
-                    <div className="max-w-[500px]">
-                        <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight text-pretty 
-                        ">
-                            Centralize vendas, estoque e financeiro em um só lugar.
-                        </h1>
-
-                        <p className="text-lg text-black/70 max-w-2xl">
-                            O Revendaja é o app completo para quem vende. Controle produtos,
-                            pedidos e financeiro com dados em tempo real.
+        <MotionSection className="w-full flex items-center justify-center bg-[#F7F7F7] min-h-[70vh] md:min-h-screen pt-14 md:pt-0">
+            <div className="max-w-[1250px] mx-auto px-4 sm:px-6 py-10 md:py-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div className="col-span-1 text-center lg:text-left">
+                        <Badge className="hidden mb:block mb-2 max-w-full whitespace-normal text-center lg:text-left">
+                            Melhor aplicativos de gestão de revendedoras de cosméticos
+                        </Badge>
+                        <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-[#0C0407]">
+                            Leve sua revenda ao próximo nível com gestão profissional.
                         </p>
+                        <p className="my-4 md:my-5 text-gray-500 text-sm md:text-base">Gestão profissional e organizada para levar sua revenda ao próximo nível de crescimento, com mais controle, estratégia e resultados</p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-5">
+                            <Button className="rounded-4xl w-full sm:w-auto">
+                                Baixe na App Store.
+                            </Button>
+                            <Button className="rounded-4xl w-full sm:w-auto" variant={"outline"}>
+                                Baixe na Play Store.
+                            </Button>
+                        </div>
                     </div>
-
-                    {/* Prova social */}
-                    <div className="flex items-center gap-3 text-sm text-black/70">
-                       
-                        <span className="font-semibold text-black">*Teste gratuitamente sem uso de cartão de credito*</span>
-                    </div>
-
-                    {/* CTAs */}
-                    <div className="flex flex-wrap items-center gap-4">
-                        <Link
-                            href="#"
-                            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-base font-semibold text-white transition hover:shadow-xl "
-                        >
-                            Criar minha conta grátis
-                            <PiArrowRightBold className="text-lg" />
-                        </Link>
-
-                        <Link
-                            href="#"
-                            className="inline-flex items-center gap-2 rounded-full border border-black/20 px-6 py-3 text-base font-semibold text-black hover:border-black/40 hover:bg-black/5 transition"
-                        >
-                            Ver como funciona
-                        </Link>
+                    <div className="col-span-1 flex justify-center lg:justify-end">
+                        <Image src={heroImage} alt="Hero Image" width={1200} className="w-full max-w-[520px] md:max-w-[650px] lg:max-w-[750px] h-auto" />
                     </div>
                 </div>
             </div>
-        </section>
+        </MotionSection>
     );
 }
