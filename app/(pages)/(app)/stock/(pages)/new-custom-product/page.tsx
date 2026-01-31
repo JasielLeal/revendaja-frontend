@@ -157,6 +157,7 @@ export default function NewCustomProduct() {
                         <SelectItem value="eudora">Eudora</SelectItem>
                         <SelectItem value="avon">Avon</SelectItem>
                         <SelectItem value="jequiti">Jequiti</SelectItem>
+                        <SelectItem value="Salon Line">Salon Line</SelectItem>
                     </SelectGroup>
                 </SelectContent>
             </Select>
