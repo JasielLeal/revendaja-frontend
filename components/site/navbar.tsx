@@ -39,9 +39,12 @@ export function Navbar() {
                         ))}
                     </div>
 
-                    <Button className="hidden md:inline-flex rounded-full bg-primary">
-                        Baixar Aplicativo
-                    </Button>
+                    
+                    <Link href="https://www.linkedin.com/company/revendaja-%E2%80%93-gest%C3%A3o-para-perfumarias/" target="_blank">
+                        <Button className="rounded-full bg-primary" size={"sm"}>
+                            Garanta acesso antecipado
+                        </Button>
+                    </Link>
 
                     <div className="md:hidden">
                         <Sheet>
