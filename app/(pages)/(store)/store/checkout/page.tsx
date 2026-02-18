@@ -23,6 +23,7 @@ import {
 import { formatCurrency } from "@/lib/format-currency"
 import { useCart } from "@/app/context/cart-context"
 import { useStoreBySubdomain } from "../hooks/use-store"
+import { color } from "framer-motion"
 
 // Função para extrair subdomain do hostname
 function getSubdomainFromHostname(): string {
@@ -50,6 +51,7 @@ export default function CheckoutPage() {
     const { data: storeData, isLoading } = useStoreBySubdomain(subdomain)
     const [orderNumber] = useState(() => Math.random().toString(36).substr(2, 9).toUpperCase())
     const { mutateAsync: createOrder, isPending: isCreatingOrder } = useCreateOrder()
+
 
     // Estados do formulário - Carregar dados salvos do localStorage
     const [formData, setFormData] = useState(() => {
@@ -158,7 +160,9 @@ export default function CheckoutPage() {
             ? 'Pix'
             : formData.paymentMethod === 'credit_card'
                 ? 'Credito'
-                : 'Dinheiro'
+                : formData.paymentMethod === 'debit_card'
+                    ? 'Debito'
+                    : 'Dinheiro'
 
         const orderPayload = {
             customerName: formData.name,
@@ -183,23 +187,6 @@ export default function CheckoutPage() {
             // Simular processamento
             setStep(3)
 
-            // Limpar carrinho após 3 segundos e abrir WhatsApp
-            setTimeout(() => {
-                clearCart()
-
-                // Redirecionar para WhatsApp da loja para confirmar pagamento
-                const message = encodeURIComponent(
-                    `Olá! Acabei de realizar um pedido:\n\n` +
-                    `Pedido: #${orderNumber}\n` +
-                    `Valor: ${formatCurrency(total)}\n` +
-                    `Forma de pagamento: ${paymentMethodLabel}\n` +
-                    `${formData.deliveryType === 'delivery' ? 'Entrega' : 'Retirada na loja'}`
-                )
-
-                if (storeData?.phone) {
-                    window.open(`https://wa.me/${storeData.phone.replace(/\D/g, '')}?text=${message}`, '_blank')
-                }
-            }, 3000)
         } catch (error) {
             console.error('Erro ao criar pedido', error)
             alert('Não foi possível finalizar o pedido. Tente novamente.')
@@ -256,34 +243,42 @@ export default function CheckoutPage() {
     // Página de confirmação
     if (step === 3) {
         return (
-            <div className="min-h-screen bg-gray-50">
-                <main className="py-16">
-                    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <Card className="text-center p-8">
-                            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-                                <CheckCircle2 className="h-10 w-10 text-green-600" />
+            <div className="bg-white flex justify-center pt-8 sm:pt-12 px-4">
+                <div className="w-full max-w-md">
+                    <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+                        
+                        {/* Ícone de Sucesso */}
+                        <div className="text-center pt-6 sm:pt-8">
+                            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full mb-4 sm:mb-6">
+                                <CheckCircle2 className="h-8 w-8 sm:h-10 sm:w-10 text-green-600" />
                             </div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                        </div>
+
+                        {/* Conteúdo */}
+                        <div className="text-center px-6 pb-6 sm:px-8 sm:pb-8">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                                 Pedido Confirmado!
                             </h1>
-                            <p className="text-gray-600 mb-2">
+                            <p className="text-gray-600 mb-1 text-sm sm:text-base">
                                 Seu pedido foi realizado com sucesso.
                             </p>
-                            <p className="text-sm text-gray-500 mb-8">
+                            <p className="text-xs sm:text-sm text-gray-500 mb-6">
                                 Você receberá um e-mail com os detalhes do pedido.
                             </p>
 
-                            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                                <div className="text-sm text-gray-600 mb-2">Número do Pedido</div>
-                                <div className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
+                            {/* Número do Pedido */}
+                            <div className="bg-gray-50 rounded-xl p-4 sm:p-5 mb-6">
+                                <div className="text-xs sm:text-sm text-gray-600 mb-2 font-medium">Número do Pedido</div>
+                                <div className="text-2xl sm:text-3xl font-bold" style={{ color: storeData.primaryColor }}>
                                     #{orderNumber}
                                 </div>
                             </div>
 
-                            <div className="space-y-3">
+                            {/* Botões */}
+                            <div className="space-y-2">
                                 <Button
                                     size="lg"
-                                    className="w-full text-white"
+                                    className="w-full text-white font-semibold"
                                     style={{ backgroundColor: storeData.primaryColor }}
                                     onClick={() => router.push('/')}
                                 >
@@ -292,59 +287,37 @@ export default function CheckoutPage() {
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full border-gray-200 font-semibold"
                                     onClick={() => router.push('/orders')}
                                 >
                                     Ver Meus Pedidos
                                 </Button>
                             </div>
-                        </Card>
+                        </div>
                     </div>
-                </main>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-white">
+            <main className="py-6 sm:py-8 pb-20 sm:pb-8">
+                <div className="max-w-5xl mx-auto px-4">
 
                     {/* Cabeçalho */}
-                    <div className="mb-2">
-
-                        <h1 className="text-md md:text-4xl text-center font-bold text-gray-900">
+                    <div className="mb-6 sm:mb-8">
+                        <h1 className="text-2xl sm:text-4xl font-bold text-gray-900">
                             Finalizar Compra
                         </h1>
                     </div>
 
-                    {/* Progress indicator (responsive) */}
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-                        <div className="flex items-center justify-center gap-6">
-                            {['Carrinho', 'Confirmação', 'Finalizar'].map((step, i) => {
-                                const stepIndex = i + 1
-                                const active = stepIndex === 2
-                                return (
-                                    <div key={step} className="flex items-center gap-3">
-                                        <div
-                                            className={`flex items-center justify-center rounded-full ${active ? 'w-8 h-8 scale-100' : 'w-7 h-7 scale-95'} transition-all duration-300 ${active ? '' : ''}`}
-                                            style={active ? { background: storeData.primaryColor } : { background: '#E6E6E6' }}
-                                        >
-                                            <span className={`text-white text-xs font-semibold`}>{stepIndex}</span>
-                                        </div>
-                                        <div className="sm:block text-xs text-gray-600">{step}</div>
-                                        {i < 2 && <div className="hidden sm:block w-12 h-[2px]" style={{ background: '#E6E6E6' }} />}
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
 
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
 
                         {/* Formulário */}
-                        <div className="lg:col-span-2 space-y-6">
+                        <div className="lg:col-span-2 space-y-5 sm:space-y-6">
 
                             {step === 1 && (
                                 <>
@@ -388,10 +361,9 @@ export default function CheckoutPage() {
                                         <div className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <label
-                                                    className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.deliveryType === 'delivery'
-                                                        ? 'border-primary bg-primary/5'
-                                                        : 'border-gray-200 hover:border-gray-300'
-                                                        }`}
+                                                    className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all`}
+
+                                                    style={formData.deliveryType === 'delivery' ? { borderColor: storeData.primaryColor, borderWidth: 1 } : { borderColor: '#E5E7EB', borderWidth: 1 }}
                                                 >
                                                     <input
                                                         type="radio"
@@ -409,10 +381,8 @@ export default function CheckoutPage() {
                                                 </label>
 
                                                 <label
-                                                    className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.deliveryType === 'pickup'
-                                                        ? 'border-primary bg-primary/5'
-                                                        : 'border-gray-200 hover:border-gray-300'
-                                                        }`}
+                                                    className={`flex items-center gap-3 p-4 rounded-lg cursor-pointer transition-all`}
+                                                    style={formData.deliveryType === 'pickup' ? { borderColor: storeData.primaryColor, borderWidth: 1 } : { borderColor: '#E5E7EB', borderWidth: 1 }}
                                                 >
                                                     <input
                                                         type="radio"
@@ -431,11 +401,12 @@ export default function CheckoutPage() {
                                             </div>
 
                                             {formData.deliveryType === 'pickup' && (
-                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                                    <p className="text-sm text-blue-900 font-medium mb-1">
+                                                <div className=" rounded-lg p-4 bg-gray-200"
+                                                >
+                                                    <p className="text-sm text-black font-medium mb-1">
                                                         📍 Endereço para retirada:
                                                     </p>
-                                                    <p className="text-sm text-blue-800">
+                                                    <p className="text-sm text-black">
                                                         {storeData.address}
                                                     </p>
                                                 </div>
@@ -555,7 +526,7 @@ export default function CheckoutPage() {
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        
+
                                                         <Input
                                                             id="city"
                                                             placeholder="Sua cidade"
@@ -565,7 +536,7 @@ export default function CheckoutPage() {
                                                         />
                                                     </div>
                                                     <div>
-                        
+
                                                         <Input
                                                             id="state"
                                                             placeholder="UF"
@@ -579,25 +550,27 @@ export default function CheckoutPage() {
                                             </div>
                                         </div>
                                     )}
+
+                                    
                                 </>
                             )}
 
                             {step === 2 && (
                                 <>
                                     {/* Forma de Pagamento */}
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
+                                    <Card className="border-gray-200 shadow-sm">
+                                        <CardHeader className="pb-3 sm:pb-4">
+                                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                                                 <CreditCard className="h-5 w-5" />
                                                 Forma de Pagamento
                                             </CardTitle>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
+                                        <CardContent className="space-y-3">
                                             <p className="text-sm text-gray-600 mb-4">
                                                 O pagamento será confirmado pelo vendedor via WhatsApp após finalizar o pedido.
                                             </p>
 
-                                            <div className="space-y-3">
+                                            <div className="space-y-2 sm:space-y-3">
                                                 <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.paymentMethod === 'pix'
                                                         ? 'border-primary bg-primary/5'
@@ -644,6 +617,27 @@ export default function CheckoutPage() {
                                                 </label>
 
                                                 <label
+                                                    className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.paymentMethod === 'debit_card'
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 hover:border-gray-300'
+                                                        }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="paymentMethod"
+                                                        value="debit_card"
+                                                        checked={formData.paymentMethod === 'debit_card'}
+                                                        onChange={(e) => handleInputChange('paymentMethod', e.target.value)}
+                                                        className="w-4 h-4"
+                                                        style={{ accentColor: storeData.primaryColor }}
+                                                    />
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold text-sm">Cartão de Débito</p>
+                                                        <p className="text-xs text-gray-600">Pagamento instantâneo</p>
+                                                    </div>
+                                                </label>
+
+                                                <label
                                                     className={`flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${formData.paymentMethod === 'money'
                                                         ? 'border-primary bg-primary/5'
                                                         : 'border-gray-200 hover:border-gray-300'
@@ -667,104 +661,59 @@ export default function CheckoutPage() {
                                         </CardContent>
                                     </Card>
 
-                                    <div className="flex gap-4">
-                                        <Button
-                                            size="lg"
-                                            variant="outline"
-                                            className="flex-1"
-                                            onClick={() => setStep(1)}
-                                        >
-                                            Voltar
-                                        </Button>
-                                        <Button
-                                            size="lg"
-                                            className="flex-1 text-white"
-                                            style={{ backgroundColor: storeData.primaryColor }}
-                                            onClick={handleSubmitOrder}
-                                            disabled={isSubmitting || isCreatingOrder}
-                                        >
-                                            {isSubmitting || isCreatingOrder ? 'Enviando...' : 'Finalizar Pedido'}
-                                        </Button>
-                                    </div>
                                 </>
                             )}
 
                         </div>
 
-                        {/* Resumo do Pedido */}
-                        <div className="lg:col-span-1">
-                            <div className="sticky top-24 space-y-4">
+                     
 
-                                {/* Produtos */}
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-base">Resumo do Pedido</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {items.map((item) => (
-                                            <div key={item.id} className="flex gap-3">
-                                                <div className="relative w-16 h-16 shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                                                    <Image
-                                                        src={item.image}
-                                                        alt={item.name}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 line-clamp-1">
-                                                        {item.name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Qtd: {item.quantity}
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        {formatCurrency(item.price * item.quantity)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
+                    </div>
+                </div>
 
-                                        <Separator />
-
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600">Subtotal</span>
-                                                <span className="font-medium">{formatCurrency(subtotal)}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-gray-600">
-                                                    {formData.deliveryType === 'pickup' ? 'Retirada' : 'Frete'}
-                                                </span>
-                                                <span className={`font-medium ${shipping === 0 ? 'text-green-600' : ''}`}>
-                                                    {shipping === 0 ? 'Grátis' : formatCurrency(shipping)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <Separator />
-
-                                        <div className="flex justify-between">
-                                            <span className="text-lg font-bold text-gray-900">Total</span>
-                                            <span className="text-2xl font-bold" style={{ color: storeData.primaryColor }}>
-                                                {formatCurrency(total)}
-                                            </span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
+                {/* Mobile fixed bar */}
+                <div className="lg:hidden fixed inset-x-0 bottom-0 border-t bg-white p-4 z-50">
+                    <div className="max-w-5xl mx-auto">
+                        {step === 1 && (
+                            <div className="flex gap-3">
+                                <Link href="/cart" className="flex-1">
+                                    <Button
+                                        size="lg"
+                                        variant="outline"
+                                        className="w-full border-gray-200"
+                                    >
+                                        <ArrowLeft className="h-4 w-4" />
+                                    </Button>
+                                </Link>
+                                <Button
+                                    size="lg"
+                                    className="flex-1 text-white font-semibold"
+                                    style={{ backgroundColor: storeData.primaryColor }}
+                                    onClick={() => setStep(2)}
+                                >
+                                    Próximo
+                                </Button>
                             </div>
-                        </div>
-
-                        <Button
-                            size="lg"
-                            className="w-full text-white"
-                            style={{ backgroundColor: storeData.primaryColor }}
-                            onClick={() => setStep(2)}
-                        >
-                            Continuar para Pagamento
-                        </Button>
-
+                        )}
+                        {step === 2 && (
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <div className="text-xs text-gray-600">Total</div>
+                                    <div className="text-lg font-bold" style={{ color: storeData.primaryColor }}>
+                                        {formatCurrency(total)}
+                                    </div>
+                                </div>
+                                <Button
+                                    size="lg"
+                                    className="flex-1 text-white font-semibold"
+                                    style={{ backgroundColor: storeData.primaryColor }}
+                                    onClick={handleSubmitOrder}
+                                    disabled={isSubmitting || isCreatingOrder}
+                                >
+                                    {isSubmitting || isCreatingOrder ? 'Enviando...' : 'Finalizar'}
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
