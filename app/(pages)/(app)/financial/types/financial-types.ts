@@ -137,3 +137,17 @@ export interface FinancialDataResponse {
     totalPages: number;
   };
 }
+
+export interface MonthlySummaryBrand {
+  name: string;
+  value: number;
+}
+
+export interface MonthlySummaryMonth {
+  label: string;
+  fullLabel: string;
+  value: number;
+  brands: MonthlySummaryBrand[];
+}
+
+export type MonthlySummary = MonthlySummaryMonth[];

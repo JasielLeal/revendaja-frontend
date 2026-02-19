@@ -2,6 +2,7 @@ import { api } from "@/app/backend/axios";
 import {
   FinancialDataResponse,
   FinancialFilters,
+  MonthlySummary,
 } from "../types/financial-types";
 
 export async function fetchFinancialSummary(
@@ -142,6 +143,16 @@ export async function exportFinancialReport(
       format,
     },
     responseType: "blob",
+  });
+
+  return response.data;
+}
+
+export async function fetchMonthlySummary(year: number): Promise<MonthlySummary> {
+  const response = await api.get<MonthlySummary>("/dashboard/monthly-summary", {
+    params: {
+      year,
+    },
   });
 
   return response.data;

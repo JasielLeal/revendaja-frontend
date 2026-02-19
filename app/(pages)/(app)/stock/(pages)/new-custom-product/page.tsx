@@ -14,10 +14,19 @@ const productSchema = z.object({
     brand: z.string().min(1, "Linha é obrigatória"),
     company: z.string().min(1, "Marca é obrigatória"),
     category: z.string().min(1, "Categoria é obrigatória"),
-    normalPrice: z.string().min(1, "Preço normal é obrigatório"),
-    suggestedPrice: z.string().min(1, "Preço sugerido é obrigatório"),
+    normalPrice: z.string().min(1, "Preço normal é obrigatório").refine(
+        (val) => !isNaN(Number(val)) && Number(val) > 0,
+        "Preço normal deve ser um valor válido maior que 0"
+    ),
+    suggestedPrice: z.string().min(1, "Preço sugerido é obrigatório").refine(
+        (val) => !isNaN(Number(val)) && Number(val) > 0,
+        "Preço sugerido deve ser um valor válido maior que 0"
+    ),
     barcode: z.string().min(1, "Código de barras é obrigatório"),
-    image: z.any().optional(),
+    image: z.any().refine(
+        (file) => file instanceof File || (file && file.size > 0),
+        "Imagem é obrigatória"
+    ),
 });
 
 // Função para capitalizar o nome do produto de forma elegante
@@ -132,21 +141,23 @@ export default function NewCustomProduct() {
             <Input
                 ref={nomeRef}
                 placeholder="Produto Personalizado"
-                className={`mb-3 ${erros.nome ? "border-red-500 border-2" : ""}`}
+                className={`mb-3 ${erros.name ? "border-red-500 border-2" : ""}`}
             />
-            {erros.nome && <p className="text-red-600 text-sm mb-2">⚠️ {erros.nome}</p>}
+            {erros.name && <p className="text-red-600 text-sm mb-2">⚠️ {erros.name}</p>}
             <Label className="mb-2">Linha</Label>
             <Input
                 ref={linhaRef}
                 placeholder="Linha do Produto"
-                className={`mb-3 ${erros.linha ? "border-red-500 border-2" : ""}`}
+                className={`mb-3 ${erros.brand ? "border-red-500 border-2" : ""}`}
             />
-            {erros.linha && <p className="text-red-600 text-sm mb-2">⚠️ {erros.linha}</p>}
+            {erros.brand && <p className="text-red-600 text-sm mb-2">⚠️ {erros.brand}</p>}
             <Label className="mb-2">Marca</Label>
             <Select value={marcaValue} onValueChange={(value) => {
                 setMarcaValue(value);
+                const { company, ...rest } = erros;
+                setErros(rest);
             }}>
-                <SelectTrigger className={`w-full mb-3 ${erros.marca ? "border-red-500 border-2" : ""}`}>
+                <SelectTrigger className={`w-full mb-3 ${erros.company ? "border-red-500 border-2" : ""}`}>
                     <SelectValue placeholder="Selecione uma marca" />
                 </SelectTrigger>
                 <SelectContent>
@@ -161,12 +172,14 @@ export default function NewCustomProduct() {
                     </SelectGroup>
                 </SelectContent>
             </Select>
-            {erros.marca && <p className="text-red-600 text-sm mb-2">⚠️ {erros.marca}</p>}
+            {erros.company && <p className="text-red-600 text-sm mb-2">⚠️ {erros.company}</p>}
             <Label className="mb-2">Categoria</Label>
             <Select value={categoriaValue} onValueChange={(value) => {
                 setCategoriaValue(value);
+                const { category, ...rest } = erros;
+                setErros(rest);
             }}>
-                <SelectTrigger className={`w-full mb-3 ${erros.categoria ? "border-red-500 border-2" : ""}`}>
+                <SelectTrigger className={`w-full mb-3 ${erros.category ? "border-red-500 border-2" : ""}`}>
                     <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
@@ -181,42 +194,44 @@ export default function NewCustomProduct() {
                         <SelectItem value="Infantil">Infantil</SelectItem>
                         <SelectItem value="Desodorantes">Desodorantes</SelectItem>
                         <SelectItem value="Body Splash">Body Splash</SelectItem>
+                        <SelectItem value="Acessórios">Acessórios</SelectItem>
                         <SelectItem value="Maquiagem">Maquiagem</SelectItem>
                     </SelectGroup>
                 </SelectContent>
             </Select>
-            {erros.categoria && <p className="text-red-600 text-sm mb-2">⚠️ {erros.categoria}</p>}
+            {erros.category && <p className="text-red-600 text-sm mb-2">⚠️ {erros.category}</p>}
             <div className="flex items-center gap-4 mb-3">
                 <div className="w-full">
                     <Label className="mb-2">Preço Normal</Label>
                     <Input
                         ref={precoNormalRef}
                         placeholder="R$ 0,00"
-                        className={`mb-3 ${erros.precoNormal ? "border-red-500 border-2" : ""}`}
+                        className={`mb-3 ${erros.normalPrice ? "border-red-500 border-2" : ""}`}
                         onChange={() => handlePriceChange(precoNormalRef)}
                     />
-                    {erros.precoNormal && <p className="text-red-600 text-sm mb-2">⚠️ {erros.precoNormal}</p>}
+                    {erros.normalPrice && <p className="text-red-600 text-sm mb-2">⚠️ {erros.normalPrice}</p>}
                 </div>
                 <div className="w-full">
                     <Label className="mb-2">Preço Sugerido</Label>
                     <Input
                         ref={precoSugeridoRef}
                         placeholder="R$ 0,00"
-                        className={`mb-3 ${erros.precoSugerido ? "border-red-500 border-2" : ""}`}
+                        className={`mb-3 ${erros.suggestedPrice ? "border-red-500 border-2" : ""}`}
                         onChange={() => handlePriceChange(precoSugeridoRef)}
                     />
-                    {erros.precoSugerido && <p className="text-red-600 text-sm mb-2">⚠️ {erros.precoSugerido}</p>}
+                    {erros.suggestedPrice && <p className="text-red-600 text-sm mb-2">⚠️ {erros.suggestedPrice}</p>}
                 </div>
             </div>
             <Label className="mb-2">Codigo de Barras</Label>
             <Input
                 ref={codigoBarrasRef}
                 placeholder="Codigo de barras"
-                className={`mb-3 ${erros.codigoBarras ? "border-red-500 border-2" : ""}`}
+                className={`mb-3 ${erros.barcode ? "border-red-500 border-2" : ""}`}
             />
-            {erros.codigoBarras && <p className="text-red-600 text-sm mb-2">⚠️ {erros.codigoBarras}</p>}
+            {erros.barcode && <p className="text-red-600 text-sm mb-2">⚠️ {erros.barcode}</p>}
             <Label className="mb-2">Escolha a imagem</Label>
-            <Input ref={imagemRef} className="mb-3" type="file" />
+            <Input ref={imagemRef} className={`mb-3 ${erros.image ? "border-red-500 border-2" : ""}`} type="file" />
+            {erros.image && <p className="text-red-600 text-sm mb-2">⚠️ {erros.image}</p>}
 
             <Button
                 onClick={handleSubmit}

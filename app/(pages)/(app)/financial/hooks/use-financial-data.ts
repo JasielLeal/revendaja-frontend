@@ -9,6 +9,7 @@ import {
   fetchRevenueByCategory,
   fetchExpensesByCategory,
   fetchPaymentMethods,
+  fetchMonthlySummary,
 } from "../services/financial-api";
 import { FinancialFilters } from "../types/financial-types";
 
@@ -95,5 +96,13 @@ export function usePaymentMethods(filters: FinancialFilters) {
     queryKey: ["payment-methods", filters.dateRange.from, filters.dateRange.to],
     queryFn: () => fetchPaymentMethods(filters),
     staleTime: 1000 * 60 * 15, // 15 minutos
+  });
+}
+
+export function useMonthlySummary(year: number) {
+  return useQuery({
+    queryKey: ["monthly-summary", year],
+    queryFn: () => fetchMonthlySummary(year),
+    staleTime: 1000 * 60 * 30, // 30 minutos
   });
 }
