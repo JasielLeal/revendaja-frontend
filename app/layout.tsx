@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Poppins } from "next/font/google";
-import "./globals.css";
+import { Geist, Google_Sans, Poppins, Instrument_Sans, Birthstone} from "next/font/google";
 import { Providers } from "./providers/query-client";
 import { Toaster } from "@/components/ui/sonner"
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import "./globals.css";
 
 const popins = Poppins({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -15,6 +11,17 @@ const popins = Poppins({
 
 })
 
+const googleSans = Google_Sans({
+  weight: [ "400", "500", "700", "600"],
+  variable: "--font-google-sans",
+  subsets: ["latin"]
+})
+
+const birthstone = Birthstone({
+  weight: ["400"],
+  variable: "--font-birthstone",
+  subsets: ["latin"]
+})
 
 export const metadata: Metadata = {
   title: "Revendaja",
@@ -30,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${popins.variable} antialiased`}
+        className={`${popins.variable} ${googleSans.variable} ${birthstone.variable} *: antialiased`}
       >
         <Providers>
           {children}

@@ -41,6 +41,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-birthstone: var(--font-birthstone);
 }
 
 
@@ -77,6 +78,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.75 0.183 55.934);
+  --font-google-sans: var(--font-google-sans);
+  --font-birthstone: var(--font-birthstone);
 }
 
 .dark {
@@ -113,7 +116,7 @@
   --sidebar-ring: oklch(0.408 0.123 38.172);
 }
 *{
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-google-sans), sans-serif;
 }
 
 /* Oculta scrollbar no Chrome, Edge, Safari */
