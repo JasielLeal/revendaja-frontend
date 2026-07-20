@@ -14,7 +14,7 @@ import { Eye, EyeOff, AlertCircle, X, Loader2 } from "lucide-react";
 import { Session } from "../services/session";
 import Link from "next/link";
 import Image from "next/image";
-import logoBlack from "@/public/icon.png";
+import logoBlack from "@/public/logo-primary.png";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
