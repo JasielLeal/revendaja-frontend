@@ -32,7 +32,7 @@ import {
 import Link from "next/link"
 import { useUser } from "@/app/context/user-context"
 import Image from "next/image"
-import logo from "@/public/icon.png"
+import logo from "@/public/logo-primary.png"
 import { useTheme } from "next-themes"
 import { NavStore } from "./nav-store"
 
